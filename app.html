@@ -895,8 +895,10 @@ const DEFAULT_APP_SETTINGS = {
   idleMinutes: 15,
   presetMinutes: [5, 15, 25],
   fontScale: 'medium',
-  lang: 'en'
+  lang: 'en',
+  plan: 'free' // 'free' | 'pro' — no billing wired up yet, so this always defaults to 'free'
 };
+function isProUser() { return appSettings.plan === 'pro'; }
 function loadAppSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(APP_SETTINGS_KEY) || '{}');
@@ -2607,14 +2609,18 @@ function buildWidgetEl(type, id, data) {
   } else if (type === 'ministats') {
     el.innerHTML = `${widgetRemoveBtn(id)}<div class="ministats-widget"><div class="num" data-ministats-num>0</div><div class="lbl">${t('thisWeekFocus')}</div></div>`;
   } else if (type === 'ad') {
-    el.innerHTML = `${widgetRemoveBtn(id)}<div class="ad-widget" data-ad-widget></div>`;
+    // free-tier users can move/resize the ad slot but not remove it; Pro removes ads entirely (see pricing)
+    el.innerHTML = `${isProUser() ? widgetRemoveBtn(id) : ''}<div class="ad-widget" data-ad-widget></div>`;
     renderAdInto(el.querySelector('[data-ad-widget]'));
   }
 
-  el.querySelector('[data-remove]').addEventListener('click', (e) => {
-    e.stopPropagation();
-    removeWidget(id);
-  });
+  const removeBtnEl = el.querySelector('[data-remove]');
+  if (removeBtnEl) {
+    removeBtnEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeWidget(id);
+    });
+  }
 
   if (type === 'digitalClock') {
     const tzSelect = el.querySelector('[data-clock-tz]');
@@ -2710,9 +2716,10 @@ function addWidget(type, id, data, gridOpts) {
 }
 
 function removeWidget(id) {
+  const d = loadWidgetsData();
+  if (d[id]?.type === 'ad' && !isProUser()) return; // free tier: ad slot can be moved/resized, not removed
   const el = document.querySelector(`[gs-id="${id}"]`);
   if (el) dashboardGrid.removeWidget(el);
-  const d = loadWidgetsData();
   delete d[id];
   saveWidgetsData(d);
   saveLayout();
