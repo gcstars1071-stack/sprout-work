@@ -2796,7 +2796,7 @@ let dashboardGrid = null;
 function addWidget(type, id, data, gridOpts) {
   const el = buildWidgetEl(type, id, data);
   const defaults = { id, w: 3, h: 3, autoPosition: true };
-  if (type === 'ad') Object.assign(defaults, { w: 4, h: 3, minW: 3, minH: 2 });
+  if (type === 'ad') Object.assign(defaults, { w: 3, h: 3, minW: 3, minH: 2 });
   const opts = Object.assign(defaults, gridOpts || {});
   dashboardGrid.addWidget(el, opts);
 }
