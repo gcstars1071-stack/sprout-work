@@ -19,7 +19,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile(path.join(__dirname, '..', 'index.html'));
 
   // keep the app running in the tray instead of quitting when the window is closed
   mainWindow.on('close', (event) => {
@@ -31,7 +31,7 @@ function createWindow() {
 }
 
 function createTray() {
-  const iconPath = path.join(__dirname, 'icon.png');
+  const iconPath = path.join(__dirname, '..', 'icon.png');
   let trayIcon;
   try {
     trayIcon = nativeImage.createFromPath(iconPath);
