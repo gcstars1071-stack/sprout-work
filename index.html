@@ -829,6 +829,7 @@ function loadThemeSettings() {
 }
 function saveThemeSettings(settings) {
   localStorage.setItem(THEME_SETTINGS_KEY, JSON.stringify(settings));
+  cloudSet(THEME_SETTINGS_KEY, settings);
 }
 let themeSettings = loadThemeSettings();
 
@@ -892,6 +893,7 @@ function loadAppSettings() {
 }
 function saveAppSettings() {
   localStorage.setItem(APP_SETTINGS_KEY, JSON.stringify(appSettings));
+  cloudSet(APP_SETTINGS_KEY, appSettings);
 }
 let appSettings = loadAppSettings();
 
@@ -1088,8 +1090,7 @@ function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
    `sessions` table). The display countdown stays purely client-side, computed
    from stored start timestamps — it never needs its own write. */
 function syncEvent(eventType, payload) {
-  // TODO: once Supabase is configured, push this event to the server here.
-  // Example shape: supabase.from('focus_events').insert({ event_type: eventType, payload, created_at: new Date().toISOString() });
+  cloudSet(STORAGE_KEY, state);
 }
 function persist(eventType, payload) {
   saveState();
@@ -1151,6 +1152,7 @@ function bumpTitleFrequency(title) {
   const freq = loadTitleFreq();
   freq[t] = (freq[t] || 0) + 1;
   localStorage.setItem(TITLE_FREQ_KEY, JSON.stringify(freq));
+  cloudSet(TITLE_FREQ_KEY, freq);
 }
 function topFrequentTitles(limit) {
   const freq = loadTitleFreq();
@@ -2271,7 +2273,7 @@ function loadWidgetsData() {
 }
 function saveWidgetsData(data) {
   localStorage.setItem(WIDGETS_KEY, JSON.stringify(data));
-  syncEvent('widgets_changed', null);
+  cloudSet(WIDGETS_KEY, data);
 }
 
 const WORLD_TIMEZONES = [
@@ -2565,7 +2567,7 @@ function saveLayout() {
   if (!dashboardGrid) return;
   const layout = dashboardGrid.save(false);
   localStorage.setItem(LAYOUT_KEY, JSON.stringify(layout));
-  syncEvent('layout_changed', null);
+  cloudSet(LAYOUT_KEY, layout);
 }
 
 /* ---------- clock-out lock (flip + fade all tiles except the start/active card) ---------- */
@@ -2687,8 +2689,30 @@ const authGate = document.getElementById('authGate');
 const appRoot = document.getElementById('appRoot');
 const authMsg = document.getElementById('authMsg');
 let appStarted = false;
+let currentUser = null;
+
+/* ---------- cloud sync (per-user key/value mirror of localStorage) ---------- */
+function cloudSet(key, value) {
+  if (!currentUser) return;
+  supabaseClient.from('user_data').upsert({
+    user_id: currentUser.id, data_key: key, data_value: value, updated_at: new Date().toISOString()
+  }).then(({ error }) => { if (error) console.error('cloudSet failed', key, error); });
+}
+async function cloudPullAll() {
+  if (!currentUser) return;
+  const { data, error } = await supabaseClient.from('user_data').select('data_key,data_value').eq('user_id', currentUser.id);
+  if (error || !data) return;
+  data.forEach(row => localStorage.setItem(row.data_key, JSON.stringify(row.data_value)));
+  // re-read everything already-loaded-at-parse-time now that the cloud copy has overwritten localStorage
+  state = loadState();
+  nextIdCounter = Object.keys(state.sessions).length
+    ? Math.max(...Object.keys(state.sessions).map(Number)) + 1 : 1;
+  appSettings = loadAppSettings();
+  themeSettings = loadThemeSettings();
+}
 
 function showApp(user) {
+  currentUser = user;
   authGate.style.display = 'none';
   appRoot.style.display = '';
   const nameEl = document.getElementById('profileName');
@@ -2699,10 +2723,11 @@ function showApp(user) {
   }
   if (!appStarted) {
     appStarted = true;
-    startApp();
+    cloudPullAll().then(startApp);
   }
 }
 function showAuthGate() {
+  currentUser = null;
   appRoot.style.display = 'none';
   authGate.style.display = '';
 }
