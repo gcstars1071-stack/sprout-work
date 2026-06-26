@@ -722,6 +722,16 @@
     <div class="settings-section">
       <div class="settings-label" data-i18n="settingsColorPreset">Color preset</div>
       <div class="preset-grid" id="presetGrid"></div>
+      <div class="settings-row" id="customColorRow" style="display:none; margin-top:14px;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--dim);">
+          <input type="color" id="customAccentInput" style="width:28px; height:28px; padding:0; border:none; background:none; cursor:pointer;">
+          <span data-i18n="customAccentLabel">Accent</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--dim);">
+          <input type="color" id="customAccent2Input" style="width:28px; height:28px; padding:0; border:none; background:none; cursor:pointer;">
+          <span data-i18n="customAccent2Label">Buttons</span>
+        </label>
+      </div>
     </div>
 
     <div class="settings-section">
@@ -835,13 +845,25 @@ const THEME_PRESETS = [
   }
 ];
 
+const DEFAULT_CUSTOM_COLORS = { accent: '#ff6b6b', accent2: '#4ecdc4' };
 function loadThemeSettings() {
   try {
     const saved = JSON.parse(localStorage.getItem(THEME_SETTINGS_KEY) || '{}');
-    return { mode: saved.mode || 'dark', preset: saved.preset || 'classic' };
+    return {
+      mode: saved.mode || 'dark',
+      preset: saved.preset || 'classic',
+      customColors: Object.assign({}, DEFAULT_CUSTOM_COLORS, saved.customColors || {})
+    };
   } catch (e) {
-    return { mode: 'dark', preset: 'classic' };
+    return { mode: 'dark', preset: 'classic', customColors: Object.assign({}, DEFAULT_CUSTOM_COLORS) };
   }
+}
+// simple perceived-brightness check so custom accent colors always get readable text on top
+function pickOnColor(hex) {
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 150 ? '#08332b' : '#ffffff';
 }
 function saveThemeSettings(settings) {
   localStorage.setItem(THEME_SETTINGS_KEY, JSON.stringify(settings));
@@ -856,6 +878,16 @@ function effectiveMode() {
   return themeSettings.mode;
 }
 function currentPreset() {
+  if (themeSettings.preset === 'custom') {
+    // custom keeps the classic preset's neutral background/text, swapping only the accent colors
+    const base = THEME_PRESETS[0];
+    const cc = themeSettings.customColors;
+    return {
+      id: 'custom',
+      dark: Object.assign({}, base.dark, { accent: cc.accent, accent2: cc.accent2, onAccent2: pickOnColor(cc.accent2) }),
+      light: Object.assign({}, base.light, { accent: cc.accent, accent2: cc.accent2, onAccent2: pickOnColor(cc.accent2) })
+    };
+  }
   return THEME_PRESETS.find(p => p.id === themeSettings.preset) || THEME_PRESETS[0];
 }
 const SHADOWS = {
@@ -973,7 +1005,7 @@ const TRANSLATIONS = {
     settingsWorkHours: 'Work hours range (for tracking paused time)', hourUnit: 'h',
     settingsIdle: 'Idle detection time', settingsDefaultPresets: 'Default timer presets (minutes)',
     settingsDataMgmt: 'Data management', exportData: 'Export (JSON)', resetData: 'Reset all', resetConfirm: 'Reset all Sprout Work data? This cannot be undone.',
-    settingsLanguage: 'Language', thisWeekFocus: 'Focus time this week', continueWithGoogle: 'Continue with Google', authOr: 'or', authEmailPh: 'Email', authPasswordPh: 'Password', authSignup: 'Sign up', authLogin: 'Log in', authCheckEmail: 'Check your email to confirm your account.', authInvalid: 'Incorrect email or password.', authFillBoth: 'Enter both email and password.', authError: 'Something went wrong. Please try again.',
+    settingsLanguage: 'Language', thisWeekFocus: 'Focus time this week', continueWithGoogle: 'Continue with Google', authOr: 'or', authEmailPh: 'Email', authPasswordPh: 'Password', authSignup: 'Sign up', authLogin: 'Log in', authCheckEmail: 'Check your email to confirm your account.', authInvalid: 'Incorrect email or password.', authFillBoth: 'Enter both email and password.', authError: 'Something went wrong. Please try again.', customColorLabel: 'Custom', customAccentLabel: 'Accent', customAccent2Label: 'Buttons',
     overtimeStatus: 'Time is up — finish or switch tasks (reminds every 5 min)',
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
@@ -1011,7 +1043,7 @@ const TRANSLATIONS = {
     settingsWorkHours: '근무시간 범위 (멈춤시간 집계 기준)', hourUnit: '시',
     settingsIdle: '유휴 감지 시간', settingsDefaultPresets: '기본 타이머 프리셋 (분)',
     settingsDataMgmt: '데이터 관리', exportData: '내보내기 (JSON)', resetData: '전체 초기화', resetConfirm: '정말로 모든 Sprout Work 데이터를 초기화할까요? 이 작업은 되돌릴 수 없습니다.',
-    settingsLanguage: '언어', thisWeekFocus: '이번주 집중시간', continueWithGoogle: 'Google로 계속하기', authOr: '또는', authEmailPh: '이메일', authPasswordPh: '비밀번호', authSignup: '회원가입', authLogin: '로그인', authCheckEmail: '이메일을 확인해서 계정을 인증해주세요.', authInvalid: '이메일 또는 비밀번호가 올바르지 않습니다.', authFillBoth: '이메일과 비밀번호를 모두 입력해주세요.', authError: '문제가 발생했습니다. 다시 시도해주세요.',
+    settingsLanguage: '언어', thisWeekFocus: '이번주 집중시간', continueWithGoogle: 'Google로 계속하기', authOr: '또는', authEmailPh: '이메일', authPasswordPh: '비밀번호', authSignup: '회원가입', authLogin: '로그인', authCheckEmail: '이메일을 확인해서 계정을 인증해주세요.', authInvalid: '이메일 또는 비밀번호가 올바르지 않습니다.', authFillBoth: '이메일과 비밀번호를 모두 입력해주세요.', authError: '문제가 발생했습니다. 다시 시도해주세요.', customColorLabel: '직접 선택', customAccentLabel: '강조색', customAccent2Label: '버튼색',
     overtimeStatus: '예정시간 초과 — 종료 또는 전환해주세요 (5분마다 알림)',
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
@@ -1049,7 +1081,7 @@ const TRANSLATIONS = {
     settingsWorkHours: 'Khung giờ làm việc (tính thời gian tạm dừng)', hourUnit: 'h',
     settingsIdle: 'Thời gian phát hiện không hoạt động', settingsDefaultPresets: 'Mốc thời gian mặc định (phút)',
     settingsDataMgmt: 'Quản lý dữ liệu', exportData: 'Xuất (JSON)', resetData: 'Đặt lại tất cả', resetConfirm: 'Đặt lại toàn bộ dữ liệu Sprout Work? Không thể hoàn tác.',
-    settingsLanguage: 'Ngôn ngữ', thisWeekFocus: 'Thời gian tập trung tuần này', continueWithGoogle: 'Tiếp tục với Google', authOr: 'hoặc', authEmailPh: 'Email', authPasswordPh: 'Mật khẩu', authSignup: 'Đăng ký', authLogin: 'Đăng nhập', authCheckEmail: 'Hãy kiểm tra email để xác nhận tài khoản.', authInvalid: 'Email hoặc mật khẩu không đúng.', authFillBoth: 'Vui lòng nhập cả email và mật khẩu.', authError: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+    settingsLanguage: 'Ngôn ngữ', thisWeekFocus: 'Thời gian tập trung tuần này', continueWithGoogle: 'Tiếp tục với Google', authOr: 'hoặc', authEmailPh: 'Email', authPasswordPh: 'Mật khẩu', authSignup: 'Đăng ký', authLogin: 'Đăng nhập', authCheckEmail: 'Hãy kiểm tra email để xác nhận tài khoản.', authInvalid: 'Email hoặc mật khẩu không đúng.', authFillBoth: 'Vui lòng nhập cả email và mật khẩu.', authError: 'Đã xảy ra lỗi. Vui lòng thử lại.', customColorLabel: 'Tùy chỉnh', customAccentLabel: 'Màu nhấn', customAccent2Label: 'Màu nút',
     overtimeStatus: 'Đã hết thời gian — hãy hoàn thành hoặc chuyển việc (nhắc lại mỗi 5 phút)',
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
@@ -2154,6 +2186,23 @@ document.addEventListener('click', (e) => {
 const settingsOverlay = document.getElementById('settingsOverlay');
 const modeTabs = document.getElementById('modeTabs');
 const presetGrid = document.getElementById('presetGrid');
+const customColorRow = document.getElementById('customColorRow');
+const customAccentInput = document.getElementById('customAccentInput');
+const customAccent2Input = document.getElementById('customAccent2Input');
+customAccentInput.addEventListener('input', () => {
+  themeSettings.customColors.accent = customAccentInput.value;
+  themeSettings.preset = 'custom';
+  saveThemeSettings(themeSettings);
+  applyTheme();
+  renderSettingsUI();
+});
+customAccent2Input.addEventListener('input', () => {
+  themeSettings.customColors.accent2 = customAccent2Input.value;
+  themeSettings.preset = 'custom';
+  saveThemeSettings(themeSettings);
+  applyTheme();
+  renderSettingsUI();
+});
 
 function renderSettingsUI() {
   modeTabs.querySelectorAll('button').forEach(btn => {
@@ -2181,6 +2230,31 @@ function renderSettingsUI() {
     });
     presetGrid.appendChild(sw);
   });
+
+  // "custom" swatch — same look as the others, using the user's own picked colors
+  const customVariant = currentPreset()[mode];
+  const customSw = document.createElement('div');
+  customSw.className = 'preset-swatch' + (themeSettings.preset === 'custom' ? ' active' : '');
+  customSw.title = t('customColorLabel');
+  customSw.style.background = customVariant.bg;
+  customSw.innerHTML = `
+    <span class="block" style="background:${customVariant.card2};"></span>
+    <span class="letter" style="color:${customVariant.text};">Aa</span>
+    <span class="btn-pill" style="background:${customVariant.accent2}; color:${customVariant.onAccent2};"></span>
+    ${themeSettings.preset === 'custom' ? '<span class="check">✓</span>' : ''}
+  `;
+  customSw.addEventListener('click', () => {
+    themeSettings.preset = 'custom';
+    saveThemeSettings(themeSettings);
+    applyTheme();
+    renderSettingsUI();
+  });
+  presetGrid.appendChild(customSw);
+
+  // custom color pickers — only shown once "custom" is selected
+  customColorRow.style.display = themeSettings.preset === 'custom' ? 'flex' : 'none';
+  customAccentInput.value = themeSettings.customColors.accent;
+  customAccent2Input.value = themeSettings.customColors.accent2;
 
   // font scale
   fontScaleTabs.querySelectorAll('button').forEach(btn => {
