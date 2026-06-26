@@ -112,6 +112,7 @@
   .btn-primary { background: var(--accent2); color: var(--on-accent2); }
   .btn-secondary { background: var(--accent); color: #3a0d0d; }
   .btn-ghost { background: var(--card2); color: var(--text); }
+  .btn-icon { padding: 11px 14px; font-size: 16px; line-height: 1; }
   button:hover { filter: brightness(1.1); }
 
   .start-form input[type=text] {
@@ -558,7 +559,7 @@
       </div>
       <div class="btn-row">
         <button class="btn-primary" id="startBtn" style="flex:1;" data-i18n="startBtn">Start</button>
-        <button class="btn-ghost" id="breakBtnStart" data-i18n="breakBtn">☕ Start break</button>
+        <button class="btn-ghost btn-icon" id="breakBtnStart" data-i18n-title="breakBtn" data-i18n-aria="breakBtn" title="Start break" aria-label="Start break">☕</button>
         <button class="btn-secondary" id="leaveBtnStart" data-i18n="clockOut">Clock out</button>
       </div>
       <div class="status-line" id="startLeaveMsg" style="display:none;" data-i18n="leaveMsg">Great work today 👋</div>
@@ -670,7 +671,7 @@
     <div class="modal-foot">
       <button class="btn-ghost" id="modalCancel" data-i18n="modalCancel">Cancel</button>
       <button class="btn-secondary" id="leaveBtn" data-i18n="clockOut">Clock out</button>
-      <button class="btn-ghost" id="breakBtnModal" data-i18n="breakBtn">☕ Start break</button>
+      <button class="btn-ghost btn-icon" id="breakBtnModal" data-i18n-title="breakBtn" data-i18n-aria="breakBtn" title="Start break" aria-label="Start break">☕</button>
       <button class="btn-primary" id="modalStartNew" data-i18n="modalStartNew">Start new task</button>
     </div>
   </div>
@@ -1022,7 +1023,7 @@ const TRANSLATIONS = {
     myStats: 'My focus history', logout: 'Log out', logoutAlert: 'Logging out will be available once Google sign-in is connected. (Coming soon)',
     finishBtn: 'Finish task', finishBreakBtn: 'Finish break', switchBtn: 'Switch task', cancelTask: 'Cancel', cancelledLabel: 'Cancelled',
     startQuestion: 'What will you focus on now?', startTitlePh: 'e.g. Draft the report',
-    presetCustom: 'Custom', customMinUnit: 'm', secUnit: 's', startBtn: 'Start', breakBtn: '☕ Start break',
+    presetCustom: 'Custom', customMinUnit: 'm', secUnit: 's', startBtn: 'Start', breakBtn: 'Start break',
     clockOut: 'Clock out', clockIn: 'Clock in', leaveMsg: 'Great work today 👋',
     treeTitle: "Today's task tree", planTitle: "Tomorrow's plan (unfinished)", planEmpty: 'Nothing unfinished to carry over',
     yesterdayTitle: 'Done yesterday', todayTitle: 'Done today', emptyToday: 'No tasks recorded yet', emptyYesterday: 'No tasks recorded yesterday',
@@ -1060,7 +1061,7 @@ const TRANSLATIONS = {
     myStats: '나의 집중 기록', logout: '로그아웃', logoutAlert: '구글 계정 연동 후 로그아웃이 가능합니다. (준비 중)',
     finishBtn: '작업 종료', finishBreakBtn: '휴식 종료', switchBtn: '다른 업무 전환', cancelTask: '취소', cancelledLabel: '취소됨',
     startQuestion: '지금 무엇에 집중할까요?', startTitlePh: '예: 보고서 초안 작성',
-    presetCustom: '직접입력', customMinUnit: '분', secUnit: '초', startBtn: '시작', breakBtn: '☕ 휴식 시작',
+    presetCustom: '직접입력', customMinUnit: '분', secUnit: '초', startBtn: '시작', breakBtn: '휴식 시작',
     clockOut: '퇴근!', clockIn: '출근', leaveMsg: '오늘 하루도 고생하셨어요 👋',
     treeTitle: '오늘의 업무 트리', planTitle: '내일 계획 (미완료 가지)', planEmpty: '내일로 넘길 미완료 업무가 없습니다',
     yesterdayTitle: '어제 한 일', todayTitle: '오늘 한 일', emptyToday: '아직 기록된 업무가 없습니다', emptyYesterday: '어제는 기록된 업무가 없습니다',
@@ -1098,7 +1099,7 @@ const TRANSLATIONS = {
     myStats: 'Lịch sử tập trung', logout: 'Đăng xuất', logoutAlert: 'Đăng xuất sẽ khả dụng sau khi liên kết Google. (Sắp ra mắt)',
     finishBtn: 'Hoàn thành', finishBreakBtn: 'Kết thúc nghỉ', switchBtn: 'Chuyển việc khác', cancelTask: 'Hủy', cancelledLabel: 'Đã hủy',
     startQuestion: 'Bạn sẽ tập trung vào việc gì?', startTitlePh: 'VD: Soạn báo cáo',
-    presetCustom: 'Tùy chỉnh', customMinUnit: 'phút', secUnit: 'giây', startBtn: 'Bắt đầu', breakBtn: '☕ Bắt đầu nghỉ',
+    presetCustom: 'Tùy chỉnh', customMinUnit: 'phút', secUnit: 'giây', startBtn: 'Bắt đầu', breakBtn: 'Bắt đầu nghỉ',
     clockOut: 'Tan ca', clockIn: 'Vào ca', leaveMsg: 'Bạn đã làm tốt hôm nay 👋',
     treeTitle: 'Cây công việc hôm nay', planTitle: 'Kế hoạch ngày mai (chưa xong)', planEmpty: 'Không có việc tồn đọng',
     yesterdayTitle: 'Việc đã làm hôm qua', todayTitle: 'Việc đã làm hôm nay', emptyToday: 'Chưa có việc nào', emptyYesterday: 'Không có việc nào hôm qua',
@@ -1150,6 +1151,7 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-ph')); });
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.setAttribute('title', t(el.getAttribute('data-i18n-title'))); });
   applyPresetMinutesToButtons();
   applyDayEndedVisuals();
   applyExtendButtonLabels();
