@@ -2698,8 +2698,14 @@ function cloudSet(key, value) {
     user_id: currentUser.id, data_key: key, data_value: value, updated_at: new Date().toISOString()
   }).then(({ error }) => { if (error) console.error('cloudSet failed', key, error); });
 }
+function clearLocalAppData() {
+  Object.keys(localStorage)
+    .filter(k => k.startsWith('sproutWork_'))
+    .forEach(k => localStorage.removeItem(k));
+}
 async function cloudPullAll() {
   if (!currentUser) return;
+  clearLocalAppData(); // wipe whatever the previous signed-in user (or anonymous session) left behind
   const { data, error } = await supabaseClient.from('user_data').select('data_key,data_value').eq('user_id', currentUser.id);
   if (error || !data) return;
   data.forEach(row => localStorage.setItem(row.data_key, JSON.stringify(row.data_value)));
@@ -2765,6 +2771,7 @@ document.getElementById('authSignupBtn').addEventListener('click', async () => {
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   profileMenu.classList.remove('show');
   await supabaseClient.auth.signOut();
+  clearLocalAppData();
   location.reload();
 });
 
