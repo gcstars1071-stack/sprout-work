@@ -70,13 +70,13 @@ a:hover { text-decoration: underline; }
 /* pricing */
 .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 760px; margin: 40px auto 0; }
 @media (max-width: 640px) { .price-grid { grid-template-columns: 1fr; } }
-.price-card { background: var(--card); border-radius: 18px; padding: 32px; }
+.price-card { background: var(--card); border-radius: 18px; padding: 22px 28px; }
 .price-card.featured { border: 2px solid var(--accent2); }
 .price-card h2 { font-size: 18px; margin: 0 0 6px; }
-.price-card .amount { font-size: 36px; font-weight: 800; margin: 10px 0 4px; }
+.price-card .amount { font-size: 32px; font-weight: 800; margin: 6px 0 2px; }
 .price-card .amount span { font-size: 14px; font-weight: 400; color: var(--dim); }
-.price-card ul { list-style: none; padding: 0; margin: 20px 0 24px; font-size: 14px; }
-.price-card li { padding: 7px 0; color: var(--text); border-top: 1px solid #2c2c4a; }
+.price-card ul { list-style: none; padding: 0; margin: 14px 0 16px; font-size: 14px; }
+.price-card li { padding: 5px 0; color: var(--text); border-top: 1px solid #2c2c4a; }
 .price-card li:first-child { border-top: none; }
 .price-card li.no { color: var(--dim); }
 
