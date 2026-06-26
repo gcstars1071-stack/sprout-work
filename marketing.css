@@ -93,3 +93,16 @@ a:hover { text-decoration: underline; }
 .docs-content h2 { font-size: 20px; border-top: 1px solid #2c2c4a; padding-top: 30px; }
 .docs-content p, .docs-content li { color: #cfcfe0; font-size: 15px; }
 .docs-content code { background: var(--card2); padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+
+/* downloads */
+.dl-grid { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+.dl-card {
+  width: 160px; padding: 30px 16px; border-radius: 16px; text-align: center;
+  background: var(--card); border: 1px solid #33334d; text-decoration: none; color: var(--text);
+}
+.dl-card .dl-icon { font-size: 40px; display: block; margin-bottom: 14px; }
+.dl-card .dl-label { font-size: 16px; font-weight: 700; }
+.dl-card .dl-note { font-size: 12px; color: var(--dim); margin-top: 6px; }
+.dl-card.ready { border-color: var(--accent2); cursor: pointer; }
+.dl-card.ready:hover { background: var(--card2); text-decoration: none; }
+.dl-card.soon { opacity: 0.4; cursor: default; pointer-events: none; }
