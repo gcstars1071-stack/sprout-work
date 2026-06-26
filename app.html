@@ -410,16 +410,16 @@
   .widget-remove:hover { color: var(--accent); background: var(--card2); }
 
   /* widgets */
-  .widget-card { position: relative; background: var(--card); border-radius: 20px; padding: 28px; display:flex; flex-direction:column; }
+  .widget-card { position: relative; background: var(--card); border-radius: 20px; padding: 10px; display:flex; flex-direction:column; }
   .widget-card-ad { padding: 8px; }
-  .digital-clock { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; }
+  .digital-clock { display:flex; flex-direction:column; justify-content:center; height:100%; }
   .digital-clock .time { font-size: 36px; font-weight:700; font-variant-numeric: tabular-nums; }
   .digital-clock .date { font-size: 13px; color: var(--dim); margin-top:6px; }
   .digital-clock select {
     background: var(--card2); color: var(--text); border:none; border-radius:8px;
     padding: 5px 8px; font-size: 12px; margin-bottom: 10px;
   }
-  .analog-clock-wrap { display:flex; align-items:center; justify-content:center; height:100%; }
+  .analog-clock-wrap { display:flex; justify-content:center; height:100%; }
   .sticky-note { height:100%; display:flex; flex-direction:column; }
   .sticky-note textarea {
     flex:1; resize:none; border:none; outline:none;
@@ -433,14 +433,14 @@
   .sticky-note .sticky-colors { display:flex; gap:6px; margin-bottom:10px; }
   .sticky-note .sticky-colors span { width:16px; height:16px; border-radius:50%; cursor:pointer; display:inline-block; border: 2px solid transparent; }
   .sticky-note .sticky-colors span.selected { border-color: #333; }
-  .ddday-widget { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:8px; }
+  .ddday-widget { display:flex; flex-direction:column; justify-content:center; height:100%; gap:8px; }
   .ddday-widget .ddday-num { font-size: 34px; font-weight:700; }
   .ddday-widget input[type=text], .ddday-widget input[type=date] {
     background: var(--card2); border:none; border-radius:8px; padding:6px 10px; color:var(--text); font-size:13px;
   }
-  .quote-widget { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; gap:10px; }
+  .quote-widget { display:flex; flex-direction:column; justify-content:center; height:100%; gap:10px; }
   .quote-widget .quote-text { font-size: 15px; line-height:1.6; font-family: var(--font-serif, serif); }
-  .ministats-widget { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; }
+  .ministats-widget { display:flex; flex-direction:column; justify-content:center; height:100%; }
   .ministats-widget .num { font-size: 30px; font-weight:700; color: var(--accent2); }
   .ministats-widget .lbl { font-size:12px; color:var(--dim); margin-top:4px; }
   .ad-widget { height:100%; width:100%; }
@@ -2830,10 +2830,19 @@ let dashboardGrid = null;
 // tiles) has nothing to apply to, so widgets sat flush against their neighbors. Wrapping our
 // widget-card in a .grid-stack-item-content div ourselves matches the built-in cards exactly.
 function wrapAsGridStackContent(el) {
-  const wrap = document.createElement('div');
-  wrap.className = 'grid-stack-item-content';
-  wrap.appendChild(el);
-  return wrap;
+  // GridStack's addWidget() always merges the 'grid-stack-item' class onto whatever
+  // element we pass it — it does NOT create the nested .grid-stack-item-content child
+  // the way our static built-in cards have. That inner element is what GridStack's own
+  // margin/inset CSS targets to create the gap between tiles, so without a genuinely
+  // separate nested div, the widget sits flush against its neighbors. We build both
+  // levels ourselves here: an outer (plain) div that GridStack turns into the item, and
+  // a real nested .grid-stack-item-content child carrying the actual widget markup.
+  const outer = document.createElement('div');
+  const content = document.createElement('div');
+  content.className = 'grid-stack-item-content';
+  content.appendChild(el);
+  outer.appendChild(content);
+  return outer;
 }
 
 function addWidget(type, id, data, gridOpts) {
