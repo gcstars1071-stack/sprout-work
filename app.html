@@ -189,7 +189,9 @@
   .wait-item > div:first-child { flex: 1 1 auto; min-width: 0; overflow: hidden; }
   .wait-item > div:last-child { flex-shrink: 0; margin-left: 10px; }
   .modal-divider { border-top: 1px solid #33334d; margin: 16px 0; padding-top: 16px; }
-  .modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+  .modal-foot { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .modal-foot:has(.modal-foot-right) { justify-content: space-between; }
+  .modal-foot-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
   /* tree view */
   .tree-card h2 { font-size: 14px; color: var(--dim); font-weight: 500; margin: 0 0 12px; }
@@ -670,9 +672,11 @@
     </div>
     <div class="modal-foot">
       <button class="btn-ghost" id="modalCancel" data-i18n="modalCancel">Cancel</button>
-      <button class="btn-secondary" id="leaveBtn" data-i18n="clockOut">Clock out</button>
-      <button class="btn-ghost btn-icon" id="breakBtnModal" data-i18n-title="breakBtn" data-i18n-aria="breakBtn" title="Start break" aria-label="Start break">☕</button>
-      <button class="btn-primary" id="modalStartNew" data-i18n="modalStartNew">Start new task</button>
+      <div class="modal-foot-right">
+        <button class="btn-secondary" id="leaveBtn" data-i18n="clockOut">Clock out</button>
+        <button class="btn-ghost btn-icon" id="breakBtnModal" data-i18n-title="breakBtn" data-i18n-aria="breakBtn" title="Start break" aria-label="Start break">☕</button>
+        <button class="btn-primary" id="modalStartNew" data-i18n="modalStartNew">Start new task</button>
+      </div>
     </div>
   </div>
 </div>
