@@ -407,7 +407,7 @@
   .widget-remove:hover { color: var(--accent); background: var(--card2); }
 
   /* widgets */
-  .widget-card { position: relative; background: var(--card); border-radius: 20px; padding: 24px; display:flex; flex-direction:column; }
+  .widget-card { position: relative; background: var(--card); border-radius: 20px; padding: 28px; display:flex; flex-direction:column; }
   .widget-card-ad { padding: 8px; }
   .digital-clock { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; }
   .digital-clock .time { font-size: 36px; font-weight:700; font-variant-numeric: tabular-nums; }
@@ -2883,29 +2883,20 @@ function initDashboard() {
     draggable: { cancel: 'input, textarea, select, button, a, .todo-item, .tree-node, .day-list-item, .cal-cell, .sticky-colors span' }
   }, '#dashboardGrid');
 
-  // recreate any previously added extra widgets
-  const WIDGET_DEFAULT_W = 3; // matches the built-in cards' width, out of 12 grid columns
+  // recreate any previously added extra widgets — always respect whatever size/position the user last saved
   const widgetsData = loadWidgetsData();
-  let migratedWidth = false;
   Object.entries(widgetsData).forEach(([id, w]) => {
-    if (w.w !== WIDGET_DEFAULT_W) { w.w = WIDGET_DEFAULT_W; migratedWidth = true; } // normalize widget width to match built-in blocks
     const el = buildWidgetEl(w.type, id, w.data || {});
-    const opts = { id, w: w.w, h: w.h || 3, autoPosition: true };
+    const opts = { id, w: w.w || 3, h: w.h || 3, autoPosition: true };
     if (w.type === 'ad') Object.assign(opts, { minW: 3, minH: 2 });
     dashboardGrid.addWidget(el, opts);
   });
-  if (migratedWidth) saveWidgetsData(widgetsData);
 
   // restore saved positions/sizes for everything (built-in cards + widgets)
   const savedLayoutRaw = localStorage.getItem(LAYOUT_KEY);
   if (savedLayoutRaw) {
     try {
-      const layout = JSON.parse(savedLayoutRaw);
-      layout.forEach(node => {
-        if (widgetsData[node.id] && node.w !== WIDGET_DEFAULT_W) { node.w = WIDGET_DEFAULT_W; migratedWidth = true; }
-      });
-      dashboardGrid.load(layout);
-      if (migratedWidth) saveLayout();
+      dashboardGrid.load(JSON.parse(savedLayoutRaw));
     } catch (e) {}
   }
 
