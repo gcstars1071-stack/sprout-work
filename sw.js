@@ -1,5 +1,5 @@
-const CACHE_NAME = 'sprout-work-v1';
-const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
+const CACHE_NAME = 'sprout-work-v2';
+const ASSETS = ['./', './index.html', './app.html', './pricing.html', './docs.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
