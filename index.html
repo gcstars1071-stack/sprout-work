@@ -199,6 +199,14 @@
   .icon-active { color: #6ea8ff; }
   .icon-waiting { color: var(--warn); }
   .icon-open { color: var(--dim); }
+  .icon-cancelled { color: var(--accent); }
+  .tree-node.is-cancelled .txt { text-decoration: line-through; color: var(--dim); }
+  .day-list-item.is-cancelled .dtxt { text-decoration: line-through; color: var(--dim); }
+  .tree-node[draggable="true"] { cursor: grab; }
+  .tree-node.drag-dragging { opacity: 0.4; }
+  .tree-node.drop-before { box-shadow: inset 0 2px 0 0 var(--accent2); }
+  .tree-node.drop-after { box-shadow: inset 0 -2px 0 0 var(--accent2); }
+  .tree-node.drop-into { outline: 2px dashed var(--accent2); outline-offset: -2px; }
   .empty-msg { color: var(--dim); font-size: 13px; text-align: center; padding: 10px 0; }
 
   /* todo list */
@@ -508,6 +516,7 @@
       <div class="status-line" id="statusLine"></div>
       <div class="btn-row">
         <button class="btn-primary" id="finishBtn" data-i18n="finishBtn">Finish task</button>
+        <button class="btn-ghost" id="cancelTaskBtn" data-i18n="cancelTask">Cancel</button>
         <button class="btn-secondary" id="switchBtn" data-i18n="switchBtn">Switch task</button>
       </div>
     </div>
@@ -932,7 +941,7 @@ const TRANSLATIONS = {
     addWidget: '+ Add widget', settings: '⚙ Settings', settingsAria: 'Settings', profileAria: 'Profile',
     profileDefaultName: 'User', profilePending: 'Google account linking coming soon',
     myStats: 'My focus history', logout: 'Log out', logoutAlert: 'Logging out will be available once Google sign-in is connected. (Coming soon)',
-    finishBtn: 'Finish task', finishBreakBtn: 'Finish break', switchBtn: 'Switch task',
+    finishBtn: 'Finish task', finishBreakBtn: 'Finish break', switchBtn: 'Switch task', cancelTask: 'Cancel', cancelledLabel: 'Cancelled',
     startQuestion: 'What will you focus on now?', startTitlePh: 'e.g. Draft the report',
     presetCustom: 'Custom', customMinUnit: 'min', secUnit: 'sec', startBtn: 'Start', breakBtn: '☕ Start break',
     clockOut: 'Clock out', clockIn: 'Clock in', leaveMsg: 'Great work today 👋',
@@ -970,7 +979,7 @@ const TRANSLATIONS = {
     addWidget: '+ 위젯 추가', settings: '⚙ 설정', settingsAria: '설정', profileAria: '프로필',
     profileDefaultName: '사용자', profilePending: '구글 계정 연동 예정',
     myStats: '나의 집중 기록', logout: '로그아웃', logoutAlert: '구글 계정 연동 후 로그아웃이 가능합니다. (준비 중)',
-    finishBtn: '작업 종료', finishBreakBtn: '휴식 종료', switchBtn: '다른 업무 전환',
+    finishBtn: '작업 종료', finishBreakBtn: '휴식 종료', switchBtn: '다른 업무 전환', cancelTask: '취소', cancelledLabel: '취소됨',
     startQuestion: '지금 무엇에 집중할까요?', startTitlePh: '예: 보고서 초안 작성',
     presetCustom: '직접입력', customMinUnit: '분', secUnit: '초', startBtn: '시작', breakBtn: '☕ 휴식 시작',
     clockOut: '퇴근!', clockIn: '출근', leaveMsg: '오늘 하루도 고생하셨어요 👋',
@@ -1008,7 +1017,7 @@ const TRANSLATIONS = {
     addWidget: '+ Thêm tiện ích', settings: '⚙ Cài đặt', settingsAria: 'Cài đặt', profileAria: 'Hồ sơ',
     profileDefaultName: 'Người dùng', profilePending: 'Liên kết Google sắp ra mắt',
     myStats: 'Lịch sử tập trung', logout: 'Đăng xuất', logoutAlert: 'Đăng xuất sẽ khả dụng sau khi liên kết Google. (Sắp ra mắt)',
-    finishBtn: 'Hoàn thành', finishBreakBtn: 'Kết thúc nghỉ', switchBtn: 'Chuyển việc khác',
+    finishBtn: 'Hoàn thành', finishBreakBtn: 'Kết thúc nghỉ', switchBtn: 'Chuyển việc khác', cancelTask: 'Hủy', cancelledLabel: 'Đã hủy',
     startQuestion: 'Bạn sẽ tập trung vào việc gì?', startTitlePh: 'VD: Soạn báo cáo',
     presetCustom: 'Tùy chỉnh', customMinUnit: 'phút', secUnit: 'giây', startBtn: 'Bắt đầu', breakBtn: '☕ Bắt đầu nghỉ',
     clockOut: 'Tan ca', clockIn: 'Vào ca', leaveMsg: 'Bạn đã làm tốt hôm nay 👋',
@@ -1132,7 +1141,8 @@ function createSession(title, plannedSeconds, parentId, category) {
     status: 'active',
     category: category || 'work',
     intervals: [{ type: 'focus', start: Date.now(), end: null }],
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    order: Date.now()
   };
   state.sessions[id] = s;
   if (s.category !== 'break') bumpTitleFrequency(title);
@@ -1241,6 +1251,12 @@ function resumeSession(session) {
 function finishSession(session) {
   closeCurrentInterval(session);
   session.status = 'done';
+  state.waitingIds = state.waitingIds.filter(id => id !== session.id);
+  if (state.activeId === session.id) state.activeId = null;
+}
+function cancelSession(session) {
+  closeCurrentInterval(session);
+  session.status = 'cancelled';
   state.waitingIds = state.waitingIds.filter(id => id !== session.id);
   if (state.activeId === session.id) state.activeId = null;
 }
@@ -1591,13 +1607,22 @@ startBtn.addEventListener('click', () => {
   render();
 });
 
-let pendingRevert = null; // { id, kind: 'finish' | 'switch' } — lets "취소" undo and return to the task that was running
+let pendingRevert = null; // { id, kind: 'finish' | 'switch' | 'cancel' } — lets "취소" undo and return to the task that was running
 
 finishBtn.addEventListener('click', () => {
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (!active) return;
   pendingRevert = { id: active.id, kind: 'finish' };
   finishSession(active);
+  render();
+  openSwitchModal();
+});
+
+document.getElementById('cancelTaskBtn').addEventListener('click', () => {
+  const active = state.activeId ? state.sessions[state.activeId] : null;
+  if (!active) return;
+  pendingRevert = { id: active.id, kind: 'cancel' };
+  cancelSession(active);
   render();
   openSwitchModal();
 });
@@ -1673,7 +1698,7 @@ modalCancel.addEventListener('click', () => {
   if (pendingRevert) {
     const s = state.sessions[pendingRevert.id];
     if (s) {
-      if (pendingRevert.kind === 'finish') {
+      if (pendingRevert.kind === 'finish' || pendingRevert.kind === 'cancel') {
         s.status = 'active';
         s.intervals.push({ type: 'focus', start: Date.now(), end: null });
         state.waitingIds = state.waitingIds.filter(id => id !== s.id);
@@ -1758,6 +1783,7 @@ function escapeHtml(str) {
 
 /* ---------- tree rendering ---------- */
 function statusIcon(s) {
+  if (s.status === 'cancelled') return '<span class="icon-cancelled">✕</span>';
   if (s.category === 'break') return '<span class="icon-waiting">☕</span>';
   if (s.status === 'done') return '<span class="icon-done">✓</span>';
   if (s.status === 'active') return '<span class="icon-active">▶</span>';
@@ -1776,10 +1802,103 @@ function switchToSession(session) {
   render();
 }
 
+function sessionOrder(s) { return s.order ?? s.createdAt; }
+
+/* ---------- tree drag & drop (reorder siblings or re-parent) ---------- */
+let draggedSessionId = null;
+
+function isDescendantOf(nodeId, ancestorId) {
+  let cur = state.sessions[nodeId];
+  while (cur && cur.parentId) {
+    if (cur.parentId === ancestorId) return true;
+    cur = state.sessions[cur.parentId];
+  }
+  return false;
+}
+
+// moves `draggedId` to be a child of `newParentId` (or top-level if null),
+// inserted right before `beforeId` (or appended at the end if null/not found)
+function moveSession(draggedId, newParentId, beforeId) {
+  const dragged = state.sessions[draggedId];
+  if (!dragged) return;
+  if (draggedId === newParentId) return;
+  if (newParentId && isDescendantOf(newParentId, draggedId)) return; // would create a cycle
+  dragged.parentId = newParentId || null;
+  const siblings = Object.values(state.sessions)
+    .filter(s => (s.parentId || null) === (newParentId || null) && s.id !== draggedId)
+    .sort((a, b) => sessionOrder(a) - sessionOrder(b));
+  let insertAt = siblings.length;
+  if (beforeId) {
+    const idx = siblings.findIndex(s => s.id === beforeId);
+    if (idx !== -1) insertAt = idx;
+  }
+  siblings.splice(insertAt, 0, dragged);
+  siblings.forEach((s, i) => { s.order = i; });
+}
+
+function clearDropIndicators() {
+  document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('drop-before', 'drop-after', 'drop-into'));
+}
+
+function attachTreeDragHandlers(row, session) {
+  row.draggable = true;
+  row.addEventListener('dragstart', (e) => {
+    draggedSessionId = session.id;
+    e.dataTransfer.effectAllowed = 'move';
+    row.classList.add('drag-dragging');
+  });
+  row.addEventListener('dragend', () => {
+    row.classList.remove('drag-dragging');
+    clearDropIndicators();
+    draggedSessionId = null;
+  });
+  row.addEventListener('dragover', (e) => {
+    if (!draggedSessionId || draggedSessionId === session.id) return;
+    e.preventDefault();
+    const rect = row.getBoundingClientRect();
+    const ratio = (e.clientY - rect.top) / rect.height;
+    const zone = ratio < 0.25 ? 'before' : ratio > 0.75 ? 'after' : 'into';
+    if (row.dataset.dropZone !== zone) {
+      row.classList.remove('drop-before', 'drop-after', 'drop-into');
+      row.classList.add('drop-' + zone);
+      row.dataset.dropZone = zone;
+    }
+  });
+  row.addEventListener('dragleave', () => {
+    row.classList.remove('drop-before', 'drop-after', 'drop-into');
+    delete row.dataset.dropZone;
+  });
+  row.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const zone = row.dataset.dropZone || 'into';
+    const draggedId = draggedSessionId;
+    row.classList.remove('drop-before', 'drop-after', 'drop-into');
+    delete row.dataset.dropZone;
+    if (!draggedId || draggedId === session.id) return;
+    if (zone === 'into') {
+      moveSession(draggedId, session.id, null);
+    } else {
+      const siblings = Object.values(state.sessions)
+        .filter(s => (s.parentId || null) === (session.parentId || null) && s.id !== draggedId)
+        .sort((a, b) => sessionOrder(a) - sessionOrder(b));
+      const idx = siblings.findIndex(s => s.id === session.id);
+      if (zone === 'before') {
+        moveSession(draggedId, session.parentId || null, session.id);
+      } else {
+        const nextId = siblings[idx + 1] ? siblings[idx + 1].id : null;
+        moveSession(draggedId, session.parentId || null, nextId);
+      }
+    }
+    draggedSessionId = null;
+    render();
+  });
+}
+
 function renderTree() {
   const roots = Object.values(state.sessions)
     .filter(s => !s.parentId)
-    .sort((a, b) => a.createdAt - b.createdAt);
+    .sort((a, b) => sessionOrder(a) - sessionOrder(b));
 
   treeRoot.innerHTML = '';
   if (roots.length === 0) {
@@ -1789,17 +1908,29 @@ function renderTree() {
   roots.forEach(r => treeRoot.appendChild(buildNode(r)));
 }
 
+// dropping on empty space below all rows makes the dragged task top-level
+treeRoot.addEventListener('dragover', (e) => { if (draggedSessionId) e.preventDefault(); });
+treeRoot.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (!draggedSessionId) return;
+  moveSession(draggedSessionId, null, null);
+  draggedSessionId = null;
+  clearDropIndicators();
+  render();
+});
+
 function buildNode(session) {
   const wrap = document.createElement('div');
 
   const row = document.createElement('div');
-  row.className = 'tree-node';
+  row.className = 'tree-node' + (session.status === 'cancelled' ? ' is-cancelled' : '');
   const fs = focusSeconds(session);
   const ps = pauseSeconds(session);
   let metaText = fmtShort(fs);
   if (ps > 0.5) metaText += ` ${t('paused')}${fmtShort(ps)}${t('closeParen')}`;
   if (session.status === 'active') metaText = t('inProgress') + ' · ' + metaText;
   if (session.status === 'paused') metaText = t('waitingStatus') + ' · ' + metaText;
+  if (session.status === 'cancelled') metaText = t('cancelledLabel') + ' · ' + metaText;
 
   row.innerHTML = `<div class="label">${statusIcon(session)}<span class="txt">${escapeHtml(session.title)}</span></div><div class="meta">${metaText}</div>`;
 
@@ -1809,11 +1940,13 @@ function buildNode(session) {
     row.addEventListener('click', () => switchToSession(session));
   }
 
+  attachTreeDragHandlers(row, session);
+
   wrap.appendChild(row);
 
   const children = Object.values(state.sessions)
     .filter(s => s.parentId === session.id)
-    .sort((a, b) => a.createdAt - b.createdAt);
+    .sort((a, b) => sessionOrder(a) - sessionOrder(b));
 
   if (children.length) {
     const childWrap = document.createElement('div');
@@ -1826,13 +1959,13 @@ function buildNode(session) {
 
 function renderPlan() {
   const todayUnfinished = Object.values(state.sessions)
-    .filter(s => s.status !== 'done' && s.category !== 'break')
+    .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break')
     .map(s => ({ session: s, sessionsMap: state.sessions, label: t('todayLabel') }));
 
   const yState = loadStateForDate(dateStrOffset(-1));
   const yesterdayUnfinished = yState
     ? Object.values(yState.sessions)
-        .filter(s => s.status !== 'done' && s.category !== 'break')
+        .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break')
         .map(s => ({ session: s, sessionsMap: yState.sessions, label: t('yesterdayLabel') }))
     : [];
 
@@ -1883,9 +2016,10 @@ function renderFlatList(container, dayState, emptyMsg, clickable) {
     const ps = pauseSeconds(s);
     let meta = timeRangeLabel(s) + ' · ' + fmtShort(fs);
     if (ps > 0.5) meta += ` ${t('paused')}${fmtShort(ps)}${t('closeParen')}`;
-    if (s.status !== 'done') meta += ' · ' + t('unfinished');
+    if (s.status === 'cancelled') meta += ' · ' + t('cancelledLabel');
+    else if (s.status !== 'done') meta += ' · ' + t('unfinished');
     const row = document.createElement('div');
-    row.className = 'day-list-item';
+    row.className = 'day-list-item' + (s.status === 'cancelled' ? ' is-cancelled' : '');
     row.innerHTML = `<span class="dtxt">${statusIcon(s)} ${escapeHtml(s.title)}</span><span class="dmeta">${meta}</span>`;
     if (clickable) {
       row.style.cursor = 'pointer';
