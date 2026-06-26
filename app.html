@@ -510,6 +510,7 @@
         <div class="profile-menu-name" id="profileName">User</div>
         <div class="profile-menu-email" id="profileEmail">Google account linking coming soon</div>
         <button id="myStatsBtn" data-i18n="myStats">My focus history</button>
+        <button id="feedbackBtn" data-i18n="sendFeedback">Send feedback</button>
         <button id="logoutBtn" data-i18n="logout">Log out</button>
       </div>
     </div>
@@ -820,6 +821,31 @@
   </div>
 </div>
 
+<!-- feedback -->
+<div class="overlay" id="feedbackOverlay">
+  <div class="modal" style="width:420px;">
+    <h2 style="margin-bottom:14px;" data-i18n="feedbackTitle">Send feedback</h2>
+    <div class="settings-section">
+      <div class="settings-label" data-i18n="feedbackCategoryLabel">What's this about?</div>
+      <div class="mode-tabs" id="feedbackCategoryTabs">
+        <button data-category="bug" class="active" data-i18n="feedbackBug">Bug</button>
+        <button data-category="feature" data-i18n="feedbackFeature">Improvement</button>
+        <button data-category="widget" data-i18n="feedbackWidget">Widget request</button>
+        <button data-category="other" data-i18n="feedbackOther">Other</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <textarea id="feedbackMessage" data-i18n-ph="feedbackPh" placeholder="Tell us what happened or what you'd like to see..."
+        style="width:100%; min-height:120px; background:var(--card2); border:none; border-radius:10px; padding:12px 14px; color:var(--text); font-size:14px; resize:vertical; font-family:inherit;"></textarea>
+    </div>
+    <div class="auth-msg" id="feedbackMsg"></div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="feedbackCancelBtn" data-i18n="modalCancel">Cancel</button>
+      <button class="btn-primary" id="feedbackSubmitBtn" data-i18n="feedbackSubmit">Send</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/gridstack@9.5.0/dist/gridstack-all.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -1015,7 +1041,7 @@ const TRANSLATIONS = {
     settingsWorkHours: 'Work hours range (for tracking paused time)', hourUnit: 'h',
     settingsIdle: 'Idle detection time', settingsDefaultPresets: 'Default timer presets (minutes)',
     settingsDataMgmt: 'Data management', exportData: 'Export (JSON)', resetData: 'Reset all', resetConfirm: 'Reset all Sprout Work data? This cannot be undone.',
-    settingsLanguage: 'Language', thisWeekFocus: 'Focus time this week', continueWithGoogle: 'Continue with Google', authOr: 'or', authEmailPh: 'Email', authPasswordPh: 'Password', authSignup: 'Sign up', authLogin: 'Log in', authCheckEmail: 'Check your email to confirm your account.', authInvalid: 'Incorrect email or password.', authFillBoth: 'Enter both email and password.', authError: 'Something went wrong. Please try again.', customColorLabel: 'Custom', customAccentLabel: 'Accent', customAccent2Label: 'Buttons',
+    settingsLanguage: 'Language', thisWeekFocus: 'Focus time this week', continueWithGoogle: 'Continue with Google', authOr: 'or', authEmailPh: 'Email', authPasswordPh: 'Password', authSignup: 'Sign up', authLogin: 'Log in', authCheckEmail: 'Check your email to confirm your account.', authInvalid: 'Incorrect email or password.', authFillBoth: 'Enter both email and password.', authError: 'Something went wrong. Please try again.', customColorLabel: 'Custom', customAccentLabel: 'Accent', customAccent2Label: 'Buttons', sendFeedback: 'Send feedback', feedbackTitle: 'Send feedback', feedbackCategoryLabel: "What's this about?", feedbackBug: 'Bug', feedbackFeature: 'Improvement', feedbackWidget: 'Widget request', feedbackOther: 'Other', feedbackPh: "Tell us what happened or what you'd like to see...", feedbackSubmit: 'Send', feedbackEmpty: 'Please write a message first.', feedbackError: 'Could not send — please try again.', feedbackThanks: 'Thanks! Your feedback was sent.',
     overtimeStatus: 'Time is up — finish or switch tasks (reminds every 5 min)',
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
@@ -1053,7 +1079,7 @@ const TRANSLATIONS = {
     settingsWorkHours: '근무시간 범위 (멈춤시간 집계 기준)', hourUnit: '시',
     settingsIdle: '유휴 감지 시간', settingsDefaultPresets: '기본 타이머 프리셋 (분)',
     settingsDataMgmt: '데이터 관리', exportData: '내보내기 (JSON)', resetData: '전체 초기화', resetConfirm: '정말로 모든 Sprout Work 데이터를 초기화할까요? 이 작업은 되돌릴 수 없습니다.',
-    settingsLanguage: '언어', thisWeekFocus: '이번주 집중시간', continueWithGoogle: 'Google로 계속하기', authOr: '또는', authEmailPh: '이메일', authPasswordPh: '비밀번호', authSignup: '회원가입', authLogin: '로그인', authCheckEmail: '이메일을 확인해서 계정을 인증해주세요.', authInvalid: '이메일 또는 비밀번호가 올바르지 않습니다.', authFillBoth: '이메일과 비밀번호를 모두 입력해주세요.', authError: '문제가 발생했습니다. 다시 시도해주세요.', customColorLabel: '직접 선택', customAccentLabel: '강조색', customAccent2Label: '버튼색',
+    settingsLanguage: '언어', thisWeekFocus: '이번주 집중시간', continueWithGoogle: 'Google로 계속하기', authOr: '또는', authEmailPh: '이메일', authPasswordPh: '비밀번호', authSignup: '회원가입', authLogin: '로그인', authCheckEmail: '이메일을 확인해서 계정을 인증해주세요.', authInvalid: '이메일 또는 비밀번호가 올바르지 않습니다.', authFillBoth: '이메일과 비밀번호를 모두 입력해주세요.', authError: '문제가 발생했습니다. 다시 시도해주세요.', customColorLabel: '직접 선택', customAccentLabel: '강조색', customAccent2Label: '버튼색', sendFeedback: '피드백 보내기', feedbackTitle: '피드백 보내기', feedbackCategoryLabel: '어떤 내용인가요?', feedbackBug: '오류 신고', feedbackFeature: '개선 제안', feedbackWidget: '위젯 요청', feedbackOther: '기타', feedbackPh: '어떤 문제가 있었는지, 또는 어떤 기능을 원하시는지 적어주세요...', feedbackSubmit: '보내기', feedbackEmpty: '내용을 먼저 입력해주세요.', feedbackError: '전송에 실패했습니다. 다시 시도해주세요.', feedbackThanks: '감사합니다! 피드백이 전송되었습니다.',
     overtimeStatus: '예정시간 초과 — 종료 또는 전환해주세요 (5분마다 알림)',
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
@@ -1091,7 +1117,7 @@ const TRANSLATIONS = {
     settingsWorkHours: 'Khung giờ làm việc (tính thời gian tạm dừng)', hourUnit: 'h',
     settingsIdle: 'Thời gian phát hiện không hoạt động', settingsDefaultPresets: 'Mốc thời gian mặc định (phút)',
     settingsDataMgmt: 'Quản lý dữ liệu', exportData: 'Xuất (JSON)', resetData: 'Đặt lại tất cả', resetConfirm: 'Đặt lại toàn bộ dữ liệu Sprout Work? Không thể hoàn tác.',
-    settingsLanguage: 'Ngôn ngữ', thisWeekFocus: 'Thời gian tập trung tuần này', continueWithGoogle: 'Tiếp tục với Google', authOr: 'hoặc', authEmailPh: 'Email', authPasswordPh: 'Mật khẩu', authSignup: 'Đăng ký', authLogin: 'Đăng nhập', authCheckEmail: 'Hãy kiểm tra email để xác nhận tài khoản.', authInvalid: 'Email hoặc mật khẩu không đúng.', authFillBoth: 'Vui lòng nhập cả email và mật khẩu.', authError: 'Đã xảy ra lỗi. Vui lòng thử lại.', customColorLabel: 'Tùy chỉnh', customAccentLabel: 'Màu nhấn', customAccent2Label: 'Màu nút',
+    settingsLanguage: 'Ngôn ngữ', thisWeekFocus: 'Thời gian tập trung tuần này', continueWithGoogle: 'Tiếp tục với Google', authOr: 'hoặc', authEmailPh: 'Email', authPasswordPh: 'Mật khẩu', authSignup: 'Đăng ký', authLogin: 'Đăng nhập', authCheckEmail: 'Hãy kiểm tra email để xác nhận tài khoản.', authInvalid: 'Email hoặc mật khẩu không đúng.', authFillBoth: 'Vui lòng nhập cả email và mật khẩu.', authError: 'Đã xảy ra lỗi. Vui lòng thử lại.', customColorLabel: 'Tùy chỉnh', customAccentLabel: 'Màu nhấn', customAccent2Label: 'Màu nút', sendFeedback: 'Gửi phản hồi', feedbackTitle: 'Gửi phản hồi', feedbackCategoryLabel: 'Đây là về điều gì?', feedbackBug: 'Lỗi', feedbackFeature: 'Cải tiến', feedbackWidget: 'Yêu cầu tiện ích', feedbackOther: 'Khác', feedbackPh: 'Hãy cho chúng tôi biết điều gì đã xảy ra hoặc bạn muốn thấy gì...', feedbackSubmit: 'Gửi', feedbackEmpty: 'Vui lòng nhập nội dung trước.', feedbackError: 'Gửi không thành công — vui lòng thử lại.', feedbackThanks: 'Cảm ơn! Phản hồi của bạn đã được gửi.',
     overtimeStatus: 'Đã hết thời gian — hãy hoàn thành hoặc chuyển việc (nhắc lại mỗi 5 phút)',
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
@@ -3045,6 +3071,48 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
   await supabaseClient.auth.signOut();
   clearLocalAppData();
   location.href = 'index.html';
+});
+
+/* ---------- feedback ---------- */
+const feedbackOverlay = document.getElementById('feedbackOverlay');
+const feedbackCategoryTabs = document.getElementById('feedbackCategoryTabs');
+const feedbackMessage = document.getElementById('feedbackMessage');
+const feedbackMsg = document.getElementById('feedbackMsg');
+let feedbackCategory = 'bug';
+
+document.getElementById('feedbackBtn').addEventListener('click', () => {
+  profileMenu.classList.remove('show');
+  feedbackMessage.value = '';
+  feedbackMsg.textContent = '';
+  feedbackCategory = 'bug';
+  feedbackCategoryTabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.category === 'bug'));
+  feedbackOverlay.classList.add('show');
+  setTimeout(() => feedbackMessage.focus(), 50);
+});
+feedbackCategoryTabs.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    feedbackCategory = btn.dataset.category;
+    feedbackCategoryTabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+  });
+});
+document.getElementById('feedbackCancelBtn').addEventListener('click', () => {
+  feedbackOverlay.classList.remove('show');
+});
+document.getElementById('feedbackSubmitBtn').addEventListener('click', async () => {
+  const message = feedbackMessage.value.trim();
+  if (!message) { feedbackMsg.textContent = t('feedbackEmpty'); return; }
+  if (!currentUser) return;
+  feedbackMsg.textContent = '';
+  const { error } = await supabaseClient.from('feedback').insert({
+    user_id: currentUser.id,
+    email: currentUser.email || null,
+    category: feedbackCategory,
+    message,
+    page: location.pathname
+  });
+  if (error) { feedbackMsg.textContent = t('feedbackError'); console.error('feedback insert failed', error); return; }
+  feedbackMsg.textContent = t('feedbackThanks');
+  setTimeout(() => { feedbackOverlay.classList.remove('show'); }, 1200);
 });
 
 /* ---------- init ---------- */
