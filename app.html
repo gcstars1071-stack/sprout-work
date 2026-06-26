@@ -2934,7 +2934,7 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
   profileMenu.classList.remove('show');
   await supabaseClient.auth.signOut();
   clearLocalAppData();
-  location.reload();
+  location.href = 'index.html';
 });
 
 /* ---------- init ---------- */
