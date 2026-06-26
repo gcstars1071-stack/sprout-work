@@ -514,6 +514,11 @@
       <div class="title" id="activeTitle"></div>
       <div class="time-display" id="timeDisplay">00:00</div>
       <div class="status-line" id="statusLine"></div>
+      <div class="presets" id="extendTimeRow">
+        <button data-extend="5">+5</button>
+        <button data-extend="10">+10</button>
+        <button data-extend="15">+15</button>
+      </div>
       <div class="btn-row">
         <button class="btn-primary" id="finishBtn" data-i18n="finishBtn">Finish task</button>
         <button class="btn-ghost" id="cancelTaskBtn" data-i18n="cancelTask">Cancel</button>
@@ -1072,6 +1077,7 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
   applyPresetMinutesToButtons();
   applyDayEndedVisuals();
+  applyExtendButtonLabels();
 }
 
 /* ---------- state ---------- */
@@ -1626,6 +1632,21 @@ document.getElementById('cancelTaskBtn').addEventListener('click', () => {
   render();
   openSwitchModal();
 });
+
+document.querySelectorAll('#extendTimeRow button[data-extend]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const active = state.activeId ? state.sessions[state.activeId] : null;
+    if (!active) return;
+    active.plannedSeconds += Number(btn.dataset.extend) * 60;
+    active.alarmNextAt = null; // re-arm the alarm against the new planned time
+    render();
+  });
+});
+function applyExtendButtonLabels() {
+  document.querySelectorAll('#extendTimeRow button[data-extend]').forEach(btn => {
+    btn.textContent = '+' + btn.dataset.extend + (appSettings.lang === 'ko' ? t('customMinUnit') : ' ' + t('customMinUnit'));
+  });
+}
 
 switchBtn.addEventListener('click', () => {
   const active = state.activeId ? state.sessions[state.activeId] : null;
