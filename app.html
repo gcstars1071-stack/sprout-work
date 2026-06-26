@@ -183,8 +183,10 @@
     cursor: pointer;
   }
   .wait-item:hover { filter: brightness(1.15); }
-  .wait-item .wtitle { font-size: 14px; }
-  .wait-item .wmeta { font-size: 11px; color: var(--dim); }
+  .wait-item .wtitle { font-size: 14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+  .wait-item .wmeta { font-size: 11px; color: var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+  .wait-item > div:first-child { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+  .wait-item > div:last-child { flex-shrink: 0; margin-left: 10px; }
   .modal-divider { border-top: 1px solid #33334d; margin: 16px 0; padding-top: 16px; }
   .modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 
@@ -193,9 +195,9 @@
   .tree-node { font-size: 13px; padding: 6px 0; display: flex; justify-content: space-between; gap: 10px; }
   .tree-node-clickable { cursor: pointer; border-radius: 8px; margin: 0 -8px; padding: 6px 8px; }
   .tree-node-clickable:hover { background: var(--card2); }
-  .tree-node .label { display: flex; align-items: center; gap: 6px; min-width: 0; }
-  .tree-node .label .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .tree-node .meta { color: var(--dim); font-size: 11px; white-space: nowrap; }
+  .tree-node .label { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 auto; text-align: left; }
+  .tree-node .label .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+  .tree-node .meta { color: var(--dim); font-size: 11px; white-space: nowrap; flex-shrink: 0; }
   .tree-children { border-left: 1px solid #33334d; margin-left: 9px; padding-left: 14px; }
   .icon-done { color: var(--accent2); }
   .icon-active { color: #6ea8ff; }
@@ -448,8 +450,8 @@
 
   /* day history */
   .day-list-item { display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:6px 0; }
-  .day-list-item .dtxt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .day-list-item .dmeta { color: var(--dim); font-size:11px; white-space:nowrap; }
+  .day-list-item .dtxt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex: 1 1 auto; min-width: 0; text-align: left; }
+  .day-list-item .dmeta { color: var(--dim); font-size:11px; white-space:nowrap; flex-shrink: 0; }
 
   /* calendar */
   .cal-section { --cal-scale: 1; }
@@ -1020,7 +1022,7 @@ const TRANSLATIONS = {
     myStats: 'My focus history', logout: 'Log out', logoutAlert: 'Logging out will be available once Google sign-in is connected. (Coming soon)',
     finishBtn: 'Finish task', finishBreakBtn: 'Finish break', switchBtn: 'Switch task', cancelTask: 'Cancel', cancelledLabel: 'Cancelled',
     startQuestion: 'What will you focus on now?', startTitlePh: 'e.g. Draft the report',
-    presetCustom: 'Custom', customMinUnit: 'min', secUnit: 'sec', startBtn: 'Start', breakBtn: '☕ Start break',
+    presetCustom: 'Custom', customMinUnit: 'm', secUnit: 's', startBtn: 'Start', breakBtn: '☕ Start break',
     clockOut: 'Clock out', clockIn: 'Clock in', leaveMsg: 'Great work today 👋',
     treeTitle: "Today's task tree", planTitle: "Tomorrow's plan (unfinished)", planEmpty: 'Nothing unfinished to carry over',
     yesterdayTitle: 'Done yesterday', todayTitle: 'Done today', emptyToday: 'No tasks recorded yet', emptyYesterday: 'No tasks recorded yesterday',
@@ -1140,7 +1142,8 @@ function t(key, vars) {
 function currentLocale() { return (TRANSLATIONS[appSettings.lang] || TRANSLATIONS.en).locale; }
 function formatMinutes(n) {
   const dict = TRANSLATIONS[appSettings.lang] || TRANSLATIONS.en;
-  return appSettings.lang === 'ko' ? `${n}${dict.customMinUnit}` : `${n} ${dict.customMinUnit}`;
+  const sp = appSettings.lang === 'vi' ? ' ' : '';
+  return `${n}${sp}${dict.customMinUnit}`;
 }
 function applyI18n() {
   document.documentElement.lang = appSettings.lang;
@@ -1443,7 +1446,7 @@ function fmtShort(seconds) {
   const s = Math.round(seconds);
   const m = Math.floor(s / 60);
   const rem = s % 60;
-  const sp = appSettings.lang === 'ko' ? '' : ' ';
+  const sp = appSettings.lang === 'vi' ? ' ' : ''; // Vietnamese unit words need a space; ko/en compact units don't
   if (m <= 0) return rem + sp + t('secUnit');
   return m + sp + t('customMinUnit') + (rem > 0 ? ' ' + rem + sp + t('secUnit') : '');
 }
