@@ -2106,41 +2106,59 @@ function timeRangeLabel(session) {
   const mm = String(start.getMinutes()).padStart(2, '0');
   return `${hh}:${mm}`;
 }
-function renderFlatList(container, dayState, emptyMsg, clickable) {
+// renders a day's record as the same parent/child tree the user arranged via drag & drop
+// (not a flat creation-time list) — this is what gets "locked in" as that day's final record.
+function buildHistoryNode(session, sessionsMap, clickable) {
+  const wrap = document.createElement('div');
+  const row = document.createElement('div');
+  row.className = 'day-list-item' + (session.status === 'cancelled' ? ' is-cancelled' : '');
+  const fs = focusSeconds(session);
+  const ps = pauseSeconds(session);
+  let meta = timeRangeLabel(session) + ' · ' + fmtShort(fs);
+  if (ps > 0.5) meta += ` ${t('paused')}${fmtShort(ps)}${t('closeParen')}`;
+  if (session.status === 'cancelled') meta += ' · ' + t('cancelledLabel');
+  else if (session.status !== 'done') meta += ' · ' + t('unfinished');
+  row.innerHTML = `<span class="dtxt">${statusIcon(session)} ${escapeHtml(session.title)}</span><span class="dmeta">${meta}</span>`;
+  if (clickable) {
+    row.style.cursor = 'pointer';
+    row.title = t('setTimeTooltip');
+    row.addEventListener('click', () => {
+      const priorFocusSeconds = session.status !== 'done' ? focusSeconds(session) : 0;
+      openConvertModal({ title: session.title, priorFocusSeconds });
+    });
+  }
+  wrap.appendChild(row);
+
+  const children = Object.values(sessionsMap)
+    .filter(s => s.parentId === session.id)
+    .sort((a, b) => sessionOrder(a) - sessionOrder(b));
+  if (children.length) {
+    const childWrap = document.createElement('div');
+    childWrap.className = 'tree-children';
+    children.forEach(c => childWrap.appendChild(buildHistoryNode(c, sessionsMap, clickable)));
+    wrap.appendChild(childWrap);
+  }
+  return wrap;
+}
+
+function renderHistoryTree(container, dayState, emptyMsg, clickable) {
   container.innerHTML = '';
   if (!dayState || Object.keys(dayState.sessions).length === 0) {
     container.innerHTML = `<div class="empty-msg">${emptyMsg}</div>`;
     return;
   }
-  const sessions = Object.values(dayState.sessions).sort((a, b) => a.createdAt - b.createdAt);
-  sessions.forEach(s => {
-    const fs = focusSeconds(s);
-    const ps = pauseSeconds(s);
-    let meta = timeRangeLabel(s) + ' · ' + fmtShort(fs);
-    if (ps > 0.5) meta += ` ${t('paused')}${fmtShort(ps)}${t('closeParen')}`;
-    if (s.status === 'cancelled') meta += ' · ' + t('cancelledLabel');
-    else if (s.status !== 'done') meta += ' · ' + t('unfinished');
-    const row = document.createElement('div');
-    row.className = 'day-list-item' + (s.status === 'cancelled' ? ' is-cancelled' : '');
-    row.innerHTML = `<span class="dtxt">${statusIcon(s)} ${escapeHtml(s.title)}</span><span class="dmeta">${meta}</span>`;
-    if (clickable) {
-      row.style.cursor = 'pointer';
-      row.title = t('setTimeTooltip');
-      row.addEventListener('click', () => {
-        const priorFocusSeconds = s.status !== 'done' ? focusSeconds(s) : 0;
-        openConvertModal({ title: s.title, priorFocusSeconds });
-      });
-    }
-    container.appendChild(row);
-  });
+  const roots = Object.values(dayState.sessions)
+    .filter(s => !s.parentId)
+    .sort((a, b) => sessionOrder(a) - sessionOrder(b));
+  roots.forEach(r => container.appendChild(buildHistoryNode(r, dayState.sessions, clickable)));
 }
 
 function renderHistoryLists() {
   const yEl = document.getElementById('yesterdayList');
   const tEl = document.getElementById('todayList');
   const yState = loadStateForDate(dateStrOffset(-1));
-  renderFlatList(yEl, yState, t('emptyYesterday'), true);
-  renderFlatList(tEl, state, t('emptyToday'));
+  renderHistoryTree(yEl, yState, t('emptyYesterday'), true);
+  renderHistoryTree(tEl, state, t('emptyToday'));
 }
 
 /* ---------- calendar ---------- */
@@ -2209,7 +2227,7 @@ function showCalDetail(dStr) {
   const dayState = dStr === todayStr ? state : loadStateForDate(dStr);
   calDetail.style.display = '';
   calDetailLabel.textContent = dStr;
-  renderFlatList(calDetailList, dayState, t('calendarEmpty'));
+  renderHistoryTree(calDetailList, dayState, t('calendarEmpty'));
 }
 
 /* ---------- profile menu ---------- */
