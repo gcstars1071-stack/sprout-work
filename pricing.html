@@ -42,7 +42,11 @@
     </div>
     <div class="price-card featured">
       <h2>Pro</h2>
-      <div class="amount">$4<span>/month</span></div>
+      <div class="billing-toggle" id="billingToggle">
+        <button class="active" data-period="monthly">Monthly</button>
+        <button data-period="annual">Annual <span class="save-badge">Save 29%</span></button>
+      </div>
+      <div class="amount" id="proAmount">$2<span>/month</span></div>
       <ul>
         <li>Everything in Free</li>
         <li>Unlimited widgets</li>
@@ -56,6 +60,19 @@
   </div>
   <p style="text-align:center; color:var(--dim); font-size:13px; margin-top:20px;">Pro billing is launching soon — sign up free now and we'll let you know.</p>
 </section>
+
+<script>
+  document.getElementById('billingToggle').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('billingToggle').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const amountEl = document.getElementById('proAmount');
+      amountEl.innerHTML = btn.dataset.period === 'annual'
+        ? '$17<span>/year</span>'
+        : '$2<span>/month</span>';
+    });
+  });
+</script>
 
 <footer class="mkt-footer">
   <div>
