@@ -18,14 +18,18 @@ self.addEventListener('activate', (event) => {
 });
 
 // network-first: always try to get the latest file, fall back to cache when offline
+// only same-origin GET requests are cacheable — skip Supabase/auth POST calls and cross-origin requests
 self.addEventListener('fetch', (event) => {
+  const isCacheable = event.request.method === 'GET' && new URL(event.request.url).origin === self.location.origin;
   event.respondWith(
     fetch(event.request)
       .then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        if (isCacheable) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
         return res;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => (isCacheable ? caches.match(event.request) : Promise.reject()))
   );
 });
