@@ -487,8 +487,8 @@
     <div class="profile-wrap">
       <button class="profile-avatar" id="profileAvatar" data-i18n-aria="profileAria" aria-label="Profile">U</button>
       <div class="profile-menu" id="profileMenu">
-        <div class="profile-menu-name" id="profileName" data-i18n="profileDefaultName">User</div>
-        <div class="profile-menu-email" data-i18n="profilePending">Google account linking coming soon</div>
+        <div class="profile-menu-name" id="profileName">User</div>
+        <div class="profile-menu-email" id="profileEmail">Google account linking coming soon</div>
         <button id="myStatsBtn" data-i18n="myStats">My focus history</button>
         <button id="logoutBtn" data-i18n="logout">Log out</button>
       </div>
@@ -2722,7 +2722,7 @@ function showApp(user) {
   authGate.style.display = 'none';
   appRoot.style.display = '';
   const nameEl = document.getElementById('profileName');
-  const emailEl = document.querySelector('.profile-menu-email');
+  const emailEl = document.getElementById('profileEmail');
   if (user) {
     nameEl.textContent = user.user_metadata?.full_name || user.email || t('profileDefaultName');
     if (emailEl) emailEl.textContent = user.email || '';
