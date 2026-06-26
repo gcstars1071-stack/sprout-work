@@ -2819,12 +2819,24 @@ function updateMiniStats() {
 
 let dashboardGrid = null;
 
+// GridStack's addWidget() turns whatever element you pass into the .grid-stack-item itself —
+// it does NOT also create the nested .grid-stack-item-content wrapper the way our static HTML
+// cards have. Without that wrapper, GridStack's margin/inset CSS (which creates the gap between
+// tiles) has nothing to apply to, so widgets sat flush against their neighbors. Wrapping our
+// widget-card in a .grid-stack-item-content div ourselves matches the built-in cards exactly.
+function wrapAsGridStackContent(el) {
+  const wrap = document.createElement('div');
+  wrap.className = 'grid-stack-item-content';
+  wrap.appendChild(el);
+  return wrap;
+}
+
 function addWidget(type, id, data, gridOpts) {
   const el = buildWidgetEl(type, id, data);
   const defaults = { id, w: 3, h: 3, autoPosition: true };
   if (type === 'ad') Object.assign(defaults, { w: 3, h: 3, minW: 3, minH: 2 });
   const opts = Object.assign(defaults, gridOpts || {});
-  dashboardGrid.addWidget(el, opts);
+  dashboardGrid.addWidget(wrapAsGridStackContent(el), opts);
 }
 
 function removeWidget(id) {
@@ -2889,7 +2901,7 @@ function initDashboard() {
     const el = buildWidgetEl(w.type, id, w.data || {});
     const opts = { id, w: w.w || 3, h: w.h || 3, autoPosition: true };
     if (w.type === 'ad') Object.assign(opts, { minW: 3, minH: 2 });
-    dashboardGrid.addWidget(el, opts);
+    dashboardGrid.addWidget(wrapAsGridStackContent(el), opts);
   });
 
   // restore saved positions/sizes for everything (built-in cards + widgets)
