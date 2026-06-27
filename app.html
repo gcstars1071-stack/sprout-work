@@ -3110,7 +3110,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 });
 
 document.getElementById('googleLoginBtn').addEventListener('click', () => {
-  supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/app.html' } });
+  supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/app' } });
 });
 document.getElementById('authLoginBtn').addEventListener('click', async () => {
   const email = document.getElementById('authEmail').value.trim();

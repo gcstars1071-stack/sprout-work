@@ -2,7 +2,7 @@
   "name": "Sprout Work",
   "short_name": "SproutWork",
   "description": "Sprout Work — task tree & focus timer",
-  "start_url": "./app.html",
+  "start_url": "./app",
   "scope": "./",
   "display": "standalone",
   "background_color": "#1a1a2e",

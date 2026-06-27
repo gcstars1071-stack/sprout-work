@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /app
 Disallow: /app.html
 Disallow: /upgrade.html
+Disallow: /upgrade
 
 Sitemap: https://sproutwork.xyz/sitemap.xml
