@@ -1,0 +1,9 @@
+{
+  "appId": "xyz.sproutwork.app",
+  "appName": "Sprout Work",
+  "webDir": "www",
+  "backgroundColor": "#1a1a2e",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -2,3 +2,15 @@
 desktop/node_modules/
 desktop/dist/
 desktop/package-lock.json
+mobile/node_modules/
+mobile/package-lock.json
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/.gradle/
+mobile/android/capacitor-cordova-android-plugins/build/
+mobile/android/local.properties
+mobile/ios/App/Pods/
+mobile/ios/App/build/
+mobile/ios/App/App.xcworkspace/xcuserdata/
+mobile/ios/App/App.xcodeproj/xcuserdata/
+mobile/ios/App/Podfile.lock
