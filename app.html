@@ -1515,7 +1515,7 @@ function notify(title, body) {
   }
   // plain browser fallback — only works while the tab is open
   if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification(title, { body }); } catch (e) {}
+    try { new Notification(title, { body, requireInteraction: true }); } catch (e) {}
   }
 }
 
@@ -1566,7 +1566,7 @@ function render() {
   } else {
     activeCard.style.display = 'none';
     startCard.style.display = '';
-    flashTitle(false);
+    if (!idleModalOpen) flashTitle(false);
     renderFrequentTitles(document.getElementById('startFrequent'), startTitleInput);
   }
 
@@ -1665,6 +1665,7 @@ function tick() {
 let IDLE_LIMIT_MS = 15 * 60 * 1000;
 let lastActivity = Date.now();
 let idleSnoozeUntil = 0;
+let idleNextNudgeAt = 0;
 
 function markActivity() {
   if (idleModalOpen) return; // don't let modal interaction mask real idle time
@@ -1679,7 +1680,15 @@ document.addEventListener('visibilitychange', () => {
 
 function checkIdle() {
   if (state.dayEnded) return; // user explicitly clocked out — don't nag until they start something new
-  if (idleModalOpen) return;
+  if (idleModalOpen) {
+    // still unanswered — keep nudging every 2 minutes instead of notifying once and going quiet
+    if (Date.now() >= idleNextNudgeAt) {
+      beep();
+      notify(t('idleNotifyTitle'), t('idleNotifyBody', { min: appSettings.idleMinutes }));
+      idleNextNudgeAt = Date.now() + 2 * 60 * 1000;
+    }
+    return;
+  }
   if (Date.now() < idleSnoozeUntil) return;
   if (Date.now() - lastActivity < IDLE_LIMIT_MS) return;
 
@@ -1691,6 +1700,8 @@ function checkIdle() {
   }
   beep();
   notify(t('idleNotifyTitle'), t('idleNotifyBody', { min: appSettings.idleMinutes }));
+  idleNextNudgeAt = Date.now() + 2 * 60 * 1000;
+  flashTitle(true);
   openSwitchModal(true);
 }
 
@@ -1796,12 +1807,16 @@ function closeModal() {
 function resolveIdle() {
   idleModalOpen = false;
   idleSnoozeUntil = 0;
+  idleNextNudgeAt = 0;
+  flashTitle(false);
   lastActivity = Date.now();
 }
 modalCancel.addEventListener('click', () => {
   if (idleModalOpen) {
     idleSnoozeUntil = Date.now() + 5 * 60 * 1000;
     idleModalOpen = false;
+    idleNextNudgeAt = 0;
+    flashTitle(false);
     pendingRevert = null;
     closeModal();
     render();
