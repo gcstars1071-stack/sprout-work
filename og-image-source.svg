@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <rect width="1200" height="1200" fill="#1a1a2e"/>
+  <rect y="285" width="1200" height="630" fill="#1a1a2e"/>
+
+  <g stroke="#33334d" stroke-width="2" fill="none" opacity="0.7">
+    <path d="M 140 760 L 140 560 L 90 480"/>
+    <path d="M 140 560 L 190 500"/>
+    <path d="M 140 660 L 200 620"/>
+    <circle cx="90" cy="480" r="7" fill="#4ecdc4" stroke="none"/>
+    <circle cx="190" cy="500" r="7" fill="#ff6b6b" stroke="none"/>
+    <circle cx="200" cy="620" r="7" fill="#4ecdc4" stroke="none"/>
+    <circle cx="140" cy="760" r="9" fill="#2c2c52" stroke="#4ecdc4" stroke-width="2"/>
+  </g>
+
+  <g stroke="#33334d" stroke-width="2" fill="none" opacity="0.7">
+    <path d="M 1080 800 L 1080 600 L 1130 530"/>
+    <path d="M 1080 600 L 1030 540"/>
+    <path d="M 1080 700 L 1020 660"/>
+    <circle cx="1130" cy="530" r="7" fill="#4ecdc4" stroke="none"/>
+    <circle cx="1030" cy="540" r="7" fill="#ff6b6b" stroke="none"/>
+    <circle cx="1020" cy="660" r="7" fill="#4ecdc4" stroke="none"/>
+    <circle cx="1080" cy="800" r="9" fill="#2c2c52" stroke="#4ecdc4" stroke-width="2"/>
+  </g>
+
+  <g transform="translate(600 555)">
+    <path d="M -34 -10 C -34 -42 -6 -54 18 -50 C 12 -24 -10 -10 -34 -10 Z" fill="#4ecdc4"/>
+    <path d="M 34 -6 C 34 -38 8 -52 -16 -46 C -8 -20 12 -6 34 -6 Z" fill="#4ecdc4" opacity="0.6"/>
+    <line x1="0" y1="-10" x2="0" y2="36" stroke="#4ecdc4" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <text x="600" y="660" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="58" font-weight="700" fill="#eaeaea">Sprout Work</text>
+
+  <text x="600" y="710" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="24" fill="#8888aa">Grow your focus, one task at a time</text>
+
+  <text x="600" y="800" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="17" fill="#4ecdc4">sproutwork.xyz</text>
+</svg>
