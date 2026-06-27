@@ -3179,6 +3179,7 @@ function showAuthGate() {
 
 supabaseClient.auth.getSession().then(({ data }) => {
   if (data.session) showApp(data.session.user);
+  else if (new URLSearchParams(location.search).get('login') === '1') showAuthGate();
   else startGuestApp();
 });
 supabaseClient.auth.onAuthStateChange((event, session) => {
