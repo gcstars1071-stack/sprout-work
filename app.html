@@ -3119,6 +3119,14 @@ function clearLocalAppData() {
   Object.keys(localStorage)
     .filter(k => k.startsWith('sproutWork_'))
     .forEach(k => localStorage.removeItem(k));
+  // also reset the in-memory copy — otherwise a render()/persist() triggered by the
+  // SIGNED_OUT event (e.g. during delete-account) writes the still-loaded old state
+  // straight back into localStorage, undoing the clear above
+  state = loadState();
+  nextIdCounter = Object.keys(state.sessions).length
+    ? Math.max(...Object.keys(state.sessions).map(Number)) + 1 : 1;
+  appSettings = loadAppSettings();
+  themeSettings = loadThemeSettings();
 }
 async function cloudPullAll() {
   if (!currentUser) return;
@@ -3240,8 +3248,8 @@ document.getElementById('deleteAccountBtn').addEventListener('click', async () =
       headers: { Authorization: 'Bearer ' + sessionData.session.access_token }
     });
     if (error) throw error;
-    clearLocalAppData();
     await supabaseClient.auth.signOut();
+    clearLocalAppData();
     location.href = 'index.html';
   } catch (err) {
     console.error('delete account failed', err);
