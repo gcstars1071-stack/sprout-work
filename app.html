@@ -1525,10 +1525,23 @@ function beep() {
 if ('Notification' in window && Notification.permission === 'default') {
   Notification.requestPermission();
 }
+// mobile app (Capacitor/Android+iOS) — the web Notification API doesn't exist inside
+// the wrapped webview at all, so real notifications need the native plugin instead
+const isCapacitorApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+if (isCapacitorApp && window.Capacitor.Plugins.LocalNotifications) {
+  window.Capacitor.Plugins.LocalNotifications.requestPermissions().catch(() => {});
+}
+let capacitorNotifyId = 1;
 function notify(title, body) {
   // desktop app (Electron) — real OS notification + brings the window forward, even if minimized/tray'd
   if (window.sproutWorkDesktop && typeof window.sproutWorkDesktop.notify === 'function') {
     window.sproutWorkDesktop.notify(title, body);
+    return;
+  }
+  if (isCapacitorApp && window.Capacitor.Plugins.LocalNotifications) {
+    window.Capacitor.Plugins.LocalNotifications.schedule({
+      notifications: [{ title, body, id: capacitorNotifyId++ }]
+    }).catch(() => {});
     return;
   }
   // plain browser fallback — only works while the tab is open
