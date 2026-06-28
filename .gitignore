@@ -9,6 +9,11 @@ mobile/android/app/build/
 mobile/android/.gradle/
 mobile/android/capacitor-cordova-android-plugins/build/
 mobile/android/local.properties
+mobile/android/keystore.properties
+mobile/android/*.keystore
+mobile/android/*.jks
+mobile/android/app/*.aab
+mobile/android/app/build/outputs/
 mobile/ios/App/Pods/
 mobile/ios/App/build/
 mobile/ios/App/App.xcworkspace/xcuserdata/
