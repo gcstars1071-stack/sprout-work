@@ -2171,10 +2171,14 @@ function renderPlan() {
   planRoot.innerHTML = '';
   combined.forEach(({ session: s, sessionsMap, label }) => {
     const row = document.createElement('div');
-    row.className = 'tree-node';
+    row.className = 'tree-node tree-node-clickable';
     const bc = breadcrumbForIn(s, sessionsMap);
     const meta = (bc ? escapeHtml(bc) + ' · ' : '') + label;
     row.innerHTML = `<div class="label"><span class="icon-open">○</span><span class="txt">${escapeHtml(s.title)}</span></div><div class="meta">${meta}</div>`;
+    row.title = t('setTimeTooltip');
+    row.addEventListener('click', () => {
+      openConvertModal({ title: s.title, priorFocusSeconds: focusSeconds(s) });
+    });
     planRoot.appendChild(row);
   });
 }
