@@ -3073,6 +3073,10 @@ function removeWidget(id) {
 
 function saveLayout() {
   if (!dashboardGrid) return;
+  // GridStack also fires 'change' when it auto-rearranges everything into the
+  // single-column mobile layout — never persist that, or it overwrites the real
+  // desktop arrangement and corrupts it the next time a wide screen loads
+  if (dashboardGrid.getColumn() !== 12) return;
   const layout = dashboardGrid.save(false);
   localStorage.setItem(LAYOUT_KEY, JSON.stringify(layout));
   cloudSet(LAYOUT_KEY, layout);
