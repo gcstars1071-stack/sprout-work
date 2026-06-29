@@ -61,7 +61,12 @@ function showAndFocus() {
 // renderer asks us to surface a real OS notification + pop the window forward
 ipcMain.on('sprout-work-notify', (event, { title, body }) => {
   try {
-    new Notification({ title: title || 'Sprout Work', body: body || '' }).show();
+    new Notification({
+      title: title || 'Sprout Work',
+      body: body || '',
+      icon: path.join(__dirname, '..', 'icon.png'),
+      silent: false
+    }).show();
   } catch (e) {}
   if (mainWindow) {
     showAndFocus();
@@ -70,6 +75,12 @@ ipcMain.on('sprout-work-notify', (event, { title, body }) => {
     }
   }
 });
+
+if (process.platform === 'win32') {
+  // required for Windows toast notifications to actually display — without a
+  // registered AppUserModelID, Notification.show() can silently no-op
+  app.setAppUserModelId('xyz.sproutwork.app');
+}
 
 app.whenReady().then(() => {
   createWindow();
