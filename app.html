@@ -799,6 +799,14 @@
     </div>
 
     <div class="settings-section">
+      <div class="settings-label" data-i18n="settingsNotifyPermission">Browser popup notifications</div>
+      <div class="settings-row" style="justify-content:space-between;">
+        <span style="font-size:13px;" id="notifyPermissionStatus"></span>
+        <button class="btn-ghost" id="notifyPermissionBtn" style="font-size:12px; padding:6px 10px;"></button>
+      </div>
+    </div>
+
+    <div class="settings-section">
       <div class="settings-label" data-i18n="settingsWorkHours">Work hours range (for tracking paused time)</div>
       <div class="settings-row">
         <select id="workHourStartSel"></select>
@@ -1057,7 +1065,7 @@ const TRANSLATIONS = {
     statsTotalLbl: 'Total focus time', close: 'Close',
     settingsTitle: 'Settings', settingsDisplayMode: 'Display mode', modeLight: 'Light', modeDark: 'Dark', modeSystem: 'Follow system',
     settingsColorPreset: 'Color preset', settingsFontSize: 'Font size', fontSmall: 'Small', fontMedium: 'Medium', fontLarge: 'Large',
-    settingsSound: 'Notification sound', soundToggleLabel: 'Enable beep',
+    settingsSound: 'Notification sound', soundToggleLabel: 'Enable beep', settingsNotifyPermission: 'Browser popup notifications', notifyStatusDesktop: 'Handled by the desktop app', notifyStatusUnsupported: 'Not supported in this browser', notifyStatusGranted: 'Allowed', notifyStatusDenied: 'Blocked — enable it from your browser\'s site settings for this page', notifyStatusDefault: 'Not yet allowed', notifyTestBtn: 'Send test notification', notifyRequestBtn: 'Allow notifications', testNotifyTitle: 'Sprout Work', testNotifyBody: 'Notifications are working.',
     settingsWorkHours: 'Work hours range (for tracking paused time)', hourUnit: 'h',
     settingsIdle: 'Idle detection time', settingsDefaultPresets: 'Default timer presets (minutes)',
     settingsDataMgmt: 'Data management', exportData: 'Export (JSON)', resetData: 'Reset all', resetConfirm: 'Reset all Sprout Work data? This cannot be undone.',
@@ -1095,7 +1103,7 @@ const TRANSLATIONS = {
     statsTotalLbl: '총 집중시간', close: '닫기',
     settingsTitle: '설정', settingsDisplayMode: '화면 모드', modeLight: '라이트', modeDark: '다크', modeSystem: '시스템 설정 따름',
     settingsColorPreset: '색상 프리셋', settingsFontSize: '글자 크기', fontSmall: '작게', fontMedium: '보통', fontLarge: '크게',
-    settingsSound: '알림 소리', soundToggleLabel: '비프음 켜기',
+    settingsSound: '알림 소리', soundToggleLabel: '비프음 켜기', settingsNotifyPermission: '브라우저 팝업 알림', notifyStatusDesktop: '데스크톱 앱에서 자동으로 처리됩니다', notifyStatusUnsupported: '이 브라우저에서는 지원하지 않습니다', notifyStatusGranted: '허용됨', notifyStatusDenied: '차단됨 — 브라우저의 이 사이트 설정에서 직접 허용해주세요', notifyStatusDefault: '아직 허용하지 않음', notifyTestBtn: '테스트 알림 보내기', notifyRequestBtn: '알림 허용하기', testNotifyTitle: 'Sprout Work', testNotifyBody: '알림이 정상적으로 작동합니다.',
     settingsWorkHours: '근무시간 범위 (멈춤시간 집계 기준)', hourUnit: '시',
     settingsIdle: '유휴 감지 시간', settingsDefaultPresets: '기본 타이머 프리셋 (분)',
     settingsDataMgmt: '데이터 관리', exportData: '내보내기 (JSON)', resetData: '전체 초기화', resetConfirm: '정말로 모든 Sprout Work 데이터를 초기화할까요? 이 작업은 되돌릴 수 없습니다.',
@@ -1133,7 +1141,7 @@ const TRANSLATIONS = {
     statsTotalLbl: 'Tổng thời gian tập trung', close: 'Đóng',
     settingsTitle: 'Cài đặt', settingsDisplayMode: 'Chế độ hiển thị', modeLight: 'Sáng', modeDark: 'Tối', modeSystem: 'Theo hệ thống',
     settingsColorPreset: 'Bảng màu', settingsFontSize: 'Cỡ chữ', fontSmall: 'Nhỏ', fontMedium: 'Vừa', fontLarge: 'Lớn',
-    settingsSound: 'Âm thanh thông báo', soundToggleLabel: 'Bật âm báo',
+    settingsSound: 'Âm thanh thông báo', soundToggleLabel: 'Bật âm báo', settingsNotifyPermission: 'Thông báo popup trên trình duyệt', notifyStatusDesktop: 'Được xử lý tự động bởi ứng dụng desktop', notifyStatusUnsupported: 'Trình duyệt này không hỗ trợ', notifyStatusGranted: 'Đã cho phép', notifyStatusDenied: 'Đã bị chặn — hãy cho phép trong cài đặt trang web của trình duyệt', notifyStatusDefault: 'Chưa cho phép', notifyTestBtn: 'Gửi thông báo thử', notifyRequestBtn: 'Cho phép thông báo', testNotifyTitle: 'Sprout Work', testNotifyBody: 'Thông báo đang hoạt động bình thường.',
     settingsWorkHours: 'Khung giờ làm việc (tính thời gian tạm dừng)', hourUnit: 'h',
     settingsIdle: 'Thời gian phát hiện không hoạt động', settingsDefaultPresets: 'Mốc thời gian mặc định (phút)',
     settingsDataMgmt: 'Quản lý dữ liệu', exportData: 'Xuất (JSON)', resetData: 'Đặt lại tất cả', resetConfirm: 'Đặt lại toàn bộ dữ liệu Sprout Work? Không thể hoàn tác.',
@@ -1576,6 +1584,45 @@ function notify(title, body) {
     try { new Notification(title, { body, requireInteraction: true }); } catch (e) {}
   }
 }
+
+/* ---------- browser notification permission status (Settings panel) ---------- */
+function renderNotifyPermissionUI() {
+  const statusEl = document.getElementById('notifyPermissionStatus');
+  const btnEl = document.getElementById('notifyPermissionBtn');
+  if (!statusEl || !btnEl) return;
+  if (window.sproutWorkDesktop) {
+    statusEl.textContent = t('notifyStatusDesktop');
+    btnEl.style.display = 'none';
+    return;
+  }
+  if (!('Notification' in window)) {
+    statusEl.textContent = t('notifyStatusUnsupported');
+    btnEl.style.display = 'none';
+    return;
+  }
+  const perm = Notification.permission;
+  btnEl.style.display = '';
+  if (perm === 'granted') {
+    statusEl.textContent = t('notifyStatusGranted');
+    btnEl.textContent = t('notifyTestBtn');
+    btnEl.disabled = false;
+  } else if (perm === 'denied') {
+    statusEl.textContent = t('notifyStatusDenied');
+    btnEl.style.display = 'none';
+  } else {
+    statusEl.textContent = t('notifyStatusDefault');
+    btnEl.textContent = t('notifyRequestBtn');
+    btnEl.disabled = false;
+  }
+}
+document.getElementById('notifyPermissionBtn').addEventListener('click', () => {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') {
+    notify(t('testNotifyTitle'), t('testNotifyBody'));
+    return;
+  }
+  Notification.requestPermission().then(() => renderNotifyPermissionUI());
+});
 
 let titleFlashId = null;
 const baseTitle = document.title;
@@ -2362,6 +2409,7 @@ customAccent2Input.addEventListener('input', () => {
 });
 
 function renderSettingsUI() {
+  renderNotifyPermissionUI();
   modeTabs.querySelectorAll('button').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.mode === themeSettings.mode);
   });
