@@ -399,7 +399,7 @@
 
   .widget-panel {
     position: absolute;
-    top: 56px; right: 16px;
+    top: 100%; right: 0; margin-top: 8px;
     background: var(--card);
     border-radius: 12px;
     box-shadow: var(--shadow-menu);
@@ -523,7 +523,20 @@
   <div class="app-header">
     <h1 id="dateLabel">Sprout Work</h1>
     <div style="display:flex; align-items:center; gap:10px;">
-    <button class="btn-ghost" id="addWidgetBtn" data-i18n="addWidget">+ Add widget</button>
+    <div style="position:relative;">
+      <button class="btn-ghost" id="addWidgetBtn" data-i18n="addWidget">+ Add widget</button>
+      <div class="widget-panel" id="widgetPanel" style="display:none;">
+        <div class="widget-panel-title" data-i18n="widgetPanelTitle">Add widget</div>
+        <button data-widget="digitalClock" data-i18n="widgetDigitalClock">🕐 Digital clock</button>
+        <button data-widget="analogClock" data-i18n="widgetAnalogClock">🕰️ Analog clock</button>
+        <button data-widget="sticky" data-i18n="widgetSticky">📝 Sticky note</button>
+        <button data-widget="ddday" data-i18n="widgetDday">📅 D-Day countdown</button>
+        <button data-widget="quote" data-i18n="widgetQuote">💬 Quote of the day</button>
+        <button data-widget="ministats" data-i18n="widgetMinistats">📊 Mini stats card</button>
+        <button data-widget="todaytime" data-i18n="widgetTodayTime">⏱️ Today's time</button>
+        <button data-widget="ad" id="adWidgetBtn" data-i18n="widgetAd">📢 Ad slot</button>
+      </div>
+    </div>
     <button class="btn-ghost" id="settingsBtn" data-i18n="settings" data-i18n-aria="settingsAria" aria-label="Settings">⚙ Settings</button>
     <div class="profile-wrap">
       <button class="profile-avatar" id="profileAvatar" data-i18n-aria="profileAria" aria-label="Profile">U</button>
@@ -657,17 +670,6 @@
    </div>
   </div>
 
-  </div>
-  <div class="widget-panel" id="widgetPanel" style="display:none;">
-    <div class="widget-panel-title" data-i18n="widgetPanelTitle">Add widget</div>
-    <button data-widget="digitalClock" data-i18n="widgetDigitalClock">🕐 Digital clock</button>
-    <button data-widget="analogClock" data-i18n="widgetAnalogClock">🕰️ Analog clock</button>
-    <button data-widget="sticky" data-i18n="widgetSticky">📝 Sticky note</button>
-    <button data-widget="ddday" data-i18n="widgetDday">📅 D-Day countdown</button>
-    <button data-widget="quote" data-i18n="widgetQuote">💬 Quote of the day</button>
-    <button data-widget="ministats" data-i18n="widgetMinistats">📊 Mini stats card</button>
-    <button data-widget="todaytime" data-i18n="widgetTodayTime">⏱️ Today's time</button>
-    <button data-widget="ad" id="adWidgetBtn" data-i18n="widgetAd">📢 Ad slot</button>
   </div>
 
 <!-- switch / resume modal -->
