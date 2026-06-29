@@ -1189,7 +1189,13 @@ function applyI18n() {
 }
 
 /* ---------- state ---------- */
-function currentDateStr() { return new Date().toISOString().slice(0,10); }
+function localDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function currentDateStr() { return localDateStr(new Date()); }
 let todayStr = currentDateStr();
 let STORAGE_KEY = 'sproutWork_' + todayStr;
 
@@ -2153,7 +2159,7 @@ function renderPlan() {
 function dateStrOffset(days) {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return localDateStr(d);
 }
 function loadStateForDate(dateStr) {
   const raw = localStorage.getItem('sproutWork_' + dateStr);
@@ -2578,7 +2584,7 @@ function startOfRange(range) {
 }
 function computeStats(range) {
   const start = startOfRange(range);
-  const startStr = start.toISOString().slice(0, 10);
+  const startStr = localDateStr(start);
   const byTitle = {};
   let total = 0;
   getAllDayKeys().forEach(k => {
