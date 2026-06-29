@@ -1299,20 +1299,38 @@ function createSession(title, plannedSeconds, parentId, category) {
 /* ---------- frequent task titles (global, across all days) ---------- */
 const TITLE_FREQ_KEY = 'sproutWork_titleFreq';
 function loadTitleFreq() {
-  try { return JSON.parse(localStorage.getItem(TITLE_FREQ_KEY) || '{}'); }
-  catch (e) { return {}; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(TITLE_FREQ_KEY) || '{}');
+    // migrate the old { title: count } shape to { title: { count, lastUsedAt } } —
+    // old entries get lastUsedAt 0 so they decay away immediately instead of
+    // permanently outranking whatever's actually being typed lately
+    const out = {};
+    Object.entries(raw).forEach(([title, v]) => {
+      out[title] = typeof v === 'number' ? { count: v, lastUsedAt: 0 } : v;
+    });
+    return out;
+  } catch (e) { return {}; }
 }
 function bumpTitleFrequency(title) {
   const t = title.trim();
   if (!t) return;
   const freq = loadTitleFreq();
-  freq[t] = (freq[t] || 0) + 1;
+  const prev = freq[t] || { count: 0, lastUsedAt: 0 };
+  freq[t] = { count: prev.count + 1, lastUsedAt: Date.now() };
   localStorage.setItem(TITLE_FREQ_KEY, JSON.stringify(freq));
   cloudSet(TITLE_FREQ_KEY, freq);
 }
 function topFrequentTitles(limit) {
   const freq = loadTitleFreq();
+  const now = Date.now();
+  const HALF_LIFE_DAYS = 14; // a title's weight halves every 14 days without re-use
   return Object.entries(freq)
+    .map(([title, v]) => {
+      const daysSince = (now - (v.lastUsedAt || 0)) / 86400000;
+      const score = v.count * Math.pow(0.5, daysSince / HALF_LIFE_DAYS);
+      return [title, score];
+    })
+    .filter(([, score]) => score > 0.01)
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([title]) => title);
