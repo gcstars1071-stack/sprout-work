@@ -1201,14 +1201,21 @@ let STORAGE_KEY = 'sproutWork_' + todayStr;
 
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    const s = JSON.parse(raw);
-    if (!s.todos) s.todos = [];
-    return s;
-  }
-  return { sessions: {}, activeId: null, waitingIds: [], todos: [] };
+  if (raw) return JSON.parse(raw);
+  return { sessions: {}, activeId: null, waitingIds: [] };
 }
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+/* ---------- todo list (date-independent — survives day rollover until the user
+   clicks it to start, finishes it, or deletes it manually) ---------- */
+const TODOS_KEY = 'sproutWork_todos';
+function loadTodos() {
+  try { return JSON.parse(localStorage.getItem(TODOS_KEY) || '[]'); } catch (e) { return []; }
+}
+function persistTodos() {
+  localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+  cloudSet(TODOS_KEY, todos);
+}
 
 /* ---------- server sync seam ----------
    Right now there is no backend, so this only writes to localStorage.
@@ -1230,6 +1237,17 @@ let state = loadState();
 let nextIdCounter = Object.keys(state.sessions).length
   ? Math.max(...Object.keys(state.sessions).map(Number)) + 1 : 1;
 function newId() { return String(nextIdCounter++); }
+
+let todos = loadTodos();
+if (todos.length === 0 && Array.isArray(state.todos) && state.todos.length > 0) {
+  // one-time migration: todos used to live inside today's per-day state and were
+  // lost on day rollover — move whatever's there now into the new global store.
+  // Local-only write here (currentUser isn't declared yet at this point in the
+  // script) — the normal todo-mutation paths will pick up cloud sync from here on.
+  todos = state.todos.slice();
+  delete state.todos;
+  localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
+}
 
 /* midnight rollover: if the tab stays open past 00:00, finalize the old day
    and start a fresh, empty tree — nothing carries over until the user starts a new task */
@@ -1469,7 +1487,10 @@ todoModalStart.addEventListener('click', () => {
   const session = createSession(pendingConvert.title, selectedTodoMin * 60, parentId);
   if (pendingConvert.priorFocusSeconds > 0) session.priorFocusSeconds = pendingConvert.priorFocusSeconds;
   state.activeId = session.id;
-  if (pendingConvert.todoId) state.todos = state.todos.filter(t => t.id !== pendingConvert.todoId);
+  if (pendingConvert.todoId) {
+    todos = todos.filter(t => t.id !== pendingConvert.todoId);
+    persistTodos();
+  }
   closeTodoTimeModal();
   render();
 });
@@ -1630,7 +1651,8 @@ todoAddBtn.addEventListener('click', () => {
 function addTodo() {
   const text = todoInput.value.trim();
   if (!text) { todoInput.focus(); return; }
-  state.todos.push({ id: newId(), text, done: false, createdAt: Date.now() });
+  todos.push({ id: newId(), text, done: false, createdAt: Date.now() });
+  persistTodos();
   todoInput.value = '';
   todoInputRow.style.display = 'none';
   render();
@@ -1642,11 +1664,11 @@ todoInput.addEventListener('keydown', (e) => {
 
 function renderTodos() {
   todoListEl.innerHTML = '';
-  if (!state.todos.length) {
+  if (!todos.length) {
     todoListEl.innerHTML = `<div class="empty-msg">${t('todoEmpty')}</div>`;
     return;
   }
-  state.todos
+  todos
     .slice()
     .sort((a, b) => a.createdAt - b.createdAt)
     .forEach(todo => {
@@ -1658,13 +1680,15 @@ function renderTodos() {
       const delEl = row.querySelector('.todo-del');
       const toggle = () => {
         todo.done = !todo.done;
+        persistTodos();
         render();
       };
       checkEl.addEventListener('click', toggle);
       textEl.addEventListener('click', () => openTodoTimeModal(todo));
       delEl.addEventListener('click', (e) => {
         e.stopPropagation();
-        state.todos = state.todos.filter(t => t.id !== todo.id);
+        todos = todos.filter(t => t.id !== todo.id);
+        persistTodos();
         render();
       });
       todoListEl.appendChild(row);
@@ -3146,6 +3170,7 @@ function clearLocalAppData() {
     ? Math.max(...Object.keys(state.sessions).map(Number)) + 1 : 1;
   appSettings = loadAppSettings();
   themeSettings = loadThemeSettings();
+  todos = loadTodos();
 }
 async function cloudPullAll() {
   if (!currentUser) return;
@@ -3159,6 +3184,7 @@ async function cloudPullAll() {
     ? Math.max(...Object.keys(state.sessions).map(Number)) + 1 : 1;
   appSettings = loadAppSettings();
   themeSettings = loadThemeSettings();
+  todos = loadTodos();
 }
 function cloudPushAllFromGuest() {
   // guest signed up — push whatever they already built locally up to their brand-new account
