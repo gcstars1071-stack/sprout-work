@@ -455,6 +455,11 @@
   .ministats-widget { display:flex; flex-direction:column; justify-content:center; height:100%; }
   .ministats-widget .num { font-size: 30px; font-weight:700; color: var(--accent2); }
   .ministats-widget .lbl { font-size:12px; color:var(--dim); margin-top:4px; }
+  .todaytime-widget { display:flex; flex-direction:column; justify-content:center; height:100%; gap:14px; }
+  .todaytime-widget .row .num { font-size: 24px; font-weight:700; }
+  .todaytime-widget .row.focus .num { color: var(--accent2); }
+  .todaytime-widget .row.break .num { color: var(--warn); }
+  .todaytime-widget .row .lbl { font-size:12px; color:var(--dim); margin-top:2px; }
   .ad-widget { height:100%; width:100%; }
   .ad-placeholder {
     height:100%; display:flex; align-items:center; justify-content:center; text-align:center;
@@ -661,6 +666,7 @@
     <button data-widget="ddday" data-i18n="widgetDday">📅 D-Day countdown</button>
     <button data-widget="quote" data-i18n="widgetQuote">💬 Quote of the day</button>
     <button data-widget="ministats" data-i18n="widgetMinistats">📊 Mini stats card</button>
+    <button data-widget="todaytime" data-i18n="widgetTodayTime">⏱️ Today's time</button>
     <button data-widget="ad" id="adWidgetBtn" data-i18n="widgetAd">📢 Ad slot</button>
   </div>
 
@@ -1056,7 +1062,7 @@ const TRANSLATIONS = {
     calendarTitle: 'Calendar', calendarEmpty: 'No tasks recorded',
     widgetPanelTitle: 'Add widget',
     widgetDigitalClock: '🕐 Digital clock', widgetAnalogClock: '🕰️ Analog clock', widgetSticky: '📝 Sticky note',
-    widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
+    widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetTodayTime: "⏱️ Today's time", todayFocusLabel: 'Focus time today', todayBreakLabel: 'Break time today', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
     modalHeadingDefault: 'What would you like to do?', modalTitlePh: 'Enter new task title',
     modalCancel: 'Cancel', modalStartNew: 'Start new task', resumeArrow: 'Resume →', waiting: 'waiting', switchTooltip: 'Click to switch to this task', frequentTooltip: 'Click to fill in the task name', timeIsUpFlash: '⏰ Time is up!',
     waitEmpty: 'No tasks waiting', idleHeading: 'No activity for {{min}} minutes. What were you doing?', idleSnooze: 'Ask again in 5 min',
@@ -1094,7 +1100,7 @@ const TRANSLATIONS = {
     calendarTitle: '캘린더', calendarEmpty: '기록된 업무가 없습니다',
     widgetPanelTitle: '위젯 추가',
     widgetDigitalClock: '🕐 디지털시계', widgetAnalogClock: '🕰️ 아날로그시계', widgetSticky: '📝 스티키 노트',
-    widgetDday: '📅 D-Day 카운트다운', widgetQuote: '💬 오늘의 한마디', widgetMinistats: '📊 미니 통계 카드', widgetAd: '📢 광고 영역', adNotConfigured: '광고 영역 — 코드에 AdSense 게시자/슬롯 ID를 입력하세요.', adDesktopUnavailable: '광고는 웹 버전에서만 사용할 수 있습니다 (데스크톱 앱 제외).',
+    widgetDday: '📅 D-Day 카운트다운', widgetQuote: '💬 오늘의 한마디', widgetMinistats: '📊 미니 통계 카드', widgetTodayTime: '⏱️ 오늘의 시간', todayFocusLabel: '오늘 집중시간', todayBreakLabel: '오늘 휴식시간', widgetAd: '📢 광고 영역', adNotConfigured: '광고 영역 — 코드에 AdSense 게시자/슬롯 ID를 입력하세요.', adDesktopUnavailable: '광고는 웹 버전에서만 사용할 수 있습니다 (데스크톱 앱 제외).',
     modalHeadingDefault: '무엇을 할까요?', modalTitlePh: '새 업무 제목 입력',
     modalCancel: '취소', modalStartNew: '새 업무 시작', resumeArrow: '복귀 →', waiting: '대기', switchTooltip: '클릭하여 이 업무로 전환', frequentTooltip: '클릭하여 업무명 입력', timeIsUpFlash: '⏰ 시간 초과!',
     waitEmpty: '대기 중인 업무가 없습니다', idleHeading: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨나요?', idleSnooze: '5분 후 다시 묻기',
@@ -1132,7 +1138,7 @@ const TRANSLATIONS = {
     calendarTitle: 'Lịch', calendarEmpty: 'Không có việc nào',
     widgetPanelTitle: 'Thêm tiện ích',
     widgetDigitalClock: '🕐 Đồng hồ số', widgetAnalogClock: '🕰️ Đồng hồ kim', widgetSticky: '📝 Ghi chú dán',
-    widgetDday: '📅 Đếm ngược D-Day', widgetQuote: '💬 Câu nói hôm nay', widgetMinistats: '📊 Thẻ thống kê nhỏ', widgetAd: '📢 Ô quảng cáo', adNotConfigured: 'Ô quảng cáo — nhập ID nhà xuất bản/ID đơn vị AdSense trong mã nguồn.', adDesktopUnavailable: 'Quảng cáo chỉ khả dụng ở phiên bản web (không có ở ứng dụng desktop).',
+    widgetDday: '📅 Đếm ngược D-Day', widgetQuote: '💬 Câu nói hôm nay', widgetMinistats: '📊 Thẻ thống kê nhỏ', widgetTodayTime: '⏱️ Thời gian hôm nay', todayFocusLabel: 'Thời gian tập trung hôm nay', todayBreakLabel: 'Thời gian nghỉ hôm nay', widgetAd: '📢 Ô quảng cáo', adNotConfigured: 'Ô quảng cáo — nhập ID nhà xuất bản/ID đơn vị AdSense trong mã nguồn.', adDesktopUnavailable: 'Quảng cáo chỉ khả dụng ở phiên bản web (không có ở ứng dụng desktop).',
     modalHeadingDefault: 'Bạn muốn làm gì?', modalTitlePh: 'Nhập tên công việc mới',
     modalCancel: 'Hủy', modalStartNew: 'Bắt đầu việc mới', resumeArrow: 'Tiếp tục →', waiting: 'đang chờ', switchTooltip: 'Nhấp để chuyển sang việc này', frequentTooltip: 'Nhấp để điền tên công việc', timeIsUpFlash: '⏰ Hết giờ!',
     waitEmpty: 'Không có việc đang chờ', idleHeading: 'Không có hoạt động trong {{min}} phút. Bạn đã làm gì?', idleSnooze: 'Hỏi lại sau 5 phút',
@@ -2907,6 +2913,11 @@ function buildWidgetEl(type, id, data) {
     el.innerHTML = `${widgetRemoveBtn(id)}<div class="quote-widget"><div class="quote-text" data-quote-text>${escapeHtml(todaysQuote())}</div></div>`;
   } else if (type === 'ministats') {
     el.innerHTML = `${widgetRemoveBtn(id)}<div class="ministats-widget"><div class="num" data-ministats-num>0</div><div class="lbl">${t('thisWeekFocus')}</div></div>`;
+  } else if (type === 'todaytime') {
+    el.innerHTML = `${widgetRemoveBtn(id)}<div class="todaytime-widget">
+      <div class="row focus"><div class="num" data-todaytime-focus>0</div><div class="lbl">${t('todayFocusLabel')}</div></div>
+      <div class="row break"><div class="num" data-todaytime-break>0</div><div class="lbl">${t('todayBreakLabel')}</div></div>
+    </div>`;
   } else if (type === 'ad') {
     // free-tier users can move/resize the ad slot but not remove it; Pro removes ads entirely (see pricing)
     el.innerHTML = `${isProUser() ? widgetRemoveBtn(id) : ''}<div class="ad-widget" data-ad-widget></div>`;
@@ -2996,6 +3007,19 @@ function updateLiveWidgets() {
     if (secHand) secHand.setAttribute('transform', `rotate(${secDeg} 50 50)`);
   });
   document.querySelectorAll('[data-ddday-id]').forEach(el => updateDdayWidget(el.closest('.widget-card')));
+  updateTodayTime();
+}
+function updateTodayTime() {
+  const focusEls = document.querySelectorAll('[data-todaytime-focus]');
+  const breakEls = document.querySelectorAll('[data-todaytime-break]');
+  if (!focusEls.length && !breakEls.length) return;
+  let focusTotal = 0, breakTotal = 0;
+  Object.values(state.sessions).forEach(s => {
+    if (s.category === 'break') breakTotal += focusSeconds(s);
+    else focusTotal += focusSeconds(s);
+  });
+  focusEls.forEach(el => { el.textContent = fmtShort(focusTotal); });
+  breakEls.forEach(el => { el.textContent = fmtShort(breakTotal); });
 }
 function updateMiniStats() {
   const totalSecs = computeStats('week').total;
