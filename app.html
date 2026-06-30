@@ -1838,9 +1838,10 @@ function checkIdle() {
   if (Date.now() - lastActivity < IDLE_LIMIT_MS) return;
 
   const active = state.activeId ? state.sessions[state.activeId] : null;
-  if (active && focusSeconds(active) < active.plannedSeconds) {
-    // still within the planned time — warn periodically but keep recording,
-    // don't pause or pop the switch modal until the plan is actually exceeded
+  const OVERTIME_GRACE_SECONDS = 15 * 60;
+  if (active && focusSeconds(active) < active.plannedSeconds + OVERTIME_GRACE_SECONDS) {
+    // still within the planned time (or up to 15min over it) — warn periodically
+    // but keep recording; only pause once that grace window is also exceeded
     if (Date.now() >= idleWarnNextAt) {
       beep();
       notify(t('idleWarnTitle'), t('idleWarnBody', { min: appSettings.idleMinutes }));
