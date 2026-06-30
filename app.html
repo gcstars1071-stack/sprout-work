@@ -2478,6 +2478,9 @@ const reportWorkNote = document.getElementById('reportWorkNote');
 const reportPersonalNote = document.getElementById('reportPersonalNote');
 const reportMsg = document.getElementById('reportMsg');
 let currentReportDate = null;
+let currentReportFocusTotal = 0;
+let currentReportBreakTotal = 0;
+const PDF_EXPORT_PRO_ONLY = false; // flip to true once billing is live to gate PDF export behind Pro
 
 function flattenDaySessions(dayState) {
   const sessionsMap = (dayState && dayState.sessions) || {};
@@ -2523,6 +2526,8 @@ function openReportModal(dStr) {
     if (s.category === 'break') dayBreakTotal += focusSeconds(s);
     else dayFocusTotal += focusSeconds(s);
   });
+  currentReportFocusTotal = dayFocusTotal;
+  currentReportBreakTotal = dayBreakTotal;
   reportSummaryLine.textContent = `${t('todayFocusLabel')} ${fmtShort(dayFocusTotal)} · ${t('todayBreakLabel')} ${fmtShort(dayBreakTotal)}`;
 
   reportTreeList.innerHTML = '';
@@ -2572,7 +2577,9 @@ function collectReportData() {
     date: currentReportDate,
     items,
     workNote: reportWorkNote.value,
-    personalNote: reportPersonalNote.value
+    personalNote: reportPersonalNote.value,
+    focusTotal: currentReportFocusTotal,
+    breakTotal: currentReportBreakTotal
   };
 }
 document.getElementById('reportSaveBtn').addEventListener('click', () => {
@@ -2583,9 +2590,12 @@ document.getElementById('reportSaveBtn').addEventListener('click', () => {
   reportMsg.textContent = t('reportSaved');
   setTimeout(() => { reportMsg.textContent = ''; }, 1800);
 });
+function reportSummaryText(data) {
+  return `${t('todayFocusLabel')} ${fmtShort(data.focusTotal)} · ${t('todayBreakLabel')} ${fmtShort(data.breakTotal)}`;
+}
 document.getElementById('reportCopyBtn').addEventListener('click', async () => {
   const data = collectReportData();
-  let text = `${t('reportTitle')} — ${data.date}\n${data.name ? data.name + '\n' : ''}\n`;
+  let text = `${t('reportTitle')} — ${data.date}\n${data.name ? data.name + '\n' : ''}${reportSummaryText(data)}\n\n`;
   data.items.forEach((it, i) => { text += `${i + 1}. ${it.text}\n`; });
   if (data.workNote) text += `\n${t('reportWorkNoteLabel')}\n${data.workNote}\n`;
   if (data.personalNote) text += `\n${t('reportPersonalNoteLabel')}\n${data.personalNote}\n`;
@@ -2598,7 +2608,7 @@ document.getElementById('reportCopyBtn').addEventListener('click', async () => {
   setTimeout(() => { reportMsg.textContent = ''; }, 1800);
 });
 document.getElementById('reportPdfBtn').addEventListener('click', () => {
-  if (!isProUser()) {
+  if (PDF_EXPORT_PRO_ONLY && !isProUser()) {
     reportMsg.innerHTML = `${t('reportPdfProOnly')} <a href="upgrade.html" style="color:var(--accent2);">${t('upgradeToPro')}</a>`;
     return;
   }
@@ -2610,12 +2620,14 @@ document.getElementById('reportPdfBtn').addEventListener('click', () => {
     <style>
       body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 32px; color: #1a1a2e; }
       h1 { font-size: 20px; margin: 0 0 4px; }
-      .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
+      .meta { color: #666; font-size: 13px; margin-bottom: 4px; }
+      .summary { color: #2c7a6f; font-size: 13px; margin-bottom: 20px; }
       h2 { font-size: 14px; margin: 24px 0 8px; border-top: 1px solid #ddd; padding-top: 16px; }
       .note { white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
     </style></head><body>
     <h1>${t('reportTitle')}</h1>
     <div class="meta">${data.date}${data.name ? ' · ' + escapeHtml(data.name) : ''}</div>
+    <div class="summary">${reportSummaryText(data)}</div>
     <h2>${t('reportTreeLabel')}</h2>
     ${itemsHtml}
     ${data.workNote ? `<h2>${t('reportWorkNoteLabel')}</h2><div class="note">${escapeHtml(data.workNote)}</div>` : ''}
