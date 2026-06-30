@@ -671,7 +671,10 @@
       </div>
       <div class="cal-grid" id="calGrid"></div>
       <div class="cal-detail" id="calDetail" style="display:none;">
-        <h3 id="calDetailLabel"></h3>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+          <h3 id="calDetailLabel" style="margin:0;"></h3>
+          <button class="btn-ghost" id="openReportBtn" style="font-size:11px; padding:5px 9px;" data-i18n="openReportBtn">📋 Daily Report</button>
+        </div>
         <div id="calDetailList"></div>
       </div>
     </div>
@@ -890,6 +893,41 @@
   </div>
 </div>
 
+<div class="overlay" id="reportOverlay">
+  <div class="modal" style="width:760px; max-width:95vw;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <h2 style="margin:0; font-size:18px; color:var(--text);" data-i18n="reportTitle">Daily Report</h2>
+      <span id="reportDateLabel" style="font-size:12px; color:var(--dim);"></span>
+    </div>
+    <div class="settings-section" style="margin-bottom:14px;">
+      <input type="text" id="reportNameInput" data-i18n-ph="reportNamePh" placeholder="Your name"
+        style="width:100%; background:var(--card2); border:none; border-radius:8px; padding:9px 11px; color:var(--text); font-size:13px; font-family:inherit;">
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+      <div>
+        <div class="settings-label" data-i18n="reportTreeLabel">Today's tasks</div>
+        <div id="reportTreeList" style="background:var(--card2); border-radius:10px; padding:10px; min-height:220px; max-height:340px; overflow-y:auto;"></div>
+      </div>
+      <div>
+        <div class="settings-label" data-i18n="reportWorkNoteLabel">Notes</div>
+        <textarea id="reportWorkNote" data-i18n-ph="reportWorkNotePh" placeholder="Notes about today's work..."
+          style="width:100%; min-height:220px; max-height:340px; background:var(--card2); border:none; border-radius:10px; padding:10px; color:var(--text); font-size:13px; resize:vertical; font-family:inherit; box-sizing:border-box;"></textarea>
+      </div>
+    </div>
+    <div class="settings-section" style="margin-top:14px;">
+      <div class="settings-label" data-i18n="reportPersonalNoteLabel">Personal notes</div>
+      <textarea id="reportPersonalNote" data-i18n-ph="reportPersonalNotePh" placeholder="Anything else, not work-related..."
+        style="width:100%; min-height:80px; background:var(--card2); border:none; border-radius:10px; padding:10px; color:var(--text); font-size:13px; resize:vertical; font-family:inherit; box-sizing:border-box;"></textarea>
+    </div>
+    <div class="auth-msg" id="reportMsg"></div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="reportCopyBtn" data-i18n="reportCopyBtn">Copy as text</button>
+      <button class="btn-ghost" id="reportCloseBtn" data-i18n="modalCancel">Cancel</button>
+      <button class="btn-primary" id="reportSaveBtn" data-i18n="reportSaveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/gridstack@9.5.0/dist/gridstack-all.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -1090,7 +1128,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
-    idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} minutes, but you're still within your planned time — still recording.",
+    idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} minutes, but you're still within your planned time — still recording.", openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Your name', reportTreeLabel: "Today's tasks", reportWorkNoteLabel: 'Notes', reportWorkNotePh: "Notes about today's work...", reportPersonalNoteLabel: 'Personal notes', reportPersonalNotePh: 'Anything else, not work-related...', reportCopyBtn: 'Copy as text', reportSaveBtn: 'Save', reportSaved: 'Saved.', reportCopied: 'Copied to clipboard.', reportCopyFailed: 'Could not copy — please try again.',
     maxClocksAlert: 'You can add up to {{max}} digital clocks.',
     dDaySelectDate: 'Pick a date', dDayLabelPh: 'Goal name', stickyPh: 'Write a note',
     locale: 'en-US', dateFmt: (y, m) => `${['January','February','March','April','May','June','July','August','September','October','November','December'][m-1]} ${y}`,
@@ -1128,7 +1166,7 @@ const TRANSLATIONS = {
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
-    idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.',
+    idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: '이름', reportTreeLabel: '오늘 한 일', reportWorkNoteLabel: '업무 노트', reportWorkNotePh: '오늘 업무에 대한 메모...', reportPersonalNoteLabel: '개인 노트', reportPersonalNotePh: '업무 외 메모...', reportCopyBtn: '텍스트로 복사', reportSaveBtn: '저장', reportSaved: '저장되었습니다.', reportCopied: '클립보드에 복사되었습니다.', reportCopyFailed: '복사에 실패했습니다. 다시 시도해주세요.',
     maxClocksAlert: '디지털시계는 최대 {{max}}개까지 추가할 수 있습니다.',
     dDaySelectDate: '날짜를 선택하세요', dDayLabelPh: '목표 이름', stickyPh: '메모를 입력하세요',
     locale: 'ko-KR', dateFmt: (y, m) => `${y}년 ${m}월`,
@@ -1166,7 +1204,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
-    idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.',
+    idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Tên của bạn', reportTreeLabel: 'Công việc hôm nay', reportWorkNoteLabel: 'Ghi chú công việc', reportWorkNotePh: 'Ghi chú về công việc hôm nay...', reportPersonalNoteLabel: 'Ghi chú cá nhân', reportPersonalNotePh: 'Những việc khác, không liên quan công việc...', reportCopyBtn: 'Sao chép văn bản', reportSaveBtn: 'Lưu', reportSaved: 'Đã lưu.', reportCopied: 'Đã sao chép vào clipboard.', reportCopyFailed: 'Không thể sao chép — vui lòng thử lại.',
     maxClocksAlert: 'Bạn chỉ có thể thêm tối đa {{max}} đồng hồ số.',
     dDaySelectDate: 'Chọn một ngày', dDayLabelPh: 'Tên mục tiêu', stickyPh: 'Nhập ghi chú',
     locale: 'vi-VN', dateFmt: (y, m) => `Tháng ${m}, ${y}`,
@@ -2426,6 +2464,121 @@ function showCalDetail(dStr) {
   calDetailLabel.textContent = dStr;
   renderHistoryTree(calDetailList, dayState, t('calendarEmpty'));
 }
+
+/* ---------- daily report (calendar-integrated) ---------- */
+const REPORT_NAME_KEY = 'sproutWork_reportName';
+const reportOverlay = document.getElementById('reportOverlay');
+const reportDateLabel = document.getElementById('reportDateLabel');
+const reportNameInput = document.getElementById('reportNameInput');
+const reportTreeList = document.getElementById('reportTreeList');
+const reportWorkNote = document.getElementById('reportWorkNote');
+const reportPersonalNote = document.getElementById('reportPersonalNote');
+const reportMsg = document.getElementById('reportMsg');
+let currentReportDate = null;
+
+function flattenDaySessions(dayState) {
+  const sessionsMap = (dayState && dayState.sessions) || {};
+  const out = [];
+  function walk(parentId, depth) {
+    Object.values(sessionsMap)
+      .filter(s => (s.parentId || null) === parentId)
+      .sort((a, b) => sessionOrder(a) - sessionOrder(b))
+      .forEach(s => {
+        out.push({ session: s, depth });
+        walk(s.id, depth + 1);
+      });
+  }
+  walk(null, 0);
+  return out;
+}
+function loadReport(dStr) {
+  try { return JSON.parse(localStorage.getItem('sproutWork_report_' + dStr) || 'null'); }
+  catch (e) { return null; }
+}
+function saveReportData(dStr, data) {
+  const key = 'sproutWork_report_' + dStr;
+  localStorage.setItem(key, JSON.stringify(data));
+  cloudSet(key, data);
+}
+
+function openReportModal(dStr) {
+  currentReportDate = dStr;
+  const dayState = dStr === todayStr ? state : loadStateForDate(dStr);
+  const flat = flattenDaySessions(dayState);
+  const saved = loadReport(dStr) || {};
+  const savedItemText = {};
+  (saved.items || []).forEach(it => { savedItemText[it.sessionId] = it.text; });
+
+  reportDateLabel.textContent = dStr;
+  reportNameInput.value = saved.name || localStorage.getItem(REPORT_NAME_KEY) || '';
+  reportWorkNote.value = saved.workNote || '';
+  reportPersonalNote.value = saved.personalNote || '';
+  reportMsg.textContent = '';
+
+  reportTreeList.innerHTML = '';
+  if (flat.length === 0) {
+    reportTreeList.innerHTML = `<div class="empty-msg">${t('calendarEmpty')}</div>`;
+  } else {
+    flat.forEach((entry, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; gap:6px; padding:4px 0; margin-left:' + (entry.depth * 16) + 'px;';
+      const num = document.createElement('span');
+      num.style.cssText = 'font-size:12px; color:var(--dim); flex-shrink:0; min-width:18px;';
+      num.textContent = (i + 1) + '.';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.dataset.sessionId = entry.session.id;
+      input.value = savedItemText[entry.session.id] ?? entry.session.title;
+      input.style.cssText = 'flex:1; background:transparent; border:none; border-bottom:1px solid #44447a; color:var(--text); font-size:13px; padding:3px 2px; font-family:inherit;';
+      row.appendChild(num);
+      row.appendChild(input);
+      reportTreeList.appendChild(row);
+    });
+  }
+  reportOverlay.classList.add('show');
+}
+
+document.getElementById('openReportBtn').addEventListener('click', () => {
+  if (!selectedCalDate) return;
+  openReportModal(selectedCalDate);
+});
+document.getElementById('reportCloseBtn').addEventListener('click', () => {
+  reportOverlay.classList.remove('show');
+});
+function collectReportData() {
+  const items = Array.from(reportTreeList.querySelectorAll('input[data-session-id]')).map(el => ({
+    sessionId: el.dataset.sessionId, text: el.value
+  }));
+  return {
+    name: reportNameInput.value,
+    date: currentReportDate,
+    items,
+    workNote: reportWorkNote.value,
+    personalNote: reportPersonalNote.value
+  };
+}
+document.getElementById('reportSaveBtn').addEventListener('click', () => {
+  if (!currentReportDate) return;
+  const data = collectReportData();
+  localStorage.setItem(REPORT_NAME_KEY, data.name);
+  saveReportData(currentReportDate, data);
+  reportMsg.textContent = t('reportSaved');
+  setTimeout(() => { reportMsg.textContent = ''; }, 1800);
+});
+document.getElementById('reportCopyBtn').addEventListener('click', async () => {
+  const data = collectReportData();
+  let text = `${t('reportTitle')} — ${data.date}\n${data.name ? data.name + '\n' : ''}\n`;
+  data.items.forEach((it, i) => { text += `${i + 1}. ${it.text}\n`; });
+  if (data.workNote) text += `\n${t('reportWorkNoteLabel')}\n${data.workNote}\n`;
+  if (data.personalNote) text += `\n${t('reportPersonalNoteLabel')}\n${data.personalNote}\n`;
+  try {
+    await navigator.clipboard.writeText(text);
+    reportMsg.textContent = t('reportCopied');
+  } catch (e) {
+    reportMsg.textContent = t('reportCopyFailed');
+  }
+  setTimeout(() => { reportMsg.textContent = ''; }, 1800);
+});
 
 /* ---------- profile menu ---------- */
 const profileAvatar = document.getElementById('profileAvatar');
