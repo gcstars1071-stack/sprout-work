@@ -218,6 +218,14 @@
   .tree-node.drop-after { box-shadow: inset 0 -2px 0 0 var(--accent2); }
   .tree-node.drop-into { outline: 2px dashed var(--accent2); outline-offset: -2px; }
   .empty-msg { color: var(--dim); font-size: 13px; text-align: center; padding: 10px 0; }
+  .tree-root-dropzone { height: 22px; margin-top: 6px; border-radius: 8px; }
+  #treeRoot.dragging .tree-root-dropzone {
+    height: 30px; border: 2px dashed var(--accent2);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #treeRoot.dragging .tree-root-dropzone::after {
+    content: attr(data-label); font-size: 11px; color: var(--dim);
+  }
 
   /* todo list */
   .todo-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
@@ -1064,7 +1072,7 @@ const TRANSLATIONS = {
     calendarTitle: 'Calendar', calendarEmpty: 'No tasks recorded',
     widgetPanelTitle: 'Add widget',
     widgetDigitalClock: '🕐 Digital clock', widgetAnalogClock: '🕰️ Analog clock', widgetSticky: '📝 Sticky note',
-    widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetTodayTime: "⏱️ Today's time", todayFocusLabel: 'Focus time today', todayBreakLabel: 'Break time today', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
+    widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetTodayTime: "⏱️ Today's time", todayFocusLabel: 'Focus time today', todayBreakLabel: 'Break time today', promoteDropLabel: 'Drop here to move to top level', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
     modalHeadingDefault: 'What would you like to do?', modalTitlePh: 'Enter new task title',
     modalCancel: 'Cancel', modalStartNew: 'Start new task', resumeArrow: 'Resume →', waiting: 'waiting', switchTooltip: 'Click to switch to this task', frequentTooltip: 'Click to fill in the task name', timeIsUpFlash: '⏰ Time is up!',
     waitEmpty: 'No tasks waiting', idleHeading: 'No activity for {{min}} minutes. What were you doing?', idleSnooze: 'Ask again in 5 min',
@@ -1102,7 +1110,7 @@ const TRANSLATIONS = {
     calendarTitle: '캘린더', calendarEmpty: '기록된 업무가 없습니다',
     widgetPanelTitle: '위젯 추가',
     widgetDigitalClock: '🕐 디지털시계', widgetAnalogClock: '🕰️ 아날로그시계', widgetSticky: '📝 스티키 노트',
-    widgetDday: '📅 D-Day 카운트다운', widgetQuote: '💬 오늘의 한마디', widgetMinistats: '📊 미니 통계 카드', widgetTodayTime: '⏱️ 오늘의 시간', todayFocusLabel: '오늘 집중시간', todayBreakLabel: '오늘 휴식시간', widgetAd: '📢 광고 영역', adNotConfigured: '광고 영역 — 코드에 AdSense 게시자/슬롯 ID를 입력하세요.', adDesktopUnavailable: '광고는 웹 버전에서만 사용할 수 있습니다 (데스크톱 앱 제외).',
+    widgetDday: '📅 D-Day 카운트다운', widgetQuote: '💬 오늘의 한마디', widgetMinistats: '📊 미니 통계 카드', widgetTodayTime: '⏱️ 오늘의 시간', todayFocusLabel: '오늘 집중시간', todayBreakLabel: '오늘 휴식시간', promoteDropLabel: '여기에 놓으면 최상위로 이동', widgetAd: '📢 광고 영역', adNotConfigured: '광고 영역 — 코드에 AdSense 게시자/슬롯 ID를 입력하세요.', adDesktopUnavailable: '광고는 웹 버전에서만 사용할 수 있습니다 (데스크톱 앱 제외).',
     modalHeadingDefault: '무엇을 할까요?', modalTitlePh: '새 업무 제목 입력',
     modalCancel: '취소', modalStartNew: '새 업무 시작', resumeArrow: '복귀 →', waiting: '대기', switchTooltip: '클릭하여 이 업무로 전환', frequentTooltip: '클릭하여 업무명 입력', timeIsUpFlash: '⏰ 시간 초과!',
     waitEmpty: '대기 중인 업무가 없습니다', idleHeading: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨나요?', idleSnooze: '5분 후 다시 묻기',
@@ -1140,7 +1148,7 @@ const TRANSLATIONS = {
     calendarTitle: 'Lịch', calendarEmpty: 'Không có việc nào',
     widgetPanelTitle: 'Thêm tiện ích',
     widgetDigitalClock: '🕐 Đồng hồ số', widgetAnalogClock: '🕰️ Đồng hồ kim', widgetSticky: '📝 Ghi chú dán',
-    widgetDday: '📅 Đếm ngược D-Day', widgetQuote: '💬 Câu nói hôm nay', widgetMinistats: '📊 Thẻ thống kê nhỏ', widgetTodayTime: '⏱️ Thời gian hôm nay', todayFocusLabel: 'Thời gian tập trung hôm nay', todayBreakLabel: 'Thời gian nghỉ hôm nay', widgetAd: '📢 Ô quảng cáo', adNotConfigured: 'Ô quảng cáo — nhập ID nhà xuất bản/ID đơn vị AdSense trong mã nguồn.', adDesktopUnavailable: 'Quảng cáo chỉ khả dụng ở phiên bản web (không có ở ứng dụng desktop).',
+    widgetDday: '📅 Đếm ngược D-Day', widgetQuote: '💬 Câu nói hôm nay', widgetMinistats: '📊 Thẻ thống kê nhỏ', widgetTodayTime: '⏱️ Thời gian hôm nay', todayFocusLabel: 'Thời gian tập trung hôm nay', todayBreakLabel: 'Thời gian nghỉ hôm nay', promoteDropLabel: 'Thả vào đây để đưa lên cấp cao nhất', widgetAd: '📢 Ô quảng cáo', adNotConfigured: 'Ô quảng cáo — nhập ID nhà xuất bản/ID đơn vị AdSense trong mã nguồn.', adDesktopUnavailable: 'Quảng cáo chỉ khả dụng ở phiên bản web (không có ở ứng dụng desktop).',
     modalHeadingDefault: 'Bạn muốn làm gì?', modalTitlePh: 'Nhập tên công việc mới',
     modalCancel: 'Hủy', modalStartNew: 'Bắt đầu việc mới', resumeArrow: 'Tiếp tục →', waiting: 'đang chờ', switchTooltip: 'Nhấp để chuyển sang việc này', frequentTooltip: 'Nhấp để điền tên công việc', timeIsUpFlash: '⏰ Hết giờ!',
     waitEmpty: 'Không có việc đang chờ', idleHeading: 'Không có hoạt động trong {{min}} phút. Bạn đã làm gì?', idleSnooze: 'Hỏi lại sau 5 phút',
@@ -2111,9 +2119,11 @@ function attachTreeDragHandlers(row, session) {
     draggedSessionId = session.id;
     e.dataTransfer.effectAllowed = 'move';
     row.classList.add('drag-dragging');
+    treeRoot.classList.add('dragging');
   });
   row.addEventListener('dragend', () => {
     row.classList.remove('drag-dragging');
+    treeRoot.classList.remove('dragging');
     clearDropIndicators();
     draggedSessionId = null;
   });
@@ -2171,6 +2181,12 @@ function renderTree() {
     return;
   }
   roots.forEach(r => treeRoot.appendChild(buildNode(r)));
+  // always-present drop target so a single (or deeply nested) task can still be
+  // dragged out to the top level even when there's no other content below it
+  const dropzone = document.createElement('div');
+  dropzone.className = 'tree-root-dropzone';
+  dropzone.dataset.label = t('promoteDropLabel');
+  treeRoot.appendChild(dropzone);
 }
 
 // dropping on empty space below all rows makes the dragged task top-level
