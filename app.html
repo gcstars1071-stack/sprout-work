@@ -1822,6 +1822,8 @@ document.addEventListener('visibilitychange', () => {
 
 function checkIdle() {
   if (state.dayEnded) return; // user explicitly clocked out — don't nag until they start something new
+  const activeForIdleCheck = state.activeId ? state.sessions[state.activeId] : null;
+  if (activeForIdleCheck && activeForIdleCheck.category === 'break') return; // on a break — no movement expected, don't nag
   if (idleModalOpen) {
     // still unanswered — keep nudging every 2 minutes instead of notifying once and going quiet
     if (Date.now() >= idleNextNudgeAt) {
