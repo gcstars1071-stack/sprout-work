@@ -1090,7 +1090,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
-    idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.",
+    idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} minutes, but you're still within your planned time — still recording.",
     maxClocksAlert: 'You can add up to {{max}} digital clocks.',
     dDaySelectDate: 'Pick a date', dDayLabelPh: 'Goal name', stickyPh: 'Write a note',
     locale: 'en-US', dateFmt: (y, m) => `${['January','February','March','April','May','June','July','August','September','October','November','December'][m-1]} ${y}`,
@@ -1128,7 +1128,7 @@ const TRANSLATIONS = {
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
-    idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.',
+    idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.',
     maxClocksAlert: '디지털시계는 최대 {{max}}개까지 추가할 수 있습니다.',
     dDaySelectDate: '날짜를 선택하세요', dDayLabelPh: '목표 이름', stickyPh: '메모를 입력하세요',
     locale: 'ko-KR', dateFmt: (y, m) => `${y}년 ${m}월`,
@@ -1166,7 +1166,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
-    idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.',
+    idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.',
     maxClocksAlert: 'Bạn chỉ có thể thêm tối đa {{max}} đồng hồ số.',
     dDaySelectDate: 'Chọn một ngày', dDayLabelPh: 'Tên mục tiêu', stickyPh: 'Nhập ghi chú',
     locale: 'vi-VN', dateFmt: (y, m) => `Tháng ${m}, ${y}`,
@@ -1808,6 +1808,7 @@ let IDLE_LIMIT_MS = 15 * 60 * 1000;
 let lastActivity = Date.now();
 let idleSnoozeUntil = 0;
 let idleNextNudgeAt = 0;
+let idleWarnNextAt = 0;
 
 function markActivity() {
   if (idleModalOpen) return; // don't let modal interaction mask real idle time
@@ -1837,6 +1838,16 @@ function checkIdle() {
   if (Date.now() - lastActivity < IDLE_LIMIT_MS) return;
 
   const active = state.activeId ? state.sessions[state.activeId] : null;
+  if (active && focusSeconds(active) < active.plannedSeconds) {
+    // still within the planned time — warn periodically but keep recording,
+    // don't pause or pop the switch modal until the plan is actually exceeded
+    if (Date.now() >= idleWarnNextAt) {
+      beep();
+      notify(t('idleWarnTitle'), t('idleWarnBody', { min: appSettings.idleMinutes }));
+      idleWarnNextAt = Date.now() + 2 * 60 * 1000;
+    }
+    return;
+  }
   if (active) {
     pauseSessionAt(active, lastActivity);
     state.activeId = null;
