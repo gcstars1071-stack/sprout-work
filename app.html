@@ -899,6 +899,7 @@
       <h2 style="margin:0; font-size:18px; color:var(--text);" data-i18n="reportTitle">Daily Report</h2>
       <span id="reportDateLabel" style="font-size:12px; color:var(--dim);"></span>
     </div>
+    <div id="reportSummaryLine" style="font-size:12px; color:var(--accent2); margin-bottom:12px;"></div>
     <div class="settings-section" style="margin-bottom:14px;">
       <input type="text" id="reportNameInput" data-i18n-ph="reportNamePh" placeholder="Your name"
         style="width:100%; background:var(--card2); border:none; border-radius:8px; padding:9px 11px; color:var(--text); font-size:13px; font-family:inherit;">
@@ -922,6 +923,7 @@
     <div class="auth-msg" id="reportMsg"></div>
     <div class="modal-foot">
       <button class="btn-ghost" id="reportCopyBtn" data-i18n="reportCopyBtn">Copy as text</button>
+      <button class="btn-ghost" id="reportPdfBtn" data-i18n="reportPdfBtn">📄 PDF</button>
       <button class="btn-ghost" id="reportCloseBtn" data-i18n="modalCancel">Cancel</button>
       <button class="btn-primary" id="reportSaveBtn" data-i18n="reportSaveBtn">Save</button>
     </div>
@@ -1128,7 +1130,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
-    idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} minutes, but you're still within your planned time — still recording.", openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Your name', reportTreeLabel: "Today's tasks", reportWorkNoteLabel: 'Notes', reportWorkNotePh: "Notes about today's work...", reportPersonalNoteLabel: 'Personal notes', reportPersonalNotePh: 'Anything else, not work-related...', reportCopyBtn: 'Copy as text', reportSaveBtn: 'Save', reportSaved: 'Saved.', reportCopied: 'Copied to clipboard.', reportCopyFailed: 'Could not copy — please try again.',
+    idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} minutes, but you're still within your planned time — still recording.", openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Your name', reportTreeLabel: "Today's tasks", reportWorkNoteLabel: 'Notes', reportWorkNotePh: "Notes about today's work...", reportPersonalNoteLabel: 'Personal notes', reportPersonalNotePh: 'Anything else, not work-related...', reportCopyBtn: 'Copy as text', reportSaveBtn: 'Save', reportSaved: 'Saved.', reportCopied: 'Copied to clipboard.', reportCopyFailed: 'Could not copy — please try again.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF export is a Pro feature.',
     maxClocksAlert: 'You can add up to {{max}} digital clocks.',
     dDaySelectDate: 'Pick a date', dDayLabelPh: 'Goal name', stickyPh: 'Write a note',
     locale: 'en-US', dateFmt: (y, m) => `${['January','February','March','April','May','June','July','August','September','October','November','December'][m-1]} ${y}`,
@@ -1166,7 +1168,7 @@ const TRANSLATIONS = {
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
-    idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: '이름', reportTreeLabel: '오늘 한 일', reportWorkNoteLabel: '업무 노트', reportWorkNotePh: '오늘 업무에 대한 메모...', reportPersonalNoteLabel: '개인 노트', reportPersonalNotePh: '업무 외 메모...', reportCopyBtn: '텍스트로 복사', reportSaveBtn: '저장', reportSaved: '저장되었습니다.', reportCopied: '클립보드에 복사되었습니다.', reportCopyFailed: '복사에 실패했습니다. 다시 시도해주세요.',
+    idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: '이름', reportTreeLabel: '오늘 한 일', reportWorkNoteLabel: '업무 노트', reportWorkNotePh: '오늘 업무에 대한 메모...', reportPersonalNoteLabel: '개인 노트', reportPersonalNotePh: '업무 외 메모...', reportCopyBtn: '텍스트로 복사', reportSaveBtn: '저장', reportSaved: '저장되었습니다.', reportCopied: '클립보드에 복사되었습니다.', reportCopyFailed: '복사에 실패했습니다. 다시 시도해주세요.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF 내보내기는 Pro 전용 기능입니다.',
     maxClocksAlert: '디지털시계는 최대 {{max}}개까지 추가할 수 있습니다.',
     dDaySelectDate: '날짜를 선택하세요', dDayLabelPh: '목표 이름', stickyPh: '메모를 입력하세요',
     locale: 'ko-KR', dateFmt: (y, m) => `${y}년 ${m}월`,
@@ -1204,7 +1206,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
-    idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Tên của bạn', reportTreeLabel: 'Công việc hôm nay', reportWorkNoteLabel: 'Ghi chú công việc', reportWorkNotePh: 'Ghi chú về công việc hôm nay...', reportPersonalNoteLabel: 'Ghi chú cá nhân', reportPersonalNotePh: 'Những việc khác, không liên quan công việc...', reportCopyBtn: 'Sao chép văn bản', reportSaveBtn: 'Lưu', reportSaved: 'Đã lưu.', reportCopied: 'Đã sao chép vào clipboard.', reportCopyFailed: 'Không thể sao chép — vui lòng thử lại.',
+    idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Tên của bạn', reportTreeLabel: 'Công việc hôm nay', reportWorkNoteLabel: 'Ghi chú công việc', reportWorkNotePh: 'Ghi chú về công việc hôm nay...', reportPersonalNoteLabel: 'Ghi chú cá nhân', reportPersonalNotePh: 'Những việc khác, không liên quan công việc...', reportCopyBtn: 'Sao chép văn bản', reportSaveBtn: 'Lưu', reportSaved: 'Đã lưu.', reportCopied: 'Đã sao chép vào clipboard.', reportCopyFailed: 'Không thể sao chép — vui lòng thử lại.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'Xuất PDF là tính năng Pro.',
     maxClocksAlert: 'Bạn chỉ có thể thêm tối đa {{max}} đồng hồ số.',
     dDaySelectDate: 'Chọn một ngày', dDayLabelPh: 'Tên mục tiêu', stickyPh: 'Nhập ghi chú',
     locale: 'vi-VN', dateFmt: (y, m) => `Tháng ${m}, ${y}`,
@@ -2469,6 +2471,7 @@ function showCalDetail(dStr) {
 const REPORT_NAME_KEY = 'sproutWork_reportName';
 const reportOverlay = document.getElementById('reportOverlay');
 const reportDateLabel = document.getElementById('reportDateLabel');
+const reportSummaryLine = document.getElementById('reportSummaryLine');
 const reportNameInput = document.getElementById('reportNameInput');
 const reportTreeList = document.getElementById('reportTreeList');
 const reportWorkNote = document.getElementById('reportWorkNote');
@@ -2515,6 +2518,13 @@ function openReportModal(dStr) {
   reportPersonalNote.value = saved.personalNote || '';
   reportMsg.textContent = '';
 
+  let dayFocusTotal = 0, dayBreakTotal = 0;
+  Object.values((dayState && dayState.sessions) || {}).forEach(s => {
+    if (s.category === 'break') dayBreakTotal += focusSeconds(s);
+    else dayFocusTotal += focusSeconds(s);
+  });
+  reportSummaryLine.textContent = `${t('todayFocusLabel')} ${fmtShort(dayFocusTotal)} · ${t('todayBreakLabel')} ${fmtShort(dayBreakTotal)}`;
+
   reportTreeList.innerHTML = '';
   if (flat.length === 0) {
     reportTreeList.innerHTML = `<div class="empty-msg">${t('calendarEmpty')}</div>`;
@@ -2525,13 +2535,21 @@ function openReportModal(dStr) {
       const num = document.createElement('span');
       num.style.cssText = 'font-size:12px; color:var(--dim); flex-shrink:0; min-width:18px;';
       num.textContent = (i + 1) + '.';
+      const icon = document.createElement('span');
+      icon.innerHTML = statusIcon(entry.session);
+      icon.style.cssText = 'flex-shrink:0; font-size:12px;';
       const input = document.createElement('input');
       input.type = 'text';
       input.dataset.sessionId = entry.session.id;
       input.value = savedItemText[entry.session.id] ?? entry.session.title;
-      input.style.cssText = 'flex:1; background:transparent; border:none; border-bottom:1px solid #44447a; color:var(--text); font-size:13px; padding:3px 2px; font-family:inherit;';
+      input.style.cssText = 'flex:1; background:transparent; border:none; border-bottom:1px solid #44447a; color:var(--text); font-size:13px; padding:3px 2px; font-family:inherit; min-width:0;';
+      const time = document.createElement('span');
+      time.style.cssText = 'font-size:11px; color:var(--dim); flex-shrink:0; white-space:nowrap;';
+      time.textContent = entry.session.category === 'break' ? '' : `(${fmtShort(focusSeconds(entry.session))})`;
       row.appendChild(num);
+      row.appendChild(icon);
       row.appendChild(input);
+      row.appendChild(time);
       reportTreeList.appendChild(row);
     });
   }
@@ -2578,6 +2596,34 @@ document.getElementById('reportCopyBtn').addEventListener('click', async () => {
     reportMsg.textContent = t('reportCopyFailed');
   }
   setTimeout(() => { reportMsg.textContent = ''; }, 1800);
+});
+document.getElementById('reportPdfBtn').addEventListener('click', () => {
+  if (!isProUser()) {
+    reportMsg.innerHTML = `${t('reportPdfProOnly')} <a href="upgrade.html" style="color:var(--accent2);">${t('upgradeToPro')}</a>`;
+    return;
+  }
+  const data = collectReportData();
+  const win = window.open('', '_blank');
+  if (!win) return;
+  const itemsHtml = data.items.map((it, i) => `<div style="padding:3px 0;">${i + 1}. ${escapeHtml(it.text)}</div>`).join('');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t('reportTitle')} — ${data.date}</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 32px; color: #1a1a2e; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
+      h2 { font-size: 14px; margin: 24px 0 8px; border-top: 1px solid #ddd; padding-top: 16px; }
+      .note { white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
+    </style></head><body>
+    <h1>${t('reportTitle')}</h1>
+    <div class="meta">${data.date}${data.name ? ' · ' + escapeHtml(data.name) : ''}</div>
+    <h2>${t('reportTreeLabel')}</h2>
+    ${itemsHtml}
+    ${data.workNote ? `<h2>${t('reportWorkNoteLabel')}</h2><div class="note">${escapeHtml(data.workNote)}</div>` : ''}
+    ${data.personalNote ? `<h2>${t('reportPersonalNoteLabel')}</h2><div class="note">${escapeHtml(data.personalNote)}</div>` : ''}
+    </body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 300);
 });
 
 /* ---------- profile menu ---------- */
