@@ -930,6 +930,23 @@
   </div>
 </div>
 
+<!-- sleep resume modal -->
+<div class="overlay" id="sleepResumeOverlay" style="display:none;">
+  <div class="modal" style="max-width:420px; text-align:center;">
+    <div style="font-size:28px; margin-bottom:8px;">💤</div>
+    <h2 id="sleepResumeTitle" style="margin:0 0 10px; font-size:17px;"></h2>
+    <p id="sleepResumeBody" style="font-size:14px; color:var(--dim); margin:0 0 18px; line-height:1.6;"></p>
+    <div style="background:var(--card2); border-radius:10px; padding:12px 16px; margin-bottom:20px; text-align:left; font-size:13px; line-height:1.8;">
+      <div id="sleepIncludeInfo" style="color:var(--accent2);"></div>
+      <div id="sleepExcludeInfo" style="color:var(--dim);"></div>
+    </div>
+    <div class="modal-foot" style="justify-content:center; gap:12px;">
+      <button class="btn-ghost" id="sleepExcludeBtn"></button>
+      <button class="btn-primary" id="sleepIncludeBtn"></button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/gridstack@9.5.0/dist/gridstack-all.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -1130,6 +1147,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
+    sleepResumeHeading: 'You were away', sleepResumeBody: '"{{title}}" was paused {{gap}} ago.\nInclude that time in the record?', sleepIncludeInfo: '⏱ Include: total recorded time becomes {{total}}', sleepExcludeInfo: '⏱ Exclude: keep current record of {{current}}', sleepIncludeBtn: 'Include', sleepExcludeBtn: 'Exclude (keep current)',
     idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} minutes, but you're still within your planned time — still recording.", openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Your name', reportTreeLabel: "Today's tasks", reportWorkNoteLabel: 'Notes', reportWorkNotePh: "Notes about today's work...", reportPersonalNoteLabel: 'Personal notes', reportPersonalNotePh: 'Anything else, not work-related...', reportCopyBtn: 'Copy as text', reportSaveBtn: 'Save', reportSaved: 'Saved.', reportCopied: 'Copied to clipboard.', reportCopyFailed: 'Could not copy — please try again.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF export is a Pro feature.',
     maxClocksAlert: 'You can add up to {{max}} digital clocks.',
     dDaySelectDate: 'Pick a date', dDayLabelPh: 'Goal name', stickyPh: 'Write a note',
@@ -1168,6 +1186,7 @@ const TRANSLATIONS = {
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
+    sleepResumeHeading: '자리를 비운 것이 감지되었어요', sleepResumeBody: '"{{title}}" 세션이 {{gap}} 전에 일시정지되었어요.\n그 동안의 시간도 기록에 포함할까요?', sleepIncludeInfo: '⏱ 포함 시: 총 기록 시간이 {{total}}이 돼요', sleepExcludeInfo: '⏱ 제외 시: 현재까지 기록된 {{current}} 유지', sleepIncludeBtn: '포함하기', sleepExcludeBtn: '제외 (현재 기록 유지)',
     idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: '이름', reportTreeLabel: '오늘 한 일', reportWorkNoteLabel: '업무 노트', reportWorkNotePh: '오늘 업무에 대한 메모...', reportPersonalNoteLabel: '개인 노트', reportPersonalNotePh: '업무 외 메모...', reportCopyBtn: '텍스트로 복사', reportSaveBtn: '저장', reportSaved: '저장되었습니다.', reportCopied: '클립보드에 복사되었습니다.', reportCopyFailed: '복사에 실패했습니다. 다시 시도해주세요.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF 내보내기는 Pro 전용 기능입니다.',
     maxClocksAlert: '디지털시계는 최대 {{max}}개까지 추가할 수 있습니다.',
     dDaySelectDate: '날짜를 선택하세요', dDayLabelPh: '목표 이름', stickyPh: '메모를 입력하세요',
@@ -1206,6 +1225,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
+    sleepResumeHeading: 'Phát hiện vắng mặt', sleepResumeBody: 'Phiên "{{title}}" đã tạm dừng {{gap}} trước.\nBạn có muốn tính thêm khoảng thời gian đó không?', sleepIncludeInfo: '⏱ Bao gồm: tổng thời gian ghi nhận sẽ là {{total}}', sleepExcludeInfo: '⏱ Loại trừ: giữ nguyên {{current}} đã ghi nhận', sleepIncludeBtn: 'Bao gồm', sleepExcludeBtn: 'Loại trừ (giữ nguyên)',
     idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Tên của bạn', reportTreeLabel: 'Công việc hôm nay', reportWorkNoteLabel: 'Ghi chú công việc', reportWorkNotePh: 'Ghi chú về công việc hôm nay...', reportPersonalNoteLabel: 'Ghi chú cá nhân', reportPersonalNotePh: 'Những việc khác, không liên quan công việc...', reportCopyBtn: 'Sao chép văn bản', reportSaveBtn: 'Lưu', reportSaved: 'Đã lưu.', reportCopied: 'Đã sao chép vào clipboard.', reportCopyFailed: 'Không thể sao chép — vui lòng thử lại.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'Xuất PDF là tính năng Pro.',
     maxClocksAlert: 'Bạn chỉ có thể thêm tối đa {{max}} đồng hồ số.',
     dDaySelectDate: 'Chọn một ngày', dDayLabelPh: 'Tên mục tiêu', stickyPh: 'Nhập ghi chú',
@@ -1816,7 +1836,12 @@ function renderTodos() {
     });
 }
 
+const LAST_SEEN_KEY = 'sproutWork_lastSeen';
+let tickCount = 0;
+
 function tick() {
+  tickCount++;
+  if (tickCount % 60 === 0) localStorage.setItem(LAST_SEEN_KEY, Date.now());
   checkDateRollover();
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (active) {
@@ -1842,6 +1867,91 @@ function tick() {
   renderTree();
   checkIdle();
 }
+
+/* ---------- sleep / computer-off resume ---------- */
+let sleepResumeSession = null;
+
+function fmtGap(ms) {
+  const totalMin = Math.round(ms / 60000);
+  if (totalMin < 60) return `${totalMin}${t('minUnit') || '분'}`;
+  const h = Math.floor(totalMin / 60), m = totalMin % 60;
+  return m > 0 ? `${h}${t('hourUnit') || '시간'} ${m}${t('minUnit') || '분'}` : `${h}${t('hourUnit') || '시간'}`;
+}
+
+function findSleepPausedSession(lastSeenMs) {
+  // Look for a paused session whose last focus interval closed within 60s of lastSeenMs
+  let best = null, bestDiff = Infinity;
+  for (const s of Object.values(state.sessions)) {
+    if (s.status !== 'paused') continue;
+    const focusIvs = s.intervals.filter(iv => iv.type === 'focus' && iv.end !== null);
+    if (!focusIvs.length) continue;
+    const lastEnd = focusIvs[focusIvs.length - 1].end;
+    const diff = Math.abs(lastEnd - lastSeenMs);
+    if (diff < 60000 && diff < bestDiff) { best = s; bestDiff = diff; }
+  }
+  return best;
+}
+
+function showSleepResumeModal(session, gapMs, lastSeenMs) {
+  sleepResumeSession = session;
+  const overlay = document.getElementById('sleepResumeOverlay');
+  const gapStr = fmtGap(gapMs);
+  const currentSec = focusSeconds(session);
+
+  // what total would be if we include the gap
+  const totalSec = currentSec + gapMs / 1000;
+
+  document.getElementById('sleepResumeTitle').textContent = t('sleepResumeHeading');
+  document.getElementById('sleepResumeBody').textContent =
+    t('sleepResumeBody').replace('{{title}}', session.title).replace('{{gap}}', gapStr);
+  document.getElementById('sleepIncludeInfo').textContent =
+    t('sleepIncludeInfo').replace('{{total}}', fmtShort(totalSec));
+  document.getElementById('sleepExcludeInfo').textContent =
+    t('sleepExcludeInfo').replace('{{current}}', fmtShort(currentSec));
+
+  document.getElementById('sleepIncludeBtn').textContent = t('sleepIncludeBtn');
+  document.getElementById('sleepExcludeBtn').textContent = t('sleepExcludeBtn');
+
+  overlay.style.display = 'flex';
+}
+
+function includeSleepTime() {
+  const session = sleepResumeSession;
+  if (!session) return;
+  // Remove the trailing pause interval added by checkIdle
+  const last = session.intervals[session.intervals.length - 1];
+  if (last && last.type === 'pause' && last.end === null) session.intervals.pop();
+  // Re-open the last focus interval
+  const fi = session.intervals[session.intervals.length - 1];
+  if (fi && fi.type === 'focus') fi.end = null;
+  // Restore active state
+  session.status = 'active';
+  session.alarmNextAt = null;
+  state.activeId = session.id;
+  state.waitingIds = state.waitingIds.filter(id => id !== session.id);
+  closeSleepResumeModal();
+  persist('sleep_resume_include');
+  render();
+}
+
+function closeSleepResumeModal() {
+  document.getElementById('sleepResumeOverlay').style.display = 'none';
+  localStorage.removeItem(LAST_SEEN_KEY);
+  sleepResumeSession = null;
+}
+
+function checkSleepResume() {
+  const lastSeen = parseInt(localStorage.getItem(LAST_SEEN_KEY) || '0');
+  if (!lastSeen) return;
+  const gapMs = Date.now() - lastSeen;
+  if (gapMs < 2 * 60 * 1000) { localStorage.removeItem(LAST_SEEN_KEY); return; }
+  const candidate = findSleepPausedSession(lastSeen);
+  if (!candidate) { localStorage.removeItem(LAST_SEEN_KEY); return; }
+  showSleepResumeModal(candidate, gapMs, lastSeen);
+}
+
+document.getElementById('sleepIncludeBtn').addEventListener('click', includeSleepTime);
+document.getElementById('sleepExcludeBtn').addEventListener('click', closeSleepResumeModal);
 
 /* ---------- idle detection (15min) ---------- */
 let IDLE_LIMIT_MS = 15 * 60 * 1000;
@@ -3700,6 +3810,7 @@ function startApp() {
   setInterval(tick, 1000);
   setInterval(updateLiveWidgets, 1000);
   setInterval(updateMiniStats, 30000);
+  checkSleepResume();
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
