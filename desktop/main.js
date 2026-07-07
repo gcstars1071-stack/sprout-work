@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, Notification, ipcMain, nativeImage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, Notification, ipcMain, nativeImage, powerMonitor } = require('electron');
 const path = require('path');
 
 let mainWindow = null;
@@ -59,6 +59,13 @@ function showAndFocus() {
 }
 
 // renderer asks us to surface a real OS notification + pop the window forward
+// renderer polls this to get true OS-wide idle time (in seconds). This works even
+// when the user is active in a *different* application — unlike in-tab input events,
+// which only fire while the Sprout Work window itself has focus.
+ipcMain.handle('sprout-work-idle-time', () => {
+  try { return powerMonitor.getSystemIdleTime(); } catch (e) { return null; }
+});
+
 ipcMain.on('sprout-work-notify', (event, { title, body }) => {
   try {
     new Notification({

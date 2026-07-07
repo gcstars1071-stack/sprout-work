@@ -1960,6 +1960,25 @@ let idleSnoozeUntil = 0;
 let idleNextNudgeAt = 0;
 let idleWarnNextAt = 0;
 
+// On the desktop app we can read the *real* OS-wide idle time, which stays accurate
+// even when the user is busy in another application. In-tab input events only fire
+// while our own window has focus, so a user working in Word/an IDE would look "idle".
+let systemIdleMs = null;
+const hasDesktopIdle = !!(window.sproutWorkDesktop && window.sproutWorkDesktop.getSystemIdleTime);
+function pollSystemIdle() {
+  if (!hasDesktopIdle) return;
+  window.sproutWorkDesktop.getSystemIdleTime().then(sec => {
+    systemIdleMs = (sec == null) ? null : sec * 1000;
+  }).catch(() => { systemIdleMs = null; });
+}
+if (hasDesktopIdle) setInterval(pollSystemIdle, 2000);
+
+// how long since the user was actually active anywhere (desktop) or in-tab (web)
+function idleMs() {
+  if (systemIdleMs != null) return systemIdleMs;
+  return Date.now() - lastActivity;
+}
+
 function markActivity() {
   if (idleModalOpen) return; // don't let modal interaction mask real idle time
   lastActivity = Date.now();
@@ -1985,8 +2004,9 @@ function checkIdle() {
     return;
   }
   if (Date.now() < idleSnoozeUntil) return;
-  if (Date.now() - lastActivity < IDLE_LIMIT_MS) return;
+  if (idleMs() < IDLE_LIMIT_MS) return;
 
+  const idleSince = Date.now() - idleMs(); // timestamp of last real activity
   const active = state.activeId ? state.sessions[state.activeId] : null;
   const OVERTIME_GRACE_SECONDS = 15 * 60;
   if (active && focusSeconds(active) < active.plannedSeconds + OVERTIME_GRACE_SECONDS) {
@@ -2000,7 +2020,7 @@ function checkIdle() {
     return;
   }
   if (active) {
-    pauseSessionAt(active, lastActivity);
+    pauseSessionAt(active, idleSince);
     state.activeId = null;
     render();
   }
