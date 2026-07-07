@@ -845,6 +845,15 @@
       </div>
     </div>
 
+    <div class="settings-section" id="idleDetectorSection" style="display:none;">
+      <div class="settings-label" data-i18n="settingsSystemIdle">System-wide away detection</div>
+      <div class="settings-row" style="justify-content:space-between;">
+        <span style="font-size:13px;" id="systemIdleStatus"></span>
+        <button class="btn-ghost" id="systemIdleBtn" style="font-size:12px; padding:6px 10px;"></button>
+      </div>
+      <div style="font-size:11px; color:var(--dim); margin-top:6px; line-height:1.5;" data-i18n="settingsSystemIdleHint">Also counts activity in other apps (Chrome/Edge only). Requires a one-time permission.</div>
+    </div>
+
     <div class="settings-section">
       <div class="settings-label" data-i18n="settingsDefaultPresets">Default timer presets (minutes)</div>
       <div class="settings-row">
@@ -1064,6 +1073,7 @@ const DEFAULT_APP_SETTINGS = {
   workHourStart: 8,
   workHourEnd: 19,
   idleMinutes: 15,
+  systemIdleDetection: false, // opt-in web IdleDetector (Chromium) for system-wide away detection
   presetMinutes: [5, 15, 25],
   fontScale: 'medium',
   lang: 'en',
@@ -1141,6 +1151,7 @@ const TRANSLATIONS = {
     settingsSound: 'Notification sound', soundToggleLabel: 'Enable beep', settingsNotifyPermission: 'Browser popup notifications', notifyStatusDesktop: 'Handled by the desktop app', notifyStatusUnsupported: 'Not supported in this browser', notifyStatusGranted: 'Allowed', notifyStatusDenied: 'Blocked — enable it from your browser\'s site settings for this page', notifyStatusDefault: 'Not yet allowed', notifyTestBtn: 'Send test notification', notifyRequestBtn: 'Allow notifications', testNotifyTitle: 'Sprout Work', testNotifyBody: 'Notifications are working.',
     settingsWorkHours: 'Work hours range (for tracking paused time)', hourUnit: 'h',
     settingsIdle: 'Idle detection time', settingsDefaultPresets: 'Default timer presets (minutes)',
+    settingsSystemIdle: 'System-wide away detection', settingsSystemIdleHint: 'Also counts activity in other apps, not just this tab (Chrome/Edge only). Requires a one-time permission.', systemIdleStatusOn: 'On — using system activity', systemIdleStatusOff: 'Off — only this tab is tracked', systemIdleStatusUnsupported: 'Not supported in this browser', systemIdleEnableBtn: 'Enable', systemIdleDisableBtn: 'Turn off',
     settingsDataMgmt: 'Data management', exportData: 'Export (JSON)', resetData: 'Reset all', resetConfirm: 'Reset all Sprout Work data? This cannot be undone.',
     settingsLanguage: 'Language', thisWeekFocus: 'Focus time this week', continueWithGoogle: 'Continue with Google', authOr: 'or', authEmailPh: 'Email', authPasswordPh: 'Password', authSignup: 'Sign up', authLogin: 'Log in', authCheckEmail: 'Check your email to confirm your account.', authInvalid: 'Incorrect email or password.', authFillBoth: 'Enter both email and password.', authError: 'Something went wrong. Please try again.', customColorLabel: 'Custom', customAccentLabel: 'Accent', customAccent2Label: 'Buttons', sendFeedback: 'Send feedback', feedbackTitle: 'Send feedback', feedbackCategoryLabel: "What's this about?", feedbackBug: 'Bug', feedbackFeature: 'Improvement', feedbackWidget: 'Widget request', feedbackOther: 'Other', feedbackPh: "Tell us what happened or what you'd like to see...", feedbackSubmit: 'Send', feedbackEmpty: 'Please write a message first.', feedbackError: 'Could not send — please try again.', feedbackThanks: 'Thanks! Your feedback was sent.', upgradeToPro: '⭐ Upgrade to Pro', guestLimitTaskMsg: "You've created 5 tasks as a guest — sign up free to keep going. Everything you've done so far will be saved to your new account.", guestLimitClockoutMsg: 'Sign up free to clock out and save your work — everything you\'ve done so far will be saved to your new account.', guestProfileName: 'Guest', guestProfileHint: 'Sign up to save your work', guestSignupLink: '✍️ Sign up to save your work', deleteAccount: 'Delete account', deleteAccountConfirm: 'Deleting your account will permanently erase all of your task history. Have you downloaded a backup of your data? This cannot be undone — continue?', deleteAccountError: 'Could not delete your account — please try again or contact support.',
     overtimeStatus: 'Time is up — finish or switch tasks (reminds every 5 min)',
@@ -1180,6 +1191,7 @@ const TRANSLATIONS = {
     settingsSound: '알림 소리', soundToggleLabel: '비프음 켜기', settingsNotifyPermission: '브라우저 팝업 알림', notifyStatusDesktop: '데스크톱 앱에서 자동으로 처리됩니다', notifyStatusUnsupported: '이 브라우저에서는 지원하지 않습니다', notifyStatusGranted: '허용됨', notifyStatusDenied: '차단됨 — 브라우저의 이 사이트 설정에서 직접 허용해주세요', notifyStatusDefault: '아직 허용하지 않음', notifyTestBtn: '테스트 알림 보내기', notifyRequestBtn: '알림 허용하기', testNotifyTitle: 'Sprout Work', testNotifyBody: '알림이 정상적으로 작동합니다.',
     settingsWorkHours: '근무시간 범위 (멈춤시간 집계 기준)', hourUnit: '시',
     settingsIdle: '유휴 감지 시간', settingsDefaultPresets: '기본 타이머 프리셋 (분)',
+    settingsSystemIdle: '시스템 전체 자리비움 감지', settingsSystemIdleHint: '이 탭뿐 아니라 다른 앱에서의 활동도 감지합니다 (Chrome/Edge 전용). 최초 1회 권한 허용이 필요합니다.', systemIdleStatusOn: '켜짐 — 시스템 활동 사용', systemIdleStatusOff: '꺼짐 — 이 탭만 감지', systemIdleStatusUnsupported: '이 브라우저에서는 지원하지 않습니다', systemIdleEnableBtn: '켜기', systemIdleDisableBtn: '끄기',
     settingsDataMgmt: '데이터 관리', exportData: '내보내기 (JSON)', resetData: '전체 초기화', resetConfirm: '정말로 모든 Sprout Work 데이터를 초기화할까요? 이 작업은 되돌릴 수 없습니다.',
     settingsLanguage: '언어', thisWeekFocus: '이번주 집중시간', continueWithGoogle: 'Google로 계속하기', authOr: '또는', authEmailPh: '이메일', authPasswordPh: '비밀번호', authSignup: '회원가입', authLogin: '로그인', authCheckEmail: '이메일을 확인해서 계정을 인증해주세요.', authInvalid: '이메일 또는 비밀번호가 올바르지 않습니다.', authFillBoth: '이메일과 비밀번호를 모두 입력해주세요.', authError: '문제가 발생했습니다. 다시 시도해주세요.', customColorLabel: '직접 선택', customAccentLabel: '강조색', customAccent2Label: '버튼색', sendFeedback: '피드백 보내기', feedbackTitle: '피드백 보내기', feedbackCategoryLabel: '어떤 내용인가요?', feedbackBug: '오류 신고', feedbackFeature: '개선 제안', feedbackWidget: '위젯 요청', feedbackOther: '기타', feedbackPh: '어떤 문제가 있었는지, 또는 어떤 기능을 원하시는지 적어주세요...', feedbackSubmit: '보내기', feedbackEmpty: '내용을 먼저 입력해주세요.', feedbackError: '전송에 실패했습니다. 다시 시도해주세요.', feedbackThanks: '감사합니다! 피드백이 전송되었습니다.', upgradeToPro: '⭐ Pro로 업그레이드', guestLimitTaskMsg: '게스트로 5개의 작업을 만들었어요 — 계속하려면 무료로 가입해주세요. 지금까지의 기록은 새 계정에 그대로 저장됩니다.', guestLimitClockoutMsg: '퇴근하고 오늘 기록을 저장하려면 무료로 가입해주세요. 지금까지의 기록은 새 계정에 그대로 저장됩니다.', guestProfileName: '게스트', guestProfileHint: '가입하면 기록이 저장됩니다', guestSignupLink: '✍️ 가입하고 기록 저장하기', deleteAccount: '회원 탈퇴', deleteAccountConfirm: '계정을 삭제하면 사용자의 모든 업무 기록이 영구적으로 삭제됩니다. 기록 보관을 위해 백업 데이터를 받으셨나요? 이 작업은 되돌릴 수 없습니다. 계속하시겠어요?', deleteAccountError: '계정 삭제에 실패했습니다. 다시 시도하거나 문의해주세요.',
     overtimeStatus: '예정시간 초과 — 종료 또는 전환해주세요 (5분마다 알림)',
@@ -1219,6 +1231,7 @@ const TRANSLATIONS = {
     settingsSound: 'Âm thanh thông báo', soundToggleLabel: 'Bật âm báo', settingsNotifyPermission: 'Thông báo popup trên trình duyệt', notifyStatusDesktop: 'Được xử lý tự động bởi ứng dụng desktop', notifyStatusUnsupported: 'Trình duyệt này không hỗ trợ', notifyStatusGranted: 'Đã cho phép', notifyStatusDenied: 'Đã bị chặn — hãy cho phép trong cài đặt trang web của trình duyệt', notifyStatusDefault: 'Chưa cho phép', notifyTestBtn: 'Gửi thông báo thử', notifyRequestBtn: 'Cho phép thông báo', testNotifyTitle: 'Sprout Work', testNotifyBody: 'Thông báo đang hoạt động bình thường.',
     settingsWorkHours: 'Khung giờ làm việc (tính thời gian tạm dừng)', hourUnit: 'h',
     settingsIdle: 'Thời gian phát hiện không hoạt động', settingsDefaultPresets: 'Mốc thời gian mặc định (phút)',
+    settingsSystemIdle: 'Phát hiện vắng mặt toàn hệ thống', settingsSystemIdleHint: 'Tính cả hoạt động trong ứng dụng khác, không chỉ tab này (chỉ Chrome/Edge). Cần cấp quyền một lần.', systemIdleStatusOn: 'Bật — dùng hoạt động hệ thống', systemIdleStatusOff: 'Tắt — chỉ theo dõi tab này', systemIdleStatusUnsupported: 'Trình duyệt này không hỗ trợ', systemIdleEnableBtn: 'Bật', systemIdleDisableBtn: 'Tắt',
     settingsDataMgmt: 'Quản lý dữ liệu', exportData: 'Xuất (JSON)', resetData: 'Đặt lại tất cả', resetConfirm: 'Đặt lại toàn bộ dữ liệu Sprout Work? Không thể hoàn tác.',
     settingsLanguage: 'Ngôn ngữ', thisWeekFocus: 'Thời gian tập trung tuần này', continueWithGoogle: 'Tiếp tục với Google', authOr: 'hoặc', authEmailPh: 'Email', authPasswordPh: 'Mật khẩu', authSignup: 'Đăng ký', authLogin: 'Đăng nhập', authCheckEmail: 'Hãy kiểm tra email để xác nhận tài khoản.', authInvalid: 'Email hoặc mật khẩu không đúng.', authFillBoth: 'Vui lòng nhập cả email và mật khẩu.', authError: 'Đã xảy ra lỗi. Vui lòng thử lại.', customColorLabel: 'Tùy chỉnh', customAccentLabel: 'Màu nhấn', customAccent2Label: 'Màu nút', sendFeedback: 'Gửi phản hồi', feedbackTitle: 'Gửi phản hồi', feedbackCategoryLabel: 'Đây là về điều gì?', feedbackBug: 'Lỗi', feedbackFeature: 'Cải tiến', feedbackWidget: 'Yêu cầu tiện ích', feedbackOther: 'Khác', feedbackPh: 'Hãy cho chúng tôi biết điều gì đã xảy ra hoặc bạn muốn thấy gì...', feedbackSubmit: 'Gửi', feedbackEmpty: 'Vui lòng nhập nội dung trước.', feedbackError: 'Gửi không thành công — vui lòng thử lại.', feedbackThanks: 'Cảm ơn! Phản hồi của bạn đã được gửi.', upgradeToPro: '⭐ Nâng cấp lên Pro', guestLimitTaskMsg: 'Bạn đã tạo 5 công việc ở chế độ khách — hãy đăng ký miễn phí để tiếp tục. Mọi thứ bạn đã làm sẽ được lưu vào tài khoản mới.', guestLimitClockoutMsg: 'Hãy đăng ký miễn phí để tan ca và lưu lại công việc của bạn — mọi thứ bạn đã làm sẽ được lưu vào tài khoản mới.', guestProfileName: 'Khách', guestProfileHint: 'Đăng ký để lưu công việc của bạn', guestSignupLink: '✍️ Đăng ký để lưu công việc của bạn', deleteAccount: 'Xóa tài khoản', deleteAccountConfirm: 'Xóa tài khoản sẽ xóa vĩnh viễn toàn bộ lịch sử công việc của bạn. Bạn đã tải bản sao lưu dữ liệu chưa? Không thể hoàn tác — tiếp tục?', deleteAccountError: 'Không thể xóa tài khoản — vui lòng thử lại hoặc liên hệ hỗ trợ.',
     overtimeStatus: 'Đã hết thời gian — hãy hoàn thành hoặc chuyển việc (nhắc lại mỗi 5 phút)',
@@ -1973,11 +1986,112 @@ function pollSystemIdle() {
 }
 if (hasDesktopIdle) setInterval(pollSystemIdle, 2000);
 
-// how long since the user was actually active anywhere (desktop) or in-tab (web)
+// On Chromium browsers, the opt-in Idle Detection API gives us system-wide activity
+// on the web too (activity in any app resets it). webDetectorState mirrors that.
+let webDetectorState = null; // 'active' | 'idle' | null (disabled/unsupported)
+let webIdleSince = null;     // timestamp the system went idle, when state === 'idle'
+let idleDetectorController = null;
+let idleDetectorInstance = null;
+const WEB_IDLE_THRESHOLD = 60000; // API minimum
+
+// how long since the user was actually active anywhere (desktop / web IdleDetector)
+// or, as a fallback, active inside this tab (plain web)
 function idleMs() {
-  if (systemIdleMs != null) return systemIdleMs;
-  return Date.now() - lastActivity;
+  if (systemIdleMs != null) return systemIdleMs;             // desktop powerMonitor
+  if (webDetectorState === 'active') return 0;               // system-wide active
+  if (webIdleSince != null) return Date.now() - webIdleSince;// system-wide idle since
+  return Date.now() - lastActivity;                          // in-tab only
 }
+
+function onWebIdleChange() {
+  if (!idleDetectorInstance) return;
+  const us = idleDetectorInstance.userState;
+  const ss = idleDetectorInstance.screenState;
+  if (us === 'active' && ss !== 'locked') {
+    webDetectorState = 'active';
+    webIdleSince = null;
+    lastActivity = Date.now();
+  } else {
+    webDetectorState = 'idle';
+    if (webIdleSince == null) webIdleSince = Date.now() - WEB_IDLE_THRESHOLD;
+  }
+}
+
+async function spinUpWebIdleDetector() {
+  if (!('IdleDetector' in window)) return false;
+  try {
+    if (idleDetectorController) idleDetectorController.abort();
+    idleDetectorController = new AbortController();
+    idleDetectorInstance = new IdleDetector();
+    idleDetectorInstance.addEventListener('change', onWebIdleChange);
+    await idleDetectorInstance.start({ threshold: WEB_IDLE_THRESHOLD, signal: idleDetectorController.signal });
+    onWebIdleChange(); // seed current state
+    return true;
+  } catch (e) {
+    stopWebIdleDetector();
+    return false;
+  }
+}
+
+async function enableWebIdleDetector() {
+  if (!('IdleDetector' in window)) return false;
+  try {
+    const perm = await IdleDetector.requestPermission(); // needs a user gesture
+    if (perm !== 'granted') return false;
+  } catch (e) { return false; }
+  return spinUpWebIdleDetector();
+}
+
+function stopWebIdleDetector() {
+  if (idleDetectorController) { try { idleDetectorController.abort(); } catch (e) {} }
+  idleDetectorController = null;
+  idleDetectorInstance = null;
+  webDetectorState = null;
+  webIdleSince = null;
+}
+
+// on load: if the user previously enabled it and the permission is still granted,
+// restart silently (no prompt — requestPermission is only needed to *grant*)
+function restoreWebIdleDetector() {
+  if (window.sproutWorkDesktop) return;               // desktop uses powerMonitor
+  if (!appSettings.systemIdleDetection) return;
+  if (!('IdleDetector' in window) || !navigator.permissions) { appSettings.systemIdleDetection = false; return; }
+  navigator.permissions.query({ name: 'idle-detection' }).then(res => {
+    if (res.state === 'granted') spinUpWebIdleDetector().then(renderSystemIdleUI);
+    else { appSettings.systemIdleDetection = false; saveAppSettings(); renderSystemIdleUI(); }
+  }).catch(() => {});
+}
+
+function renderSystemIdleUI() {
+  const statusEl = document.getElementById('systemIdleStatus');
+  const btnEl = document.getElementById('systemIdleBtn');
+  const section = document.getElementById('idleDetectorSection');
+  if (!statusEl || !btnEl || !section) return;
+  if (window.sproutWorkDesktop) { section.style.display = 'none'; return; } // desktop already accurate
+  section.style.display = '';
+  if (!('IdleDetector' in window)) {
+    statusEl.textContent = t('systemIdleStatusUnsupported');
+    btnEl.style.display = 'none';
+    return;
+  }
+  btnEl.style.display = '';
+  const on = appSettings.systemIdleDetection && webDetectorState != null;
+  statusEl.textContent = on ? t('systemIdleStatusOn') : t('systemIdleStatusOff');
+  btnEl.textContent = on ? t('systemIdleDisableBtn') : t('systemIdleEnableBtn');
+}
+
+document.getElementById('systemIdleBtn').addEventListener('click', async () => {
+  const on = appSettings.systemIdleDetection && webDetectorState != null;
+  if (on) {
+    stopWebIdleDetector();
+    appSettings.systemIdleDetection = false;
+  } else {
+    const ok = await enableWebIdleDetector();
+    appSettings.systemIdleDetection = ok;
+  }
+  saveAppSettings();
+  renderSystemIdleUI();
+});
 
 function markActivity() {
   if (idleModalOpen) return; // don't let modal interaction mask real idle time
@@ -2807,6 +2921,7 @@ customAccent2Input.addEventListener('input', () => {
 
 function renderSettingsUI() {
   renderNotifyPermissionUI();
+  renderSystemIdleUI();
   modeTabs.querySelectorAll('button').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.mode === themeSettings.mode);
   });
@@ -3831,6 +3946,7 @@ function startApp() {
   setInterval(updateLiveWidgets, 1000);
   setInterval(updateMiniStats, 30000);
   checkSleepResume();
+  restoreWebIdleDetector();
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
