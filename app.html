@@ -1327,6 +1327,25 @@ function persistTodos() {
   cloudSet(TODOS_KEY, todos);
 }
 
+/* ---------- dismissed plan items ----------
+   Keys of Tomorrow's-plan items the user has already handled (started as today's
+   work, or pushed to the Todo List) so they stop showing in the plan list.
+   Date-independent, like todos; keys embed the source date so they stay stable. */
+const PLAN_DISMISSED_KEY = 'sproutWork_planDismissed';
+function loadPlanDismissed() {
+  try { return new Set(JSON.parse(localStorage.getItem(PLAN_DISMISSED_KEY) || '[]')); } catch (e) { return new Set(); }
+}
+let planDismissed = loadPlanDismissed();
+function persistPlanDismissed() {
+  localStorage.setItem(PLAN_DISMISSED_KEY, JSON.stringify([...planDismissed]));
+  cloudSet(PLAN_DISMISSED_KEY, [...planDismissed]);
+}
+function dismissPlanItem(key) {
+  if (!key) return;
+  planDismissed.add(key);
+  persistPlanDismissed();
+}
+
 /* ---------- server sync seam ----------
    Right now there is no backend, so this only writes to localStorage.
    The important part: it is called once per meaningful EVENT (task started,
@@ -1594,7 +1613,7 @@ setupPresetGroup(todoPresets, todoCustomWrap, todoCustomMin, m => selectedTodoMi
 
 // opts: { title, priorFocusSeconds (carried-over elapsed time, default 0), todoId (optional, removes that todo on confirm) }
 function openConvertModal(opts) {
-  pendingConvert = { title: opts.title, priorFocusSeconds: opts.priorFocusSeconds || 0, todoId: opts.todoId || null };
+  pendingConvert = { title: opts.title, priorFocusSeconds: opts.priorFocusSeconds || 0, todoId: opts.todoId || null, planKey: opts.planKey || null };
   todoModalTitle.textContent = opts.title + (opts.priorFocusSeconds > 0.5 ? ' ' + t('alreadyAccrued', { time: fmtShort(opts.priorFocusSeconds) }) : '');
   todoOverlay.classList.add('show');
 }
@@ -1619,6 +1638,7 @@ todoModalStart.addEventListener('click', () => {
     todos = todos.filter(t => t.id !== pendingConvert.todoId);
     persistTodos();
   }
+  if (pendingConvert.planKey) dismissPlanItem(pendingConvert.planKey);
   closeTodoTimeModal();
   render();
 });
@@ -2560,19 +2580,26 @@ function buildNode(session) {
   return wrap;
 }
 
+// stable per-item key so dismissals survive re-render (embeds the source date,
+// since session ids restart from 1 each day)
+function planItemKey(dateStr, session) { return dateStr + '#' + session.id; }
+
 function renderPlan() {
+  const todayDate = todayStr;
+  const yDate = dateStrOffset(-1);
   const todayUnfinished = Object.values(state.sessions)
     .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break')
-    .map(s => ({ session: s, sessionsMap: state.sessions, label: t('todayLabel') }));
+    .map(s => ({ session: s, sessionsMap: state.sessions, label: t('todayLabel'), dateStr: todayDate }));
 
-  const yState = loadStateForDate(dateStrOffset(-1));
+  const yState = loadStateForDate(yDate);
   const yesterdayUnfinished = yState
     ? Object.values(yState.sessions)
         .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break')
-        .map(s => ({ session: s, sessionsMap: yState.sessions, label: t('yesterdayLabel') }))
+        .map(s => ({ session: s, sessionsMap: yState.sessions, label: t('yesterdayLabel'), dateStr: yDate }))
     : [];
 
   const combined = [...yesterdayUnfinished, ...todayUnfinished]
+    .filter(item => !planDismissed.has(planItemKey(item.dateStr, item.session)))
     .sort((a, b) => a.session.createdAt - b.session.createdAt);
 
   if (combined.length === 0) {
@@ -2580,7 +2607,8 @@ function renderPlan() {
     return;
   }
   planRoot.innerHTML = '';
-  combined.forEach(({ session: s, sessionsMap, label }) => {
+  combined.forEach(({ session: s, sessionsMap, label, dateStr }) => {
+    const key = planItemKey(dateStr, s);
     const row = document.createElement('div');
     row.className = 'tree-node tree-node-clickable';
     const bc = breadcrumbForIn(s, sessionsMap);
@@ -2588,7 +2616,7 @@ function renderPlan() {
     row.innerHTML = `<div class="label"><span class="icon-open">○</span><span class="txt">${escapeHtml(s.title)}</span></div><div class="meta">${meta}</div>`;
     row.title = t('setTimeTooltip');
     row.addEventListener('click', () => {
-      openConvertModal({ title: s.title, priorFocusSeconds: focusSeconds(s) });
+      openConvertModal({ title: s.title, priorFocusSeconds: focusSeconds(s), planKey: key });
     });
     // "+" — send this plan item to the Todo List without starting it
     const addBtn = document.createElement('button');
@@ -2598,8 +2626,9 @@ function renderPlan() {
     addBtn.setAttribute('aria-label', t('planAddTodo'));
     addBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const added = addTodoText(s.title);
-      if (added) { addBtn.textContent = '✓'; setTimeout(() => { addBtn.textContent = '+'; }, 900); }
+      addTodoText(s.title);        // add to Todo List (skips open duplicates)
+      dismissPlanItem(key);        // and remove it from the plan
+      render();                    // reflect both immediately
     });
     row.appendChild(addBtn);
     planRoot.appendChild(row);
@@ -3795,6 +3824,7 @@ function clearLocalAppData() {
   appSettings = loadAppSettings();
   themeSettings = loadThemeSettings();
   todos = loadTodos();
+  planDismissed = loadPlanDismissed();
 }
 async function cloudPullAll() {
   if (!currentUser) return;
@@ -3809,6 +3839,7 @@ async function cloudPullAll() {
   appSettings = loadAppSettings();
   themeSettings = loadThemeSettings();
   todos = loadTodos();
+  planDismissed = loadPlanDismissed();
 }
 function cloudPushAllFromGuest() {
   // guest signed up — push whatever they already built locally up to their brand-new account
