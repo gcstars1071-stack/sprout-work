@@ -1171,6 +1171,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
+    nativeRecordingBody: 'Recording in progress — tap to open and log your work.', overtimeNotifyBody: '"{{title}}" is still running past its planned time. Finish or switch tasks.',
     sleepResumeHeading: 'You were away', sleepResumeBody: '"{{title}}" was paused {{gap}} ago.\nInclude that time in the record?', sleepIncludeInfo: '⏱ Include: total recorded time becomes {{total}}', sleepExcludeInfo: '⏱ Exclude: keep current record of {{current}}', sleepIncludeBtn: 'Include', sleepExcludeBtn: 'Exclude (keep current)',
     idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} minutes, but you're still within your planned time — still recording.", openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Your name', reportTreeLabel: "Today's tasks", reportWorkNoteLabel: 'Notes', reportWorkNotePh: "Notes about today's work...", reportPersonalNoteLabel: 'Personal notes', reportPersonalNotePh: 'Anything else, not work-related...', reportCopyBtn: 'Copy as text', reportSaveBtn: 'Save', reportSaved: 'Saved.', reportCopied: 'Copied to clipboard.', reportCopyFailed: 'Could not copy — please try again.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF export is a Pro feature.',
     maxClocksAlert: 'You can add up to {{max}} digital clocks.',
@@ -1211,6 +1212,7 @@ const TRANSLATIONS = {
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
+    nativeRecordingBody: '기록 중 — 탭하여 열고 업무를 기록하세요.', overtimeNotifyBody: '"{{title}}" 예정 시간을 넘겨 계속 진행 중이에요. 종료 또는 전환해주세요.',
     sleepResumeHeading: '자리를 비운 것이 감지되었어요', sleepResumeBody: '"{{title}}" 세션이 {{gap}} 전에 일시정지되었어요.\n그 동안의 시간도 기록에 포함할까요?', sleepIncludeInfo: '⏱ 포함 시: 총 기록 시간이 {{total}}이 돼요', sleepExcludeInfo: '⏱ 제외 시: 현재까지 기록된 {{current}} 유지', sleepIncludeBtn: '포함하기', sleepExcludeBtn: '제외 (현재 기록 유지)',
     idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: '이름', reportTreeLabel: '오늘 한 일', reportWorkNoteLabel: '업무 노트', reportWorkNotePh: '오늘 업무에 대한 메모...', reportPersonalNoteLabel: '개인 노트', reportPersonalNotePh: '업무 외 메모...', reportCopyBtn: '텍스트로 복사', reportSaveBtn: '저장', reportSaved: '저장되었습니다.', reportCopied: '클립보드에 복사되었습니다.', reportCopyFailed: '복사에 실패했습니다. 다시 시도해주세요.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF 내보내기는 Pro 전용 기능입니다.',
     maxClocksAlert: '디지털시계는 최대 {{max}}개까지 추가할 수 있습니다.',
@@ -1251,6 +1253,7 @@ const TRANSLATIONS = {
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
+    nativeRecordingBody: 'Đang ghi nhận — chạm để mở và ghi lại công việc.', overtimeNotifyBody: '"{{title}}" vẫn đang chạy quá thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
     sleepResumeHeading: 'Phát hiện vắng mặt', sleepResumeBody: 'Phiên "{{title}}" đã tạm dừng {{gap}} trước.\nBạn có muốn tính thêm khoảng thời gian đó không?', sleepIncludeInfo: '⏱ Bao gồm: tổng thời gian ghi nhận sẽ là {{total}}', sleepExcludeInfo: '⏱ Loại trừ: giữ nguyên {{current}} đã ghi nhận', sleepIncludeBtn: 'Bao gồm', sleepExcludeBtn: 'Loại trừ (giữ nguyên)',
     idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Tên của bạn', reportTreeLabel: 'Công việc hôm nay', reportWorkNoteLabel: 'Ghi chú công việc', reportWorkNotePh: 'Ghi chú về công việc hôm nay...', reportPersonalNoteLabel: 'Ghi chú cá nhân', reportPersonalNotePh: 'Những việc khác, không liên quan công việc...', reportCopyBtn: 'Sao chép văn bản', reportSaveBtn: 'Lưu', reportSaved: 'Đã lưu.', reportCopied: 'Đã sao chép vào clipboard.', reportCopyFailed: 'Không thể sao chép — vui lòng thử lại.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'Xuất PDF là tính năng Pro.',
     maxClocksAlert: 'Bạn chỉ có thể thêm tối đa {{max}} đồng hồ số.',
@@ -1725,6 +1728,75 @@ function notify(title, body) {
   }
 }
 
+/* ---------- native background notifications (Capacitor / Android) ----------
+   The webview's JS timers freeze when the app is backgrounded or the screen is
+   off, so tick()/checkAlarm() can't fire reminders in the field. Instead, while
+   a task is active we PRE-SCHEDULE the alarms natively — the OS fires them even
+   while JS is frozen — plus an ongoing "recording" notification, and cancel them
+   when the task pauses/finishes. This is what keeps reminders alive away from a PC. */
+const N_ONGOING_ID = 90000;                 // persistent "recording" chip
+const N_ALARM_ID = 90001;                   // planned-time-reached
+const N_REMIND_BASE = 90100;                // repeating over-time reminders (base+i)
+const N_REMIND_COUNT = 8;                   // how many repeats to pre-schedule
+const N_REMIND_EVERY_MS = 5 * 60 * 1000;    // 5 min apart
+let lastNativeSig = null;
+
+function nativeLN() {
+  return (isCapacitorApp && window.Capacitor.Plugins.LocalNotifications) || null;
+}
+function nativeAllIds() {
+  const ids = [N_ONGOING_ID, N_ALARM_ID];
+  for (let i = 0; i < N_REMIND_COUNT; i++) ids.push(N_REMIND_BASE + i);
+  return ids;
+}
+function cancelNativeSchedule() {
+  const ln = nativeLN(); if (!ln) return;
+  ln.cancel({ notifications: nativeAllIds().map(id => ({ id })) }).catch(() => {});
+}
+function scheduleNativeForActive(active) {
+  const ln = nativeLN(); if (!ln) return;
+  const now = Date.now();
+  const notifs = [{
+    // ongoing, non-dismissable chip so the user always sees a task is recording
+    id: N_ONGOING_ID,
+    title: (active.category === 'break' ? '☕ ' : '⏱ ') + active.title,
+    body: t('nativeRecordingBody'),
+    ongoing: true, autoCancel: false,
+    schedule: { at: new Date(now + 500) }
+  }];
+  // planned-time-reached alarm + repeating over-time nudges, all pre-scheduled
+  const remainingMs = Math.max(0, (active.plannedSeconds - focusSeconds(active)) * 1000);
+  const alarmAt = now + remainingMs + 500;
+  notifs.push({
+    id: N_ALARM_ID,
+    title: t('alarmNotifyTitle'),
+    body: t('alarmNotifyBody', { title: active.title }),
+    schedule: { at: new Date(alarmAt) }
+  });
+  for (let i = 0; i < N_REMIND_COUNT; i++) {
+    notifs.push({
+      id: N_REMIND_BASE + i,
+      title: t('alarmNotifyTitle'),
+      body: t('overtimeNotifyBody', { title: active.title }),
+      schedule: { at: new Date(alarmAt + (i + 1) * N_REMIND_EVERY_MS) }
+    });
+  }
+  ln.schedule({ notifications: notifs }).catch(() => {});
+}
+// called from render(); only re-issues native schedules when the active-task
+// signature changes, so we don't spam the OS on every render
+function syncNativeSchedule() {
+  if (!nativeLN()) return;
+  const active = state.activeId ? state.sessions[state.activeId] : null;
+  const sig = active
+    ? active.id + ':' + Math.round(active.plannedSeconds) + ':' + Math.round(focusSeconds(active))
+    : 'none';
+  if (sig === lastNativeSig) return;
+  lastNativeSig = sig;
+  cancelNativeSchedule();
+  if (active) scheduleNativeForActive(active);
+}
+
 /* ---------- browser notification permission status (Settings panel) ---------- */
 function renderNotifyPermissionUI() {
   const statusEl = document.getElementById('notifyPermissionStatus');
@@ -1820,6 +1892,7 @@ function render() {
   renderHistoryLists();
   renderTodos();
   applyDayEndedVisuals();
+  syncNativeSchedule();
 }
 
 /* ---------- todo list ---------- */
