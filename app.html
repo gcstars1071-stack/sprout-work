@@ -1641,7 +1641,11 @@ todoModalStart.addEventListener('click', () => {
     todos = todos.filter(t => t.id !== pendingConvert.todoId);
     persistTodos();
   }
-  if (pendingConvert.planKey) dismissPlanItem(pendingConvert.planKey);
+  if (pendingConvert.planKey) {
+    dismissPlanItem(pendingConvert.planKey);            // remove the clicked plan item
+    dismissPlanItem(planItemKey(todayStr, session));    // and don't let the freshly-started
+                                                        // today session pop back into the plan
+  }
   closeTodoTimeModal();
   render();
 });
