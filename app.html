@@ -252,6 +252,16 @@
   }
   .tree-node-clickable:hover .plan-add-btn { opacity: 1; }
   .plan-add-btn:hover { background: var(--accent2); color: var(--on-accent2); }
+  #treeRoot .tree-node .label { flex: 1; min-width: 0; }
+  #treeRoot .tree-node .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tree-add-btn {
+    width: 22px; height: 22px; flex-shrink: 0; padding: 0; margin-left: 6px;
+    border-radius: 6px; background: var(--card2); color: var(--dim);
+    font-size: 14px; line-height: 1; opacity: 0;
+    transition: opacity .12s, background .12s, color .12s;
+  }
+  .tree-node:hover .tree-add-btn { opacity: .7; }
+  .tree-add-btn:hover { background: var(--accent2); color: var(--on-accent2); opacity: 1; }
   .todo-input-row { display:flex; gap:8px; margin-bottom:12px; }
   .todo-input-row input {
     flex: 1;
@@ -368,6 +378,9 @@
   .mode-tabs { display:flex; gap:8px; }
   .mode-tabs button { flex:1; background: var(--card2); color: var(--text); padding:9px 8px; font-size:13px; }
   .mode-tabs button.active { background: var(--accent2); color: var(--on-accent2); }
+  .parent-choice { display:flex; gap:8px; margin-bottom:12px; }
+  .parent-choice button { flex:1; background: var(--card2); color: var(--text); padding:9px 8px; font-size:12.5px; border-radius:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .parent-choice button.active { background: var(--accent2); color: var(--on-accent2); }
   .preset-grid { display:flex; gap:12px; flex-wrap:wrap; }
   .preset-swatch {
     width: 76px; height: 76px;
@@ -702,6 +715,10 @@
     <h2 id="modalHeading" data-i18n="modalHeadingDefault">What would you like to do?</h2>
     <div id="waitList"></div>
     <div class="modal-divider">
+      <div class="parent-choice" id="parentChoiceRow" style="display:none;">
+        <button type="button" id="parentIndependentBtn" class="active" data-i18n="parentIndependent">Independent task</button>
+        <button type="button" id="parentSubtaskBtn"></button>
+      </div>
       <input type="text" id="modalTitle" data-i18n-ph="modalTitlePh" placeholder="Enter new task title" style="width:100%; background:var(--card2); border:none; border-radius:10px; padding:12px 14px; color:var(--text); font-size:14px; margin-bottom:10px;" />
       <div class="presets freq-row" id="modalFrequent" style="margin-bottom:14px;"></div>
       <div class="presets" id="modalPresets">
@@ -1155,6 +1172,7 @@ const TRANSLATIONS = {
     widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetTodayTime: "⏱️ Today's time", todayFocusLabel: 'Focus time today', todayBreakLabel: 'Break time today', promoteDropLabel: 'Drop here to move to top level', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
     modalHeadingDefault: 'What would you like to do?', modalTitlePh: 'Enter new task title',
     modalCancel: 'Cancel', modalStartNew: 'Start new task', resumeArrow: 'Resume →', waiting: 'waiting', switchTooltip: 'Click to switch to this task', frequentTooltip: 'Click to fill in the task name', timeIsUpFlash: '⏰ Time is up!',
+    parentIndependent: 'Independent task', parentSubtaskOf: 'Subtask of "{{title}}"', addSubtask: 'Add a subtask',
     waitEmpty: 'No tasks waiting', idleHeading: 'No activity for {{min}} min. What were you doing?', idleSnooze: 'Ask again in 5 min',
     todoModalHeading: 'Set a time to add as a task', todoModalStart: 'Start task', alreadyAccrued: '(already {{time}} logged)', setTimeTooltip: 'Click to set a time and add as a task',
     statsTitle: 'My focus history', statsWeek: 'This week', statsMonth: 'This month', statsYear: 'This year',
@@ -1196,6 +1214,7 @@ const TRANSLATIONS = {
     widgetDday: '📅 D-Day 카운트다운', widgetQuote: '💬 오늘의 한마디', widgetMinistats: '📊 미니 통계 카드', widgetTodayTime: '⏱️ 오늘의 시간', todayFocusLabel: '오늘 집중시간', todayBreakLabel: '오늘 휴식시간', promoteDropLabel: '여기에 놓으면 최상위로 이동', widgetAd: '📢 광고 영역', adNotConfigured: '광고 영역 — 코드에 AdSense 게시자/슬롯 ID를 입력하세요.', adDesktopUnavailable: '광고는 웹 버전에서만 사용할 수 있습니다 (데스크톱 앱 제외).',
     modalHeadingDefault: '무엇을 할까요?', modalTitlePh: '새 업무 제목 입력',
     modalCancel: '취소', modalStartNew: '새 업무 시작', resumeArrow: '복귀 →', waiting: '대기', switchTooltip: '클릭하여 이 업무로 전환', frequentTooltip: '클릭하여 업무명 입력', timeIsUpFlash: '⏰ 시간 초과!',
+    parentIndependent: '독립 작업', parentSubtaskOf: '"{{title}}"의 하위작업', addSubtask: '하위작업 추가',
     waitEmpty: '대기 중인 업무가 없습니다', idleHeading: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨나요?', idleSnooze: '5분 후 다시 묻기',
     todoModalHeading: '시간을 설정해 작업으로 추가', todoModalStart: '작업 시작', alreadyAccrued: '(이미 {{time}} 누적됨)', setTimeTooltip: '클릭하여 시간을 설정해 업무로 추가',
     statsTitle: '나의 집중 기록', statsWeek: '이번주', statsMonth: '이번달', statsYear: '올해',
@@ -1237,6 +1256,7 @@ const TRANSLATIONS = {
     widgetDday: '📅 Đếm ngược D-Day', widgetQuote: '💬 Câu nói hôm nay', widgetMinistats: '📊 Thẻ thống kê nhỏ', widgetTodayTime: '⏱️ Thời gian hôm nay', todayFocusLabel: 'Thời gian tập trung hôm nay', todayBreakLabel: 'Thời gian nghỉ hôm nay', promoteDropLabel: 'Thả vào đây để đưa lên cấp cao nhất', widgetAd: '📢 Ô quảng cáo', adNotConfigured: 'Ô quảng cáo — nhập ID nhà xuất bản/ID đơn vị AdSense trong mã nguồn.', adDesktopUnavailable: 'Quảng cáo chỉ khả dụng ở phiên bản web (không có ở ứng dụng desktop).',
     modalHeadingDefault: 'Bạn muốn làm gì?', modalTitlePh: 'Nhập tên công việc mới',
     modalCancel: 'Hủy', modalStartNew: 'Bắt đầu việc mới', resumeArrow: 'Tiếp tục →', waiting: 'đang chờ', switchTooltip: 'Nhấp để chuyển sang việc này', frequentTooltip: 'Nhấp để điền tên công việc', timeIsUpFlash: '⏰ Hết giờ!',
+    parentIndependent: 'Việc độc lập', parentSubtaskOf: 'Việc con của "{{title}}"', addSubtask: 'Thêm việc con',
     waitEmpty: 'Không có việc đang chờ', idleHeading: 'Không có hoạt động trong {{min}} phút. Bạn đã làm gì?', idleSnooze: 'Hỏi lại sau 5 phút',
     todoModalHeading: 'Đặt thời gian để thêm thành công việc', todoModalStart: 'Bắt đầu', alreadyAccrued: '(đã tích lũy {{time}})', setTimeTooltip: 'Nhấp để đặt thời gian và thêm thành công việc',
     statsTitle: 'Lịch sử tập trung', statsWeek: 'Tuần này', statsMonth: 'Tháng này', statsYear: 'Năm này',
@@ -1573,6 +1593,37 @@ const modalCustomWrap = document.getElementById('modalCustomWrap');
 const modalCustomMin = document.getElementById('modalCustomMin');
 const modalStartNew = document.getElementById('modalStartNew');
 const modalCancel = document.getElementById('modalCancel');
+
+// Parent-choice state for the start modal: lets the user decide whether a new task
+// is independent (top-level) or a subtask of a specific existing task.
+const parentChoiceRow = document.getElementById('parentChoiceRow');
+const parentIndependentBtn = document.getElementById('parentIndependentBtn');
+const parentSubtaskBtn = document.getElementById('parentSubtaskBtn');
+let modalParentCandidate = null; // { id, title } — the task offered as a possible parent
+let modalParentChoice = null;    // null = independent; otherwise the candidate's id
+
+function setModalParentChoice(choice) {
+  modalParentChoice = choice;
+  parentIndependentBtn.classList.toggle('active', choice === null);
+  parentSubtaskBtn.classList.toggle('active', choice !== null);
+}
+
+// candidate: { id, title } or null; defaultSubtask: start with the subtask option selected
+function setupParentChoice(candidate, defaultSubtask) {
+  modalParentCandidate = candidate;
+  if (!candidate) {
+    parentChoiceRow.style.display = 'none';
+    modalParentChoice = null;
+    return;
+  }
+  parentChoiceRow.style.display = 'flex';
+  parentIndependentBtn.textContent = t('parentIndependent');
+  parentSubtaskBtn.textContent = t('parentSubtaskOf', { title: candidate.title });
+  parentSubtaskBtn.title = parentSubtaskBtn.textContent;
+  setModalParentChoice(defaultSubtask ? candidate.id : null);
+}
+parentIndependentBtn.addEventListener('click', () => setModalParentChoice(null));
+parentSubtaskBtn.addEventListener('click', () => setModalParentChoice(modalParentCandidate ? modalParentCandidate.id : null));
 
 const treeRoot = document.getElementById('treeRoot');
 const planCard = document.getElementById('planCard');
@@ -2374,7 +2425,10 @@ switchBtn.addEventListener('click', () => {
 const modalHeadingEl = document.getElementById('modalHeading');
 let idleModalOpen = false;
 
-function openSwitchModal(idleMode) {
+// parentCtx (optional): { id, title } — force the "subtask of this task" default,
+// used by the tree's "+ subtask" buttons. Otherwise the most-recently-paused task
+// is offered as an optional parent, defaulting to an independent (top-level) task.
+function openSwitchModal(idleMode, parentCtx) {
   idleModalOpen = !!idleMode;
   modalHeadingEl.textContent = idleMode
     ? t('idleHeading', { min: appSettings.idleMinutes })
@@ -2406,6 +2460,18 @@ function openSwitchModal(idleMode) {
   }
   modalTitleInput.value = '';
   renderFrequentTitles(document.getElementById('modalFrequent'), modalTitleInput);
+
+  // parent choice: explicit ctx from a "+ subtask" click, else offer the most
+  // recently paused task as an optional parent (defaulting to an independent task)
+  if (parentCtx) {
+    setupParentChoice({ id: parentCtx.id, title: parentCtx.title }, true);
+  } else if (state.waitingIds.length) {
+    const cand = state.sessions[state.waitingIds[state.waitingIds.length - 1]];
+    setupParentChoice(cand ? { id: cand.id, title: cand.title } : null, false);
+  } else {
+    setupParentChoice(null, false);
+  }
+
   overlay.classList.add('show');
   setTimeout(() => modalTitleInput.focus(), 50);
 }
@@ -2504,8 +2570,8 @@ document.getElementById('breakBtnModal').addEventListener('click', () => {
 modalStartNew.addEventListener('click', () => {
   const title = modalTitleInput.value.trim();
   if (!title) { modalTitleInput.focus(); return; }
-  // parent = the most recently waiting session, if any (branch off it); else null
-  const parentId = state.waitingIds.length ? state.waitingIds[state.waitingIds.length - 1] : null;
+  // parent comes from the explicit choice (independent = null, or subtask of a task)
+  const parentId = (modalParentChoice && state.sessions[modalParentChoice]) ? modalParentChoice : null;
   if (guestLimitBlocks()) { closeModal(); requireAccountForGuestLimit('task'); return; }
   resolveIdle();
   pendingRevert = null;
@@ -2686,6 +2752,25 @@ function buildNode(session) {
     row.classList.add('tree-node-clickable');
     row.title = t('switchTooltip');
     row.addEventListener('click', () => switchToSession(session));
+  }
+
+  // "+ subtask" — discoverable way to start a child task under this one
+  if (session.status !== 'cancelled') {
+    const addSubBtn = document.createElement('button');
+    addSubBtn.className = 'tree-add-btn';
+    addSubBtn.textContent = '+';
+    addSubBtn.title = t('addSubtask');
+    addSubBtn.setAttribute('aria-label', t('addSubtask'));
+    addSubBtn.draggable = false;
+    addSubBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const active = state.activeId ? state.sessions[state.activeId] : null;
+      if (active) { pendingRevert = { id: active.id, kind: 'switch' }; pauseSession(active); }
+      state.activeId = null;
+      render();
+      openSwitchModal(false, { id: session.id, title: session.title });
+    });
+    row.appendChild(addSubBtn);
   }
 
   attachTreeDragHandlers(row, session);
