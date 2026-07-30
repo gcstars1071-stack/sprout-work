@@ -1144,7 +1144,7 @@ const TRANSLATIONS = {
     myStats: 'My focus history', logout: 'Log out', logoutAlert: 'Logging out will be available once Google sign-in is connected. (Coming soon)',
     finishBtn: 'Finish', finishBreakBtn: 'Finish', switchBtn: 'Switch', cancelTask: 'Cancel', cancelledLabel: 'Cancelled',
     startQuestion: 'What will you focus on now?', startTitlePh: 'e.g. Draft the report',
-    presetCustom: 'Custom', customMinUnit: 'm', secUnit: 's', startBtn: 'Start', breakBtn: 'Start break',
+    presetCustom: 'Custom', customMinUnit: 'm', secUnit: 's', durHourUnit: 'h', startBtn: 'Start', breakBtn: 'Start break',
     clockOut: 'Clock out', clockIn: 'Clock in', leaveMsg: 'Great work today 👋',
     treeTitle: "Today's task tree", planTitle: "Tomorrow's plan (unfinished)", planEmpty: 'Nothing unfinished to carry over', planAddTodo: 'Add to Todo List',
     yesterdayTitle: 'Done yesterday', todayTitle: 'Done today', emptyToday: 'No tasks recorded yet', emptyYesterday: 'No tasks recorded yesterday',
@@ -1155,7 +1155,7 @@ const TRANSLATIONS = {
     widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetTodayTime: "⏱️ Today's time", todayFocusLabel: 'Focus time today', todayBreakLabel: 'Break time today', promoteDropLabel: 'Drop here to move to top level', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
     modalHeadingDefault: 'What would you like to do?', modalTitlePh: 'Enter new task title',
     modalCancel: 'Cancel', modalStartNew: 'Start new task', resumeArrow: 'Resume →', waiting: 'waiting', switchTooltip: 'Click to switch to this task', frequentTooltip: 'Click to fill in the task name', timeIsUpFlash: '⏰ Time is up!',
-    waitEmpty: 'No tasks waiting', idleHeading: 'No activity for {{min}} minutes. What were you doing?', idleSnooze: 'Ask again in 5 min',
+    waitEmpty: 'No tasks waiting', idleHeading: 'No activity for {{min}} min. What were you doing?', idleSnooze: 'Ask again in 5 min',
     todoModalHeading: 'Set a time to add as a task', todoModalStart: 'Start task', alreadyAccrued: '(already {{time}} logged)', setTimeTooltip: 'Click to set a time and add as a task',
     statsTitle: 'My focus history', statsWeek: 'This week', statsMonth: 'This month', statsYear: 'This year',
     statsTotalLbl: 'Total focus time', close: 'Close',
@@ -1172,8 +1172,8 @@ const TRANSLATIONS = {
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
     nativeRecordingBody: 'Recording in progress — tap to open and log your work.', overtimeNotifyBody: '"{{title}}" is still running past its planned time. Finish or switch tasks.',
-    sleepResumeHeading: 'You were away', sleepResumeBody: '"{{title}}" was paused {{gap}} ago.\nInclude that time in the record?', sleepIncludeInfo: '⏱ Include: total recorded time becomes {{total}}', sleepExcludeInfo: '⏱ Exclude: keep current record of {{current}}', sleepIncludeBtn: 'Include', sleepExcludeBtn: 'Exclude (keep current)',
-    idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} minutes. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} minutes, but you're still within your planned time — still recording.", openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Your name', reportTreeLabel: "Today's tasks", reportWorkNoteLabel: 'Notes', reportWorkNotePh: "Notes about today's work...", reportPersonalNoteLabel: 'Personal notes', reportPersonalNotePh: 'Anything else, not work-related...', reportCopyBtn: 'Copy as text', reportSaveBtn: 'Save', reportSaved: 'Saved.', reportCopied: 'Copied to clipboard.', reportCopyFailed: 'Could not copy — please try again.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF export is a Pro feature.',
+    sleepResumeHeading: 'You were away', sleepResumeBody: 'You were away from "{{title}}" for about {{gap}}.\nCount that time in the record?', sleepIncludeInfo: '⏱ Include: total recorded time becomes {{total}}', sleepExcludeInfo: '⏱ Exclude: keep current record of {{current}}', sleepIncludeBtn: 'Include', sleepExcludeBtn: 'Exclude (keep current)',
+    idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} min. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} min, but you're still within your planned time — still recording.", openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Your name', reportTreeLabel: "Today's tasks", reportWorkNoteLabel: 'Notes', reportWorkNotePh: "Notes about today's work...", reportPersonalNoteLabel: 'Personal notes', reportPersonalNotePh: 'Anything else, not work-related...', reportCopyBtn: 'Copy as text', reportSaveBtn: 'Save', reportSaved: 'Saved.', reportCopied: 'Copied to clipboard.', reportCopyFailed: 'Could not copy — please try again.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF export is a Pro feature.',
     maxClocksAlert: 'You can add up to {{max}} digital clocks.',
     dDaySelectDate: 'Pick a date', dDayLabelPh: 'Goal name', stickyPh: 'Write a note',
     locale: 'en-US', dateFmt: (y, m) => `${['January','February','March','April','May','June','July','August','September','October','November','December'][m-1]} ${y}`,
@@ -1185,7 +1185,7 @@ const TRANSLATIONS = {
     myStats: '나의 집중 기록', logout: '로그아웃', logoutAlert: '구글 계정 연동 후 로그아웃이 가능합니다. (준비 중)',
     finishBtn: '종료', finishBreakBtn: '종료', switchBtn: '전환', cancelTask: '취소', cancelledLabel: '취소됨',
     startQuestion: '지금 무엇에 집중할까요?', startTitlePh: '예: 보고서 초안 작성',
-    presetCustom: '직접입력', customMinUnit: '분', secUnit: '초', startBtn: '시작', breakBtn: '휴식 시작',
+    presetCustom: '직접입력', customMinUnit: '분', secUnit: '초', durHourUnit: '시간', startBtn: '시작', breakBtn: '휴식 시작',
     clockOut: '퇴근!', clockIn: '출근', leaveMsg: '오늘 하루도 고생하셨어요 👋',
     treeTitle: '오늘의 업무 트리', planTitle: '내일 계획 (미완료 가지)', planEmpty: '내일로 넘길 미완료 업무가 없습니다', planAddTodo: 'Todo List에 추가',
     yesterdayTitle: '어제 한 일', todayTitle: '오늘 한 일', emptyToday: '아직 기록된 업무가 없습니다', emptyYesterday: '어제는 기록된 업무가 없습니다',
@@ -1213,7 +1213,7 @@ const TRANSLATIONS = {
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
     nativeRecordingBody: '기록 중 — 탭하여 열고 업무를 기록하세요.', overtimeNotifyBody: '"{{title}}" 예정 시간을 넘겨 계속 진행 중이에요. 종료 또는 전환해주세요.',
-    sleepResumeHeading: '자리를 비운 것이 감지되었어요', sleepResumeBody: '"{{title}}" 세션이 {{gap}} 전에 일시정지되었어요.\n그 동안의 시간도 기록에 포함할까요?', sleepIncludeInfo: '⏱ 포함 시: 총 기록 시간이 {{total}}이 돼요', sleepExcludeInfo: '⏱ 제외 시: 현재까지 기록된 {{current}} 유지', sleepIncludeBtn: '포함하기', sleepExcludeBtn: '제외 (현재 기록 유지)',
+    sleepResumeHeading: '자리를 비운 것이 감지되었어요', sleepResumeBody: '"{{title}}" 작업 중 약 {{gap}} 동안 자리를 비웠어요.\n그 시간도 기록에 포함할까요?', sleepIncludeInfo: '⏱ 포함 시: 총 기록 시간이 {{total}}이 돼요', sleepExcludeInfo: '⏱ 제외 시: 현재까지 기록된 {{current}} 유지', sleepIncludeBtn: '포함하기', sleepExcludeBtn: '제외 (현재 기록 유지)',
     idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: '이름', reportTreeLabel: '오늘 한 일', reportWorkNoteLabel: '업무 노트', reportWorkNotePh: '오늘 업무에 대한 메모...', reportPersonalNoteLabel: '개인 노트', reportPersonalNotePh: '업무 외 메모...', reportCopyBtn: '텍스트로 복사', reportSaveBtn: '저장', reportSaved: '저장되었습니다.', reportCopied: '클립보드에 복사되었습니다.', reportCopyFailed: '복사에 실패했습니다. 다시 시도해주세요.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF 내보내기는 Pro 전용 기능입니다.',
     maxClocksAlert: '디지털시계는 최대 {{max}}개까지 추가할 수 있습니다.',
     dDaySelectDate: '날짜를 선택하세요', dDayLabelPh: '목표 이름', stickyPh: '메모를 입력하세요',
@@ -1226,7 +1226,7 @@ const TRANSLATIONS = {
     myStats: 'Lịch sử tập trung', logout: 'Đăng xuất', logoutAlert: 'Đăng xuất sẽ khả dụng sau khi liên kết Google. (Sắp ra mắt)',
     finishBtn: 'Xong', finishBreakBtn: 'Xong', switchBtn: 'Chuyển', cancelTask: 'Hủy', cancelledLabel: 'Đã hủy',
     startQuestion: 'Bạn sẽ tập trung vào việc gì?', startTitlePh: 'VD: Soạn báo cáo',
-    presetCustom: 'Tùy chỉnh', customMinUnit: 'phút', secUnit: 'giây', startBtn: 'Bắt đầu', breakBtn: 'Bắt đầu nghỉ',
+    presetCustom: 'Tùy chỉnh', customMinUnit: 'phút', secUnit: 'giây', durHourUnit: 'giờ', startBtn: 'Bắt đầu', breakBtn: 'Bắt đầu nghỉ',
     clockOut: 'Tan ca', clockIn: 'Vào ca', leaveMsg: 'Bạn đã làm tốt hôm nay 👋',
     treeTitle: 'Cây công việc hôm nay', planTitle: 'Kế hoạch ngày mai (chưa xong)', planEmpty: 'Không có việc tồn đọng', planAddTodo: 'Thêm vào danh sách việc',
     yesterdayTitle: 'Việc đã làm hôm qua', todayTitle: 'Việc đã làm hôm nay', emptyToday: 'Chưa có việc nào', emptyYesterday: 'Không có việc nào hôm qua',
@@ -1254,7 +1254,7 @@ const TRANSLATIONS = {
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
     nativeRecordingBody: 'Đang ghi nhận — chạm để mở và ghi lại công việc.', overtimeNotifyBody: '"{{title}}" vẫn đang chạy quá thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
-    sleepResumeHeading: 'Phát hiện vắng mặt', sleepResumeBody: 'Phiên "{{title}}" đã tạm dừng {{gap}} trước.\nBạn có muốn tính thêm khoảng thời gian đó không?', sleepIncludeInfo: '⏱ Bao gồm: tổng thời gian ghi nhận sẽ là {{total}}', sleepExcludeInfo: '⏱ Loại trừ: giữ nguyên {{current}} đã ghi nhận', sleepIncludeBtn: 'Bao gồm', sleepExcludeBtn: 'Loại trừ (giữ nguyên)',
+    sleepResumeHeading: 'Phát hiện vắng mặt', sleepResumeBody: 'Bạn đã vắng mặt khỏi "{{title}}" khoảng {{gap}}.\nTính khoảng thời gian đó vào bản ghi?', sleepIncludeInfo: '⏱ Bao gồm: tổng thời gian ghi nhận sẽ là {{total}}', sleepExcludeInfo: '⏱ Loại trừ: giữ nguyên {{current}} đã ghi nhận', sleepIncludeBtn: 'Bao gồm', sleepExcludeBtn: 'Loại trừ (giữ nguyên)',
     idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Tên của bạn', reportTreeLabel: 'Công việc hôm nay', reportWorkNoteLabel: 'Ghi chú công việc', reportWorkNotePh: 'Ghi chú về công việc hôm nay...', reportPersonalNoteLabel: 'Ghi chú cá nhân', reportPersonalNotePh: 'Những việc khác, không liên quan công việc...', reportCopyBtn: 'Sao chép văn bản', reportSaveBtn: 'Lưu', reportSaved: 'Đã lưu.', reportCopied: 'Đã sao chép vào clipboard.', reportCopyFailed: 'Không thể sao chép — vui lòng thử lại.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'Xuất PDF là tính năng Pro.',
     maxClocksAlert: 'Bạn chỉ có thể thêm tối đa {{max}} đồng hồ số.',
     dDaySelectDate: 'Chọn một ngày', dDayLabelPh: 'Tên mục tiêu', stickyPh: 'Nhập ghi chú',
@@ -1972,10 +1972,16 @@ function renderTodos() {
 
 const LAST_SEEN_KEY = 'sproutWork_lastSeen';
 let tickCount = 0;
+let lastTickAt = 0;
 
 function tick() {
   tickCount++;
-  if (tickCount % 60 === 0) localStorage.setItem(LAST_SEEN_KEY, Date.now());
+  const nowT = Date.now();
+  // if the 1-second interval didn't fire for a while, the machine was likely asleep —
+  // check for an away-gap even without a page reload (foreground sleep/wake)
+  if (lastTickAt && nowT - lastTickAt > 90000 && !sleepResumeCtx) checkSleepResume();
+  lastTickAt = nowT;
+  if (tickCount % 60 === 0) localStorage.setItem(LAST_SEEN_KEY, String(nowT));
   checkDateRollover();
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (active) {
@@ -2003,89 +2009,126 @@ function tick() {
 }
 
 /* ---------- sleep / computer-off resume ---------- */
-let sleepResumeSession = null;
+// When the machine sleeps or powers off mid-session, wall-clock time passes that the
+// app couldn't observe. We detect the gap (heartbeat frozen) and let the user decide
+// whether that away-time counts. Two real cases:
+//   • 'active'  — the session is still running with an OPEN focus interval, so the gap
+//                 is currently INCLUDED (open interval → now). Default keeps it; the
+//                 user may Exclude to trim the gap and resume from now.
+//   • 'paused'  — idle detection already paused it (closed interval near lastSeen), so
+//                 the gap is currently EXCLUDED. The user may Include to add it back.
+let sleepResumeCtx = null; // { session, mode:'active'|'paused', gapMs, lastSeenMs }
+const AWAY_THRESHOLD_MS = 2 * 60 * 1000;
 
 function fmtGap(ms) {
   const totalMin = Math.round(ms / 60000);
-  if (totalMin < 60) return `${totalMin}${t('minUnit') || '분'}`;
+  const sp = appSettings.lang === 'vi' ? ' ' : '';
+  const minU = t('customMinUnit'), hrU = t('durHourUnit'); // duration units (m/분/phút, h/시간/giờ)
+  if (totalMin < 60) return `${totalMin}${sp}${minU}`;
   const h = Math.floor(totalMin / 60), m = totalMin % 60;
-  return m > 0 ? `${h}${t('hourUnit') || '시간'} ${m}${t('minUnit') || '분'}` : `${h}${t('hourUnit') || '시간'}`;
+  return m > 0 ? `${h}${sp}${hrU} ${m}${sp}${minU}` : `${h}${sp}${hrU}`;
 }
 
-function findSleepPausedSession(lastSeenMs) {
-  // Look for a paused session whose last focus interval closed within 60s of lastSeenMs
+function findAwaySession(lastSeenMs) {
+  // 1) active session with an OPEN focus interval — the away time is currently counted
+  const active = state.activeId ? state.sessions[state.activeId] : null;
+  if (active && active.category !== 'break') {
+    const lastIv = active.intervals[active.intervals.length - 1];
+    if (lastIv && lastIv.type === 'focus' && lastIv.end === null) {
+      return { session: active, mode: 'active' };
+    }
+  }
+  // 2) a session idle-detection just paused, its last focus interval closing near lastSeen
   let best = null, bestDiff = Infinity;
   for (const s of Object.values(state.sessions)) {
-    if (s.status !== 'paused') continue;
+    if (s.status !== 'paused' || s.category === 'break') continue;
     const focusIvs = s.intervals.filter(iv => iv.type === 'focus' && iv.end !== null);
     if (!focusIvs.length) continue;
-    const lastEnd = focusIvs[focusIvs.length - 1].end;
-    const diff = Math.abs(lastEnd - lastSeenMs);
-    if (diff < 60000 && diff < bestDiff) { best = s; bestDiff = diff; }
+    const diff = Math.abs(focusIvs[focusIvs.length - 1].end - lastSeenMs);
+    if (diff < 90000 && diff < bestDiff) { best = s; bestDiff = diff; }
   }
-  return best;
+  return best ? { session: best, mode: 'paused' } : null;
 }
 
-function showSleepResumeModal(session, gapMs, lastSeenMs) {
-  sleepResumeSession = session;
-  const overlay = document.getElementById('sleepResumeOverlay');
-  const gapStr = fmtGap(gapMs);
-  const currentSec = focusSeconds(session);
-
-  // what total would be if we include the gap
-  const totalSec = currentSec + gapMs / 1000;
+function showSleepResumeModal(ctx) {
+  sleepResumeCtx = ctx;
+  const { session, mode, gapMs } = ctx;
+  const gapSec = gapMs / 1000;
+  const cur = focusSeconds(session);
+  // included/excluded totals depend on whether the gap is currently counted
+  const includedSec = mode === 'active' ? cur : cur + gapSec;
+  const excludedSec = mode === 'active' ? Math.max(0, cur - gapSec) : cur;
 
   document.getElementById('sleepResumeTitle').textContent = t('sleepResumeHeading');
   document.getElementById('sleepResumeBody').textContent =
-    t('sleepResumeBody').replace('{{title}}', session.title).replace('{{gap}}', gapStr);
+    t('sleepResumeBody').replace('{{title}}', session.title).replace('{{gap}}', fmtGap(gapMs));
   document.getElementById('sleepIncludeInfo').textContent =
-    t('sleepIncludeInfo').replace('{{total}}', fmtShort(totalSec));
+    t('sleepIncludeInfo').replace('{{total}}', fmtShort(includedSec));
   document.getElementById('sleepExcludeInfo').textContent =
-    t('sleepExcludeInfo').replace('{{current}}', fmtShort(currentSec));
-
+    t('sleepExcludeInfo').replace('{{current}}', fmtShort(excludedSec));
   document.getElementById('sleepIncludeBtn').textContent = t('sleepIncludeBtn');
   document.getElementById('sleepExcludeBtn').textContent = t('sleepExcludeBtn');
-
-  overlay.style.display = 'flex';
+  document.getElementById('sleepResumeOverlay').style.display = 'flex';
 }
 
 function includeSleepTime() {
-  const session = sleepResumeSession;
-  if (!session) return;
-  // Remove the trailing pause interval added by checkIdle
-  const last = session.intervals[session.intervals.length - 1];
-  if (last && last.type === 'pause' && last.end === null) session.intervals.pop();
-  // Re-open the last focus interval
-  const fi = session.intervals[session.intervals.length - 1];
-  if (fi && fi.type === 'focus') fi.end = null;
-  // Restore active state
-  session.status = 'active';
-  session.alarmNextAt = null;
-  state.activeId = session.id;
-  state.waitingIds = state.waitingIds.filter(id => id !== session.id);
+  const ctx = sleepResumeCtx;
+  if (!ctx) return;
+  const { session, mode } = ctx;
+  if (mode === 'paused') {
+    // reopen the closed interval and resume as active so it counts the away time
+    const last = session.intervals[session.intervals.length - 1];
+    if (last && last.type === 'pause' && last.end === null) session.intervals.pop();
+    const fi = session.intervals[session.intervals.length - 1];
+    if (fi && fi.type === 'focus') fi.end = null;
+    session.status = 'active';
+    session.alarmNextAt = null;
+    state.activeId = session.id;
+    state.waitingIds = state.waitingIds.filter(id => id !== session.id);
+  }
+  // mode 'active': the open interval already includes the gap — keep running as-is
   closeSleepResumeModal();
-  persist('sleep_resume_include');
+  persist('away_resume_include');
   render();
+}
+
+function excludeSleepTime() {
+  const ctx = sleepResumeCtx;
+  if (ctx && ctx.mode === 'active') {
+    // trim the away gap: close the running interval at lastSeen, resume a fresh one now
+    const { session, lastSeenMs } = ctx;
+    const fi = session.intervals[session.intervals.length - 1];
+    if (fi && fi.type === 'focus' && fi.end === null) {
+      fi.end = Math.max(fi.start, lastSeenMs);
+      session.intervals.push({ type: 'focus', start: Date.now(), end: null });
+    }
+    persist('away_resume_exclude');
+    render();
+  }
+  // mode 'paused': already excluded — keep it paused, nothing to change
+  closeSleepResumeModal();
 }
 
 function closeSleepResumeModal() {
   document.getElementById('sleepResumeOverlay').style.display = 'none';
-  localStorage.removeItem(LAST_SEEN_KEY);
-  sleepResumeSession = null;
+  localStorage.setItem(LAST_SEEN_KEY, String(Date.now())); // reset heartbeat so we don't re-fire
+  sleepResumeCtx = null;
+  lastActivity = Date.now(); // count the user as active now so idle doesn't immediately pounce
 }
 
 function checkSleepResume() {
+  if (sleepResumeCtx) return; // already prompting
   const lastSeen = parseInt(localStorage.getItem(LAST_SEEN_KEY) || '0');
-  if (!lastSeen) return;
+  if (!lastSeen) { localStorage.setItem(LAST_SEEN_KEY, String(Date.now())); return; }
   const gapMs = Date.now() - lastSeen;
-  if (gapMs < 2 * 60 * 1000) { localStorage.removeItem(LAST_SEEN_KEY); return; }
-  const candidate = findSleepPausedSession(lastSeen);
-  if (!candidate) { localStorage.removeItem(LAST_SEEN_KEY); return; }
-  showSleepResumeModal(candidate, gapMs, lastSeen);
+  if (gapMs < AWAY_THRESHOLD_MS) { localStorage.setItem(LAST_SEEN_KEY, String(Date.now())); return; }
+  const found = findAwaySession(lastSeen);
+  if (!found) { localStorage.setItem(LAST_SEEN_KEY, String(Date.now())); return; }
+  showSleepResumeModal({ session: found.session, mode: found.mode, gapMs, lastSeenMs: lastSeen });
 }
 
 document.getElementById('sleepIncludeBtn').addEventListener('click', includeSleepTime);
-document.getElementById('sleepExcludeBtn').addEventListener('click', closeSleepResumeModal);
+document.getElementById('sleepExcludeBtn').addEventListener('click', excludeSleepTime);
 
 /* ---------- idle detection (15min) ---------- */
 let IDLE_LIMIT_MS = 15 * 60 * 1000;
@@ -2222,10 +2265,15 @@ function markActivity() {
   document.addEventListener(evt, markActivity, { passive: true });
 });
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') markActivity();
+  if (document.visibilityState === 'visible') {
+    // returning to the tab after the machine may have slept — check the away-gap first
+    if (typeof checkSleepResume === 'function') checkSleepResume();
+    markActivity();
+  }
 });
 
 function checkIdle() {
+  if (sleepResumeCtx) return; // away-resume prompt is up — don't also pause it out from under the user
   if (state.dayEnded) return; // user explicitly clocked out — don't nag until they start something new
   const activeForIdleCheck = state.activeId ? state.sessions[state.activeId] : null;
   if (activeForIdleCheck && activeForIdleCheck.category === 'break') return; // on a break — no movement expected, don't nag
@@ -2665,7 +2713,8 @@ function renderPlan() {
   const todayDate = todayStr;
   const yDate = dateStrOffset(-1);
   const todayUnfinished = Object.values(state.sessions)
-    .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break')
+    // exclude the task you're actively working on right now — it's not a "carry-over"
+    .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break' && s.id !== state.activeId)
     .map(s => ({ session: s, sessionsMap: state.sessions, label: t('todayLabel'), dateStr: todayDate }));
 
   const yState = loadStateForDate(yDate);
