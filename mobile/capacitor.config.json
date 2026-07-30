@@ -4,6 +4,14 @@
   "webDir": "www",
   "backgroundColor": "#1a1a2e",
   "server": {
-    "androidScheme": "https"
+    "url": "https://sproutwork.xyz/app",
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#5FBF77"
+    }
   }
 }
