@@ -2712,9 +2712,13 @@ function planItemKey(dateStr, session) { return dateStr + '#' + session.id; }
 function renderPlan() {
   const todayDate = todayStr;
   const yDate = dateStrOffset(-1);
+  // the active task and its ancestors are "in progress right now", not carry-over —
+  // a parent whose child is running shouldn't show up as an unfinished plan item
+  const inProgressIds = new Set();
+  let cur = state.activeId ? state.sessions[state.activeId] : null;
+  while (cur) { inProgressIds.add(cur.id); cur = cur.parentId != null ? state.sessions[cur.parentId] : null; }
   const todayUnfinished = Object.values(state.sessions)
-    // exclude the task you're actively working on right now — it's not a "carry-over"
-    .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break' && s.id !== state.activeId)
+    .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break' && !inProgressIds.has(s.id))
     .map(s => ({ session: s, sessionsMap: state.sessions, label: t('todayLabel'), dateStr: todayDate }));
 
   const yState = loadStateForDate(yDate);
