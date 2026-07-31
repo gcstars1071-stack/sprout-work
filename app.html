@@ -357,6 +357,22 @@
   .stats-row .bar { height: 100%; background: var(--accent2); }
   .stats-row .name { width: 110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .stats-row .val { width: 70px; text-align:right; color: var(--dim); font-size: 12px; }
+  /* Focus Insights (Pro) */
+  .ins-wrap { position: relative; margin-top: 18px; border-top: 1px solid #2c2c4a; padding-top: 14px; }
+  .ins-head { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; margin-bottom:12px; }
+  .ins-pro-badge { font-size:10px; font-weight:700; letter-spacing:.04em; background:linear-gradient(90deg,#f59e0b,#e2503b); color:#fff; padding:2px 7px; border-radius:6px; }
+  .ins-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .ins-tile { background:var(--card2); border-radius:10px; padding:12px 8px; text-align:center; }
+  .ins-tile .ins-num { font-size:20px; font-weight:700; }
+  .ins-tile .ins-lbl { font-size:10.5px; color:var(--dim); margin-top:3px; line-height:1.3; }
+  .ins-sec-title { font-size:11px; color:var(--dim); margin:14px 0 6px; }
+  .ins-bars { display:flex; align-items:flex-end; gap:3px; height:56px; }
+  .ins-bars .ins-bar { flex:1; background:var(--accent2); border-radius:3px 3px 0 0; min-height:2px; position:relative; }
+  .ins-bars .ins-bar.dim { background:#3a3a5c; }
+  .ins-bars .ins-bar .ins-cap { position:absolute; bottom:-15px; left:0; right:0; text-align:center; font-size:8px; color:var(--dim); }
+  .ins-body.locked { filter: blur(5px); opacity:.5; pointer-events:none; user-select:none; }
+  .ins-lock { position:absolute; inset:40px 0 0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; }
+  .ins-lock .ins-lock-msg { font-size:13px; color:var(--text); max-width:240px; }
 
   /* settings */
   .settings-section { margin-bottom: 22px; }
@@ -796,8 +812,8 @@
 
 <!-- 나의 집중 기록 (stats) -->
 <div class="overlay" id="statsOverlay">
-  <div class="modal" style="width:440px;">
-    <h2 style="margin-bottom:14px;" data-i18n="statsTitle">My focus history</h2>
+  <div class="modal" style="width:460px; max-width:95vw; max-height:90vh; overflow-y:auto;">
+    <h2 style="margin-bottom:14px;" data-i18n="statsTitle">Focus insights</h2>
     <div class="stats-tabs" id="statsTabs">
       <button data-range="week" class="active" data-i18n="statsWeek">This week</button>
       <button data-range="month" data-i18n="statsMonth">This month</button>
@@ -808,6 +824,28 @@
       <div class="lbl" id="statsTotalLbl" data-i18n="statsTotalLbl">Total focus time</div>
     </div>
     <div id="statsBreakdown"></div>
+
+    <!-- advanced insights (Pro) -->
+    <div class="ins-wrap" id="insWrap">
+      <div class="ins-head"><span data-i18n="insTitle">Trends &amp; patterns</span><span class="ins-pro-badge" id="insProBadge">PRO</span></div>
+      <div class="ins-body" id="insBody">
+        <div class="ins-grid">
+          <div class="ins-tile"><div class="ins-num" id="insStreak">0</div><div class="ins-lbl" data-i18n="insStreak">🔥 Streak (days)</div></div>
+          <div class="ins-tile"><div class="ins-num" id="insTrend">–</div><div class="ins-lbl" data-i18n="insTrend">vs last week</div></div>
+          <div class="ins-tile"><div class="ins-num" id="insAvg">–</div><div class="ins-lbl" data-i18n="insAvg">Avg / active day</div></div>
+        </div>
+        <div class="ins-sec-title" data-i18n="insDaily">Daily focus (14 days)</div>
+        <div class="ins-bars" id="insDailyBars"></div>
+        <div class="ins-sec-title" data-i18n="insHourly">Focus by hour</div>
+        <div class="ins-bars" id="insHourly"></div>
+      </div>
+      <div class="ins-lock" id="insLock" style="display:none;">
+        <div style="font-size:26px;">🔒</div>
+        <div class="ins-lock-msg" data-i18n="insLockMsg">Unlock focus trends, streaks &amp; patterns</div>
+        <a href="upgrade.html" class="btn btn-primary" style="font-size:13px; padding:8px 18px;" data-i18n="upgradeToPro">⭐ Upgrade to Pro</a>
+      </div>
+    </div>
+
     <div class="modal-foot">
       <button class="btn-ghost" id="statsCloseBtn" data-i18n="close">Close</button>
     </div>
@@ -1237,7 +1275,8 @@ const TRANSLATIONS = {
     parentIndependent: 'Independent task', parentSubtaskOf: 'Subtask of "{{title}}"', addSubtask: 'Add a subtask',
     waitEmpty: 'No tasks waiting', idleHeading: 'No activity for {{min}} min. What were you doing?', idleSnooze: 'Ask again in 5 min',
     todoModalHeading: 'Set a time to add as a task', todoModalStart: 'Start task', alreadyAccrued: '(already {{time}} logged)', setTimeTooltip: 'Click to set a time and add as a task',
-    statsTitle: 'My focus history', statsWeek: 'This week', statsMonth: 'This month', statsYear: 'This year',
+    statsTitle: '📈 Focus insights', statsWeek: 'This week', statsMonth: 'This month', statsYear: 'This year',
+    insTitle: 'Trends & patterns', insStreak: '🔥 Streak (days)', insTrend: 'vs last week', insAvg: 'Avg / active day', insDaily: 'Daily focus (14 days)', insHourly: 'Focus by hour', insLockMsg: 'Unlock focus trends, streaks & patterns',
     statsTotalLbl: 'Total focus time', close: 'Close',
     settingsTitle: 'Settings', settingsDisplayMode: 'Display mode', modeLight: 'Light', modeDark: 'Dark', modeSystem: 'Follow system',
     settingsColorPreset: 'Color preset', settingsFontSize: 'Font size', fontSmall: 'Small', fontMedium: 'Medium', fontLarge: 'Large',
@@ -1248,7 +1287,7 @@ const TRANSLATIONS = {
     settingsDataMgmt: 'Data management', exportData: 'Export (JSON)', resetData: 'Reset all', resetConfirm: 'Reset all Sprout Work data? This cannot be undone.',
     settingsLanguage: 'Language', thisWeekFocus: 'Focus time this week', continueWithGoogle: 'Continue with Google', authOr: 'or', authEmailPh: 'Email', authPasswordPh: 'Password', authSignup: 'Sign up', authLogin: 'Log in', authCheckEmail: 'Check your email to confirm your account.', authInvalid: 'Incorrect email or password.', authFillBoth: 'Enter both email and password.', authError: 'Something went wrong. Please try again.', customColorLabel: 'Custom', customAccentLabel: 'Accent', customAccent2Label: 'Buttons', sendFeedback: 'Send feedback', feedbackTitle: 'Send feedback', feedbackCategoryLabel: "What's this about?", feedbackBug: 'Bug', feedbackFeature: 'Improvement', feedbackWidget: 'Widget request', feedbackOther: 'Other', feedbackPh: "Tell us what happened or what you'd like to see...", feedbackSubmit: 'Send', feedbackEmpty: 'Please write a message first.', feedbackError: 'Could not send — please try again.', feedbackThanks: 'Thanks! Your feedback was sent.', upgradeToPro: '⭐ Upgrade to Pro', guestLimitTaskMsg: "You've created 5 tasks as a guest — sign up free to keep going. Everything you've done so far will be saved to your new account.", guestLimitClockoutMsg: 'Sign up free to clock out and save your work — everything you\'ve done so far will be saved to your new account.', guestProfileName: 'Guest', guestProfileHint: 'Sign up to save your work', guestSignupLink: '✍️ Sign up to save your work', deleteAccount: 'Delete account', deleteAccountConfirm: 'Deleting your account will permanently erase all of your task history. Have you downloaded a backup of your data? This cannot be undone — continue?', deleteAccountError: 'Could not delete your account — please try again or contact support.',
     overtimeStatus: 'Time is up — finish or switch tasks (reminds every 5 min)',
-    pomoToggle: '🍅 Pomodoro', pomoOff: 'off', pomoPhaseWork: 'Focus', pomoPhaseBreak: 'Break', pomoCycleLabel: 'cycle {{n}}/{{total}}', pomoBreakTitle: '🍅 Break time', pomoBreakBody: 'Nice focus! Take a {{min}}-min break.', pomoLongBreakBody: 'Great set! Take a longer {{min}}-min break.', pomoFocusTitle: '🍅 Back to focus', pomoFocusBody: 'Break over — starting the next focus session.', pomoProOnly: 'Pomodoro auto-cycle is a Pro feature.', pomoSettingsLabel: '🍅 Pomodoro (Pro)', pomoWorkLbl: 'Focus', pomoBreakLbl: 'Break', pomoLongLbl: 'Long break', pomoCyclesLbl: 'Long break every',
+    pomoToggle: '🍅 Pomodoro', pomoOff: 'off', pomoPhaseWork: 'Focus', pomoPhaseBreak: 'Break', pomoCycleLabel: 'cycle {{n}}/{{total}}', pomoBreakTitle: '🍅 Break time', pomoBreakBody: 'Nice focus! Take a {{min}}-min break.', pomoLongBreakBody: 'Great set! Take a longer {{min}}-min break.', pomoFocusTitle: '🍅 Back to focus', pomoFocusBody: 'Break over — starting the next focus session.', pomoProOnly: 'Pomodoro auto-cycle is a Pro feature.', pomoSettingsLabel: '🍅 Pomodoro', pomoWorkLbl: 'Focus', pomoBreakLbl: 'Break', pomoLongLbl: 'Long break', pomoCyclesLbl: 'Long break every',
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
@@ -1281,7 +1320,8 @@ const TRANSLATIONS = {
     parentIndependent: '독립 작업', parentSubtaskOf: '"{{title}}"의 하위작업', addSubtask: '하위작업 추가',
     waitEmpty: '대기 중인 업무가 없습니다', idleHeading: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨나요?', idleSnooze: '5분 후 다시 묻기',
     todoModalHeading: '시간을 설정해 작업으로 추가', todoModalStart: '작업 시작', alreadyAccrued: '(이미 {{time}} 누적됨)', setTimeTooltip: '클릭하여 시간을 설정해 업무로 추가',
-    statsTitle: '나의 집중 기록', statsWeek: '이번주', statsMonth: '이번달', statsYear: '올해',
+    statsTitle: '📈 집중 인사이트', statsWeek: '이번주', statsMonth: '이번달', statsYear: '올해',
+    insTitle: '추세 & 패턴', insStreak: '🔥 연속 (일)', insTrend: '지난주 대비', insAvg: '집중일 평균', insDaily: '일별 집중 (14일)', insHourly: '시간대별 집중', insLockMsg: '집중 추세·연속 기록·패턴을 잠금 해제하세요',
     statsTotalLbl: '총 집중시간', close: '닫기',
     settingsTitle: '설정', settingsDisplayMode: '화면 모드', modeLight: '라이트', modeDark: '다크', modeSystem: '시스템 설정 따름',
     settingsColorPreset: '색상 프리셋', settingsFontSize: '글자 크기', fontSmall: '작게', fontMedium: '보통', fontLarge: '크게',
@@ -1292,7 +1332,7 @@ const TRANSLATIONS = {
     settingsDataMgmt: '데이터 관리', exportData: '내보내기 (JSON)', resetData: '전체 초기화', resetConfirm: '정말로 모든 Sprout Work 데이터를 초기화할까요? 이 작업은 되돌릴 수 없습니다.',
     settingsLanguage: '언어', thisWeekFocus: '이번주 집중시간', continueWithGoogle: 'Google로 계속하기', authOr: '또는', authEmailPh: '이메일', authPasswordPh: '비밀번호', authSignup: '회원가입', authLogin: '로그인', authCheckEmail: '이메일을 확인해서 계정을 인증해주세요.', authInvalid: '이메일 또는 비밀번호가 올바르지 않습니다.', authFillBoth: '이메일과 비밀번호를 모두 입력해주세요.', authError: '문제가 발생했습니다. 다시 시도해주세요.', customColorLabel: '직접 선택', customAccentLabel: '강조색', customAccent2Label: '버튼색', sendFeedback: '피드백 보내기', feedbackTitle: '피드백 보내기', feedbackCategoryLabel: '어떤 내용인가요?', feedbackBug: '오류 신고', feedbackFeature: '개선 제안', feedbackWidget: '위젯 요청', feedbackOther: '기타', feedbackPh: '어떤 문제가 있었는지, 또는 어떤 기능을 원하시는지 적어주세요...', feedbackSubmit: '보내기', feedbackEmpty: '내용을 먼저 입력해주세요.', feedbackError: '전송에 실패했습니다. 다시 시도해주세요.', feedbackThanks: '감사합니다! 피드백이 전송되었습니다.', upgradeToPro: '⭐ Pro로 업그레이드', guestLimitTaskMsg: '게스트로 5개의 작업을 만들었어요 — 계속하려면 무료로 가입해주세요. 지금까지의 기록은 새 계정에 그대로 저장됩니다.', guestLimitClockoutMsg: '퇴근하고 오늘 기록을 저장하려면 무료로 가입해주세요. 지금까지의 기록은 새 계정에 그대로 저장됩니다.', guestProfileName: '게스트', guestProfileHint: '가입하면 기록이 저장됩니다', guestSignupLink: '✍️ 가입하고 기록 저장하기', deleteAccount: '회원 탈퇴', deleteAccountConfirm: '계정을 삭제하면 사용자의 모든 업무 기록이 영구적으로 삭제됩니다. 기록 보관을 위해 백업 데이터를 받으셨나요? 이 작업은 되돌릴 수 없습니다. 계속하시겠어요?', deleteAccountError: '계정 삭제에 실패했습니다. 다시 시도하거나 문의해주세요.',
     overtimeStatus: '예정시간 초과 — 종료 또는 전환해주세요 (5분마다 알림)',
-    pomoToggle: '🍅 뽀모도로', pomoOff: '꺼짐', pomoPhaseWork: '집중', pomoPhaseBreak: '휴식', pomoCycleLabel: '{{n}}/{{total}} 사이클', pomoBreakTitle: '🍅 휴식 시간', pomoBreakBody: '집중 완료! {{min}}분 휴식하세요.', pomoLongBreakBody: '한 세트 완료! {{min}}분 긴 휴식을 가지세요.', pomoFocusTitle: '🍅 다시 집중', pomoFocusBody: '휴식 끝 — 다음 집중을 시작합니다.', pomoProOnly: '뽀모도로 자동 순환은 Pro 전용 기능입니다.', pomoSettingsLabel: '🍅 뽀모도로 (Pro)', pomoWorkLbl: '집중', pomoBreakLbl: '휴식', pomoLongLbl: '긴 휴식', pomoCyclesLbl: '긴 휴식 주기',
+    pomoToggle: '🍅 뽀모도로', pomoOff: '꺼짐', pomoPhaseWork: '집중', pomoPhaseBreak: '휴식', pomoCycleLabel: '{{n}}/{{total}} 사이클', pomoBreakTitle: '🍅 휴식 시간', pomoBreakBody: '집중 완료! {{min}}분 휴식하세요.', pomoLongBreakBody: '한 세트 완료! {{min}}분 긴 휴식을 가지세요.', pomoFocusTitle: '🍅 다시 집중', pomoFocusBody: '휴식 끝 — 다음 집중을 시작합니다.', pomoProOnly: '뽀모도로 자동 순환은 Pro 전용 기능입니다.', pomoSettingsLabel: '🍅 뽀모도로', pomoWorkLbl: '집중', pomoBreakLbl: '휴식', pomoLongLbl: '긴 휴식', pomoCyclesLbl: '긴 휴식 주기',
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
@@ -1325,7 +1365,8 @@ const TRANSLATIONS = {
     parentIndependent: 'Việc độc lập', parentSubtaskOf: 'Việc con của "{{title}}"', addSubtask: 'Thêm việc con',
     waitEmpty: 'Không có việc đang chờ', idleHeading: 'Không có hoạt động trong {{min}} phút. Bạn đã làm gì?', idleSnooze: 'Hỏi lại sau 5 phút',
     todoModalHeading: 'Đặt thời gian để thêm thành công việc', todoModalStart: 'Bắt đầu', alreadyAccrued: '(đã tích lũy {{time}})', setTimeTooltip: 'Nhấp để đặt thời gian và thêm thành công việc',
-    statsTitle: 'Lịch sử tập trung', statsWeek: 'Tuần này', statsMonth: 'Tháng này', statsYear: 'Năm này',
+    statsTitle: '📈 Thông tin tập trung', statsWeek: 'Tuần này', statsMonth: 'Tháng này', statsYear: 'Năm này',
+    insTitle: 'Xu hướng & mẫu', insStreak: '🔥 Chuỗi (ngày)', insTrend: 'so tuần trước', insAvg: 'TB / ngày làm', insDaily: 'Tập trung theo ngày (14)', insHourly: 'Tập trung theo giờ', insLockMsg: 'Mở khóa xu hướng, chuỗi & mẫu tập trung',
     statsTotalLbl: 'Tổng thời gian tập trung', close: 'Đóng',
     settingsTitle: 'Cài đặt', settingsDisplayMode: 'Chế độ hiển thị', modeLight: 'Sáng', modeDark: 'Tối', modeSystem: 'Theo hệ thống',
     settingsColorPreset: 'Bảng màu', settingsFontSize: 'Cỡ chữ', fontSmall: 'Nhỏ', fontMedium: 'Vừa', fontLarge: 'Lớn',
@@ -1336,7 +1377,7 @@ const TRANSLATIONS = {
     settingsDataMgmt: 'Quản lý dữ liệu', exportData: 'Xuất (JSON)', resetData: 'Đặt lại tất cả', resetConfirm: 'Đặt lại toàn bộ dữ liệu Sprout Work? Không thể hoàn tác.',
     settingsLanguage: 'Ngôn ngữ', thisWeekFocus: 'Thời gian tập trung tuần này', continueWithGoogle: 'Tiếp tục với Google', authOr: 'hoặc', authEmailPh: 'Email', authPasswordPh: 'Mật khẩu', authSignup: 'Đăng ký', authLogin: 'Đăng nhập', authCheckEmail: 'Hãy kiểm tra email để xác nhận tài khoản.', authInvalid: 'Email hoặc mật khẩu không đúng.', authFillBoth: 'Vui lòng nhập cả email và mật khẩu.', authError: 'Đã xảy ra lỗi. Vui lòng thử lại.', customColorLabel: 'Tùy chỉnh', customAccentLabel: 'Màu nhấn', customAccent2Label: 'Màu nút', sendFeedback: 'Gửi phản hồi', feedbackTitle: 'Gửi phản hồi', feedbackCategoryLabel: 'Đây là về điều gì?', feedbackBug: 'Lỗi', feedbackFeature: 'Cải tiến', feedbackWidget: 'Yêu cầu tiện ích', feedbackOther: 'Khác', feedbackPh: 'Hãy cho chúng tôi biết điều gì đã xảy ra hoặc bạn muốn thấy gì...', feedbackSubmit: 'Gửi', feedbackEmpty: 'Vui lòng nhập nội dung trước.', feedbackError: 'Gửi không thành công — vui lòng thử lại.', feedbackThanks: 'Cảm ơn! Phản hồi của bạn đã được gửi.', upgradeToPro: '⭐ Nâng cấp lên Pro', guestLimitTaskMsg: 'Bạn đã tạo 5 công việc ở chế độ khách — hãy đăng ký miễn phí để tiếp tục. Mọi thứ bạn đã làm sẽ được lưu vào tài khoản mới.', guestLimitClockoutMsg: 'Hãy đăng ký miễn phí để tan ca và lưu lại công việc của bạn — mọi thứ bạn đã làm sẽ được lưu vào tài khoản mới.', guestProfileName: 'Khách', guestProfileHint: 'Đăng ký để lưu công việc của bạn', guestSignupLink: '✍️ Đăng ký để lưu công việc của bạn', deleteAccount: 'Xóa tài khoản', deleteAccountConfirm: 'Xóa tài khoản sẽ xóa vĩnh viễn toàn bộ lịch sử công việc của bạn. Bạn đã tải bản sao lưu dữ liệu chưa? Không thể hoàn tác — tiếp tục?', deleteAccountError: 'Không thể xóa tài khoản — vui lòng thử lại hoặc liên hệ hỗ trợ.',
     overtimeStatus: 'Đã hết thời gian — hãy hoàn thành hoặc chuyển việc (nhắc lại mỗi 5 phút)',
-    pomoToggle: '🍅 Pomodoro', pomoOff: 'tắt', pomoPhaseWork: 'Tập trung', pomoPhaseBreak: 'Nghỉ', pomoCycleLabel: 'chu kỳ {{n}}/{{total}}', pomoBreakTitle: '🍅 Giờ nghỉ', pomoBreakBody: 'Tập trung tốt! Nghỉ {{min}} phút.', pomoLongBreakBody: 'Hoàn thành một set! Nghỉ dài {{min}} phút.', pomoFocusTitle: '🍅 Quay lại tập trung', pomoFocusBody: 'Hết giờ nghỉ — bắt đầu phiên tập trung tiếp theo.', pomoProOnly: 'Pomodoro tự động là tính năng Pro.', pomoSettingsLabel: '🍅 Pomodoro (Pro)', pomoWorkLbl: 'Tập trung', pomoBreakLbl: 'Nghỉ', pomoLongLbl: 'Nghỉ dài', pomoCyclesLbl: 'Nghỉ dài mỗi',
+    pomoToggle: '🍅 Pomodoro', pomoOff: 'tắt', pomoPhaseWork: 'Tập trung', pomoPhaseBreak: 'Nghỉ', pomoCycleLabel: 'chu kỳ {{n}}/{{total}}', pomoBreakTitle: '🍅 Giờ nghỉ', pomoBreakBody: 'Tập trung tốt! Nghỉ {{min}} phút.', pomoLongBreakBody: 'Hoàn thành một set! Nghỉ dài {{min}} phút.', pomoFocusTitle: '🍅 Quay lại tập trung', pomoFocusBody: 'Hết giờ nghỉ — bắt đầu phiên tập trung tiếp theo.', pomoProOnly: 'Pomodoro tự động là tính năng Pro.', pomoSettingsLabel: '🍅 Pomodoro', pomoWorkLbl: 'Tập trung', pomoBreakLbl: 'Nghỉ', pomoLongLbl: 'Nghỉ dài', pomoCyclesLbl: 'Nghỉ dài mỗi',
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
@@ -2148,13 +2189,12 @@ function tick() {
    phase boundary we auto-pause/resume and start/finish a break. A long break replaces
    the short one every `cyclesPerLong` completed work cycles. */
 function pomoCfg() { return appSettings.pomodoro || {}; }
-function pomoOn() { return isProUser() && state.pomo && state.pomo.on; }
+function pomoOn() { return state.pomo && state.pomo.on; }
 function pomoRemaining() {
   if (!state.pomo) return 0;
   return state.pomo.targetSec - (Date.now() - state.pomo.phaseStartMs) / 1000;
 }
 function startPomodoro(taskId) {
-  if (!isProUser()) return;
   state.pomo = {
     on: true, phase: 'work', workTaskId: taskId, completed: 0,
     targetSec: (pomoCfg().workMin || 25) * 60, phaseStartMs: Date.now()
@@ -2578,7 +2618,7 @@ startBtn.addEventListener('click', () => {
   const title = startTitleInput.value.trim();
   if (!title) { startTitleInput.focus(); return; }
   if (guestLimitBlocks()) { requireAccountForGuestLimit('task'); return; }
-  const usePomo = isProUser() && pomoCfg().enabled;
+  const usePomo = pomoCfg().enabled;
   const planned = usePomo ? (pomoCfg().workMin || 25) * 60 : selectedStartMin * 60;
   const session = createSession(title, planned, null);
   state.activeId = session.id;
@@ -2590,9 +2630,8 @@ startBtn.addEventListener('click', () => {
 function renderPomoSettings() {
   const sec = document.getElementById('pomoSettingsSection');
   if (!sec) return;
-  sec.style.opacity = isProUser() ? '1' : '0.5';
   const cfg = pomoCfg();
-  const set = (id, v) => { const el = document.getElementById(id); if (el) { el.value = v; el.disabled = !isProUser(); } };
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
   set('pomoWorkInput', cfg.workMin); set('pomoBreakInput', cfg.breakMin);
   set('pomoLongInput', cfg.longBreakMin); set('pomoCyclesInput', cfg.cyclesPerLong);
 }
@@ -2600,7 +2639,6 @@ function renderPomoSettings() {
   const el = document.getElementById(id);
   if (!el) return;
   el.addEventListener('change', () => {
-    if (!isProUser()) return;
     let v = parseInt(el.value, 10);
     if (isNaN(v)) v = pomoCfg()[key];
     v = Math.max(lo, Math.min(hi, v));
@@ -2615,14 +2653,12 @@ const pomoToggleBtn = document.getElementById('pomoToggleBtn');
 function updatePomoToggle() {
   if (!pomoToggleBtn) return;
   const cfg = pomoCfg();
-  const on = isProUser() && cfg.enabled;
+  const on = cfg.enabled;
   pomoToggleBtn.classList.toggle('on', on);
   const hint = document.getElementById('pomoToggleHint');
-  if (!isProUser()) hint.textContent = '🔒 PRO';
-  else hint.textContent = on ? `${cfg.workMin}·${cfg.breakMin}·${cfg.longBreakMin}` : t('pomoOff');
+  hint.textContent = on ? `${cfg.workMin}·${cfg.breakMin}·${cfg.longBreakMin}` : t('pomoOff');
 }
 pomoToggleBtn.addEventListener('click', () => {
-  if (!isProUser()) { window.location.href = 'upgrade.html'; return; }
   appSettings.pomodoro.enabled = !appSettings.pomodoro.enabled;
   saveAppSettings();
   updatePomoToggle();
@@ -3759,6 +3795,7 @@ document.getElementById('myStatsBtn').addEventListener('click', () => {
   profileMenu.classList.remove('show');
   statsOverlay.classList.add('show');
   renderStats();
+  renderInsights();
 });
 document.getElementById('statsCloseBtn').addEventListener('click', () => {
   statsOverlay.classList.remove('show');
@@ -3831,6 +3868,100 @@ function renderStats() {
     row.innerHTML = `<span class="name">${escapeHtml(title)}</span><span class="bar-wrap"><span class="bar" style="width:${pct}%;"></span></span><span class="val">${fmtShort(secs)}</span>`;
     statsBreakdown.appendChild(row);
   });
+}
+
+// ---- Focus Insights (Pro) ----
+// focus seconds for one day's state (non-break)
+function dayStateFocus(dayState) {
+  let total = 0;
+  Object.values((dayState && dayState.sessions) || {}).forEach(s => {
+    if (s.category !== 'break') total += focusSeconds(s);
+  });
+  return total;
+}
+function loadDayFocusMap() {
+  const map = {}; // dateStr -> focusSec
+  getAllDayKeys().forEach(k => {
+    const dStr = k.replace('sproutWork_', '');
+    let ds; if (dStr === todayStr) ds = state; else { try { ds = JSON.parse(localStorage.getItem(k)); } catch (e) { return; } }
+    map[dStr] = dayStateFocus(ds);
+  });
+  return map;
+}
+function computeInsights() {
+  const focusMap = loadDayFocusMap();
+  const today = new Date();
+  const dayStr = d => localDateStr(d);
+  // streak: consecutive days ending today (or yesterday) with focus > 0
+  let streak = 0;
+  for (let i = 0; i < 366; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const sec = focusMap[dayStr(d)] || 0;
+    if (sec > 0) streak++;
+    else if (i === 0) continue; // today not yet started — don't break the streak
+    else break;
+  }
+  // this week vs last week (rolling 7-day windows)
+  const sumWindow = (offset) => {
+    let s = 0;
+    for (let i = 0; i < 7; i++) { const d = new Date(today); d.setDate(d.getDate() - offset - i); s += focusMap[dayStr(d)] || 0; }
+    return s;
+  };
+  const thisWeek = sumWindow(0), lastWeek = sumWindow(7);
+  const trendPct = lastWeek > 0 ? Math.round(((thisWeek - lastWeek) / lastWeek) * 100) : (thisWeek > 0 ? 100 : 0);
+  // 14-day daily series
+  const daily = [];
+  for (let i = 13; i >= 0; i--) { const d = new Date(today); d.setDate(d.getDate() - i); daily.push({ date: d, sec: focusMap[dayStr(d)] || 0 }); }
+  // avg per active day (days with focus in the last 30)
+  let sum30 = 0, active30 = 0;
+  for (let i = 0; i < 30; i++) { const d = new Date(today); d.setDate(d.getDate() - i); const s = focusMap[dayStr(d)] || 0; if (s > 0) { sum30 += s; active30++; } }
+  const avgActive = active30 > 0 ? sum30 / active30 : 0;
+  // hourly distribution (last 30 days), bucket each focus interval by its start hour
+  const hourly = new Array(24).fill(0);
+  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 30);
+  getAllDayKeys().forEach(k => {
+    const dStr = k.replace('sproutWork_', '');
+    if (dStr < localDateStr(cutoff)) return;
+    let ds; if (dStr === todayStr) ds = state; else { try { ds = JSON.parse(localStorage.getItem(k)); } catch (e) { return; } }
+    Object.values((ds && ds.sessions) || {}).forEach(s => {
+      if (s.category === 'break') return;
+      (s.intervals || []).forEach(iv => {
+        if (iv.type !== 'focus') return;
+        const end = iv.end === null ? Date.now() : iv.end;
+        const h = new Date(iv.start).getHours();
+        hourly[h] += (end - iv.start) / 1000;
+      });
+    });
+  });
+  return { streak, thisWeek, lastWeek, trendPct, daily, avgActive, hourly };
+}
+function renderInsights() {
+  const wrap = document.getElementById('insWrap');
+  if (!wrap) return;
+  const pro = isProUser();
+  document.getElementById('insProBadge').style.display = pro ? 'none' : '';
+  document.getElementById('insBody').classList.toggle('locked', !pro);
+  document.getElementById('insLock').style.display = pro ? 'none' : 'flex';
+
+  const d = computeInsights();
+  document.getElementById('insStreak').textContent = d.streak;
+  const tv = document.getElementById('insTrend');
+  tv.textContent = (d.trendPct > 0 ? '+' : '') + d.trendPct + '%';
+  tv.style.color = d.trendPct > 0 ? '#22c55e' : (d.trendPct < 0 ? '#ef4444' : 'var(--dim)');
+  document.getElementById('insAvg').textContent = fmtShort(d.avgActive);
+
+  const dmax = Math.max(1, ...d.daily.map(x => x.sec));
+  document.getElementById('insDailyBars').innerHTML = d.daily.map(x => {
+    const h = Math.round((x.sec / dmax) * 100);
+    const cap = x.date.getDate();
+    return `<div class="ins-bar${x.sec === 0 ? ' dim' : ''}" style="height:${Math.max(2, h)}%" title="${localDateStr(x.date)} · ${fmtShort(x.sec)}"><span class="ins-cap">${x.date.getDay() === 1 || x.date.getDate() === 1 ? cap : ''}</span></div>`;
+  }).join('');
+
+  const hmax = Math.max(1, ...d.hourly);
+  document.getElementById('insHourly').innerHTML = d.hourly.map((s, h) => {
+    const ht = Math.round((s / hmax) * 100);
+    return `<div class="ins-bar${s === 0 ? ' dim' : ''}" style="height:${Math.max(2, ht)}%" title="${h}:00 · ${fmtShort(s)}"><span class="ins-cap">${h % 6 === 0 ? h : ''}</span></div>`;
+  }).join('');
 }
 
 /* ---------- dashboard grid (drag & resize) + widgets ---------- */
