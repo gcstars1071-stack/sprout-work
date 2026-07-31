@@ -3164,6 +3164,17 @@ const reportMsg = document.getElementById('reportMsg');
 let currentReportDate = null;
 let currentReportFocusTotal = 0;
 let currentReportBreakTotal = 0;
+let currentReportEntries = []; // flattened {session, depth} for the open report, for PDF structure
+
+// plain-text status marker (printable, no HTML) mirroring statusIcon()
+function statusIconText(s) {
+  if (s.status === 'cancelled') return '✕';
+  if (s.category === 'break') return '☕';
+  if (s.status === 'done') return '✓';
+  if (s.status === 'active') return '▶';
+  if (s.status === 'paused') return '⏸';
+  return '○';
+}
 const PDF_EXPORT_PRO_ONLY = false; // flip to true once billing is live to gate PDF export behind Pro
 
 function flattenDaySessions(dayState) {
@@ -3214,6 +3225,7 @@ function openReportModal(dStr) {
   currentReportBreakTotal = dayBreakTotal;
   reportSummaryLine.textContent = `${t('todayFocusLabel')} ${fmtShort(dayFocusTotal)} · ${t('todayBreakLabel')} ${fmtShort(dayBreakTotal)}`;
 
+  currentReportEntries = flat;
   reportTreeList.innerHTML = '';
   if (flat.length === 0) {
     reportTreeList.innerHTML = `<div class="empty-msg">${t('calendarEmpty')}</div>`;
@@ -3253,9 +3265,21 @@ document.getElementById('reportCloseBtn').addEventListener('click', () => {
   reportOverlay.classList.remove('show');
 });
 function collectReportData() {
-  const items = Array.from(reportTreeList.querySelectorAll('input[data-session-id]')).map(el => ({
-    sessionId: el.dataset.sessionId, text: el.value
-  }));
+  const entryById = {};
+  currentReportEntries.forEach(e => { entryById[e.session.id] = e; });
+  const items = Array.from(reportTreeList.querySelectorAll('input[data-session-id]')).map(el => {
+    const entry = entryById[el.dataset.sessionId];
+    const s = entry && entry.session;
+    return {
+      sessionId: el.dataset.sessionId,
+      text: el.value,
+      depth: entry ? entry.depth : 0,
+      status: s ? statusIconText(s) : '',
+      cancelled: s ? s.status === 'cancelled' : false,
+      isBreak: s ? s.category === 'break' : false,
+      timeSec: s && s.category !== 'break' ? focusSeconds(s) : 0
+    };
+  });
   return {
     name: reportNameInput.value,
     date: currentReportDate,
@@ -3299,27 +3323,57 @@ document.getElementById('reportPdfBtn').addEventListener('click', () => {
   const data = collectReportData();
   const win = window.open('', '_blank');
   if (!win) return;
-  const itemsHtml = data.items.map((it, i) => `<div style="padding:3px 0;">${i + 1}. ${escapeHtml(it.text)}</div>`).join('');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t('reportTitle')} — ${data.date}</title>
+  let num = 0;
+  const itemsHtml = data.items.map((it) => {
+    num += 1;
+    const indent = 14 + it.depth * 18;
+    const timeHtml = it.isBreak
+      ? `<span class="it-time break">☕</span>`
+      : (it.timeSec > 0 ? `<span class="it-time">${escapeHtml(fmtShort(it.timeSec))}</span>` : '');
+    const textCls = it.cancelled ? ' cancelled' : '';
+    return `<div class="item" style="padding-left:${indent}px;">
+      <span class="it-num">${num}.</span>
+      <span class="it-status">${it.status}</span>
+      <span class="it-text${textCls}">${escapeHtml(it.text)}</span>
+      ${timeHtml}
+    </div>`;
+  }).join('');
+  win.document.write(`<!DOCTYPE html><html lang="${appSettings.lang || 'en'}"><head><meta charset="UTF-8"><title>${t('reportTitle')} — ${data.date}</title>
     <style>
-      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 32px; color: #1a1a2e; }
-      h1 { font-size: 20px; margin: 0 0 4px; }
-      .meta { color: #666; font-size: 13px; margin-bottom: 4px; }
-      .summary { color: #2c7a6f; font-size: 13px; margin-bottom: 20px; }
-      h2 { font-size: 14px; margin: 24px 0 8px; border-top: 1px solid #ddd; padding-top: 16px; }
-      .note { white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
-    </style></head><body>
-    <h1>${t('reportTitle')}</h1>
-    <div class="meta">${data.date}${data.name ? ' · ' + escapeHtml(data.name) : ''}</div>
-    <div class="summary">${reportSummaryText(data)}</div>
+      @page { size: A4; margin: 18mm 16mm; }
+      * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: #1f2430; margin: 0; background: #fff; padding: 24px; }
+      .wrap { max-width: 720px; margin: 0 auto; }
+      .head { border-bottom: 2px solid #2c7a6f; padding-bottom: 12px; margin-bottom: 8px; }
+      h1 { font-size: 22px; margin: 0 0 2px; color: #1a1a2e; }
+      .meta { color: #666; font-size: 13px; }
+      .summary { display: inline-block; margin-top: 10px; background: #eafaf5; color: #1f7a6a; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px; }
+      h2 { font-size: 13px; letter-spacing: .02em; text-transform: uppercase; color: #2c7a6f; margin: 22px 0 8px; }
+      .item { display: flex; align-items: baseline; gap: 7px; font-size: 13px; line-height: 1.9; page-break-inside: avoid; border-bottom: 1px dotted #e3e3e8; }
+      .it-num { color: #999; min-width: 20px; flex-shrink: 0; text-align: right; }
+      .it-status { flex-shrink: 0; width: 14px; text-align: center; }
+      .it-text { flex: 1; color: #1f2430; }
+      .it-text.cancelled { text-decoration: line-through; color: #aaa; }
+      .it-time { flex-shrink: 0; color: #2c7a6f; font-variant-numeric: tabular-nums; font-size: 12px; }
+      .it-time.break { color: #c07a1a; }
+      .note { white-space: pre-wrap; font-size: 13px; line-height: 1.7; color: #2a2f3a; background: #f7f7fa; border-radius: 8px; padding: 12px 14px; }
+      .foot { margin-top: 28px; text-align: center; color: #bbb; font-size: 11px; }
+      @media print { .foot { position: fixed; bottom: 0; left: 0; right: 0; } }
+    </style></head><body><div class="wrap">
+    <div class="head">
+      <h1>${t('reportTitle')}</h1>
+      <div class="meta">${data.date}${data.name ? ' · ' + escapeHtml(data.name) : ''}</div>
+      <div class="summary">${reportSummaryText(data)}</div>
+    </div>
     <h2>${t('reportTreeLabel')}</h2>
-    ${itemsHtml}
+    ${itemsHtml || '<div class="item" style="padding-left:14px;border:none;color:#999;">—</div>'}
     ${data.workNote ? `<h2>${t('reportWorkNoteLabel')}</h2><div class="note">${escapeHtml(data.workNote)}</div>` : ''}
     ${data.personalNote ? `<h2>${t('reportPersonalNoteLabel')}</h2><div class="note">${escapeHtml(data.personalNote)}</div>` : ''}
-    </body></html>`);
+    <div class="foot">🌱 Sprout Work</div>
+    </div></body></html>`);
   win.document.close();
   win.focus();
-  setTimeout(() => win.print(), 300);
+  setTimeout(() => win.print(), 350);
 });
 
 /* ---------- profile menu ---------- */
