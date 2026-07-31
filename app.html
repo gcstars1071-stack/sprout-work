@@ -129,6 +129,13 @@
     margin-bottom: 14px;
   }
   .start-form input::placeholder { color: var(--dim); }
+  .nudge-banner { display:flex; align-items:center; gap:12px; margin:0 0 14px; padding:11px 16px; border-radius:12px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent2) 22%, var(--card)), var(--card)); border:1px solid color-mix(in srgb, var(--accent2) 35%, transparent); }
+  .nudge-banner .nudge-icon { font-size:18px; flex-shrink:0; }
+  .nudge-banner .nudge-text { flex:1; font-size:13.5px; color:var(--text); }
+  .nudge-banner .nudge-cta { background:var(--accent2); color:var(--on-accent2); font-size:12.5px; font-weight:600; padding:7px 14px; border-radius:8px; flex-shrink:0; }
+  .nudge-banner .nudge-close { background:transparent; color:var(--dim); font-size:14px; padding:4px 6px; flex-shrink:0; }
+  .nudge-banner .nudge-close:hover { color:var(--text); }
   .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
   .pomo-toggle { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; background:var(--card2); color:var(--text); border-radius:10px; padding:9px 12px; font-size:13px; margin-bottom:12px; }
   .pomo-toggle.on { background:#e2503b; color:#fff; }
@@ -629,6 +636,13 @@
       </div>
     </div>
     </div>
+  </div>
+
+  <div class="nudge-banner" id="nudgeBanner" style="display:none;">
+    <span class="nudge-icon" id="nudgeIcon">🔥</span>
+    <span class="nudge-text" id="nudgeText"></span>
+    <button class="nudge-cta" id="nudgeCta"></button>
+    <button class="nudge-close" id="nudgeClose" aria-label="Dismiss">✕</button>
   </div>
 
   <div class="grid-stack" id="dashboardGrid">
@@ -1276,7 +1290,7 @@ const TRANSLATIONS = {
     waitEmpty: 'No tasks waiting', idleHeading: 'No activity for {{min}} min. What were you doing?', idleSnooze: 'Ask again in 5 min',
     todoModalHeading: 'Set a time to add as a task', todoModalStart: 'Start task', alreadyAccrued: '(already {{time}} logged)', setTimeTooltip: 'Click to set a time and add as a task',
     statsTitle: '📈 Focus insights', statsWeek: 'This week', statsMonth: 'This month', statsYear: 'This year',
-    insTitle: 'Trends & patterns', insStreak: '🔥 Streak (days)', insTrend: 'vs last week', insAvg: 'Avg / active day', insDaily: 'Daily focus (14 days)', insHourly: 'Focus by hour', insLockMsg: 'Unlock focus trends, streaks & patterns',
+    insTitle: 'Trends & patterns', insStreak: '🔥 Streak (days)', insTrend: 'vs last week', insAvg: 'Avg / active day', insDaily: 'Daily focus (14 days)', insHourly: 'Focus by hour', insLockMsg: 'Unlock focus trends, streaks & patterns', nudgeWeekly: "You've focused {{total}} over {{days}} days this week 🔥", nudgeMonthly: 'Last month: {{total}} focused across {{days}} days.', nudgeSeeInsights: 'See insights →',
     statsTotalLbl: 'Total focus time', close: 'Close',
     settingsTitle: 'Settings', settingsDisplayMode: 'Display mode', modeLight: 'Light', modeDark: 'Dark', modeSystem: 'Follow system',
     settingsColorPreset: 'Color preset', settingsFontSize: 'Font size', fontSmall: 'Small', fontMedium: 'Medium', fontLarge: 'Large',
@@ -1321,7 +1335,7 @@ const TRANSLATIONS = {
     waitEmpty: '대기 중인 업무가 없습니다', idleHeading: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨나요?', idleSnooze: '5분 후 다시 묻기',
     todoModalHeading: '시간을 설정해 작업으로 추가', todoModalStart: '작업 시작', alreadyAccrued: '(이미 {{time}} 누적됨)', setTimeTooltip: '클릭하여 시간을 설정해 업무로 추가',
     statsTitle: '📈 집중 인사이트', statsWeek: '이번주', statsMonth: '이번달', statsYear: '올해',
-    insTitle: '추세 & 패턴', insStreak: '🔥 연속 (일)', insTrend: '지난주 대비', insAvg: '집중일 평균', insDaily: '일별 집중 (14일)', insHourly: '시간대별 집중', insLockMsg: '집중 추세·연속 기록·패턴을 잠금 해제하세요',
+    insTitle: '추세 & 패턴', insStreak: '🔥 연속 (일)', insTrend: '지난주 대비', insAvg: '집중일 평균', insDaily: '일별 집중 (14일)', insHourly: '시간대별 집중', insLockMsg: '집중 추세·연속 기록·패턴을 잠금 해제하세요', nudgeWeekly: '이번 주 {{days}}일 동안 {{total}} 집중했어요 🔥', nudgeMonthly: '지난달: {{days}}일간 {{total}} 집중했어요.', nudgeSeeInsights: '인사이트 보기 →',
     statsTotalLbl: '총 집중시간', close: '닫기',
     settingsTitle: '설정', settingsDisplayMode: '화면 모드', modeLight: '라이트', modeDark: '다크', modeSystem: '시스템 설정 따름',
     settingsColorPreset: '색상 프리셋', settingsFontSize: '글자 크기', fontSmall: '작게', fontMedium: '보통', fontLarge: '크게',
@@ -1366,7 +1380,7 @@ const TRANSLATIONS = {
     waitEmpty: 'Không có việc đang chờ', idleHeading: 'Không có hoạt động trong {{min}} phút. Bạn đã làm gì?', idleSnooze: 'Hỏi lại sau 5 phút',
     todoModalHeading: 'Đặt thời gian để thêm thành công việc', todoModalStart: 'Bắt đầu', alreadyAccrued: '(đã tích lũy {{time}})', setTimeTooltip: 'Nhấp để đặt thời gian và thêm thành công việc',
     statsTitle: '📈 Thông tin tập trung', statsWeek: 'Tuần này', statsMonth: 'Tháng này', statsYear: 'Năm này',
-    insTitle: 'Xu hướng & mẫu', insStreak: '🔥 Chuỗi (ngày)', insTrend: 'so tuần trước', insAvg: 'TB / ngày làm', insDaily: 'Tập trung theo ngày (14)', insHourly: 'Tập trung theo giờ', insLockMsg: 'Mở khóa xu hướng, chuỗi & mẫu tập trung',
+    insTitle: 'Xu hướng & mẫu', insStreak: '🔥 Chuỗi (ngày)', insTrend: 'so tuần trước', insAvg: 'TB / ngày làm', insDaily: 'Tập trung theo ngày (14)', insHourly: 'Tập trung theo giờ', insLockMsg: 'Mở khóa xu hướng, chuỗi & mẫu tập trung', nudgeWeekly: 'Bạn đã tập trung {{total}} trong {{days}} ngày tuần này 🔥', nudgeMonthly: 'Tháng trước: {{total}} tập trung trong {{days}} ngày.', nudgeSeeInsights: 'Xem thông tin →',
     statsTotalLbl: 'Tổng thời gian tập trung', close: 'Đóng',
     settingsTitle: 'Cài đặt', settingsDisplayMode: 'Chế độ hiển thị', modeLight: 'Sáng', modeDark: 'Tối', modeSystem: 'Theo hệ thống',
     settingsColorPreset: 'Bảng màu', settingsFontSize: 'Cỡ chữ', fontSmall: 'Nhỏ', fontMedium: 'Vừa', fontLarge: 'Lớn',
@@ -3337,7 +3351,7 @@ function statusIconText(s) {
   if (s.status === 'paused') return '⏸';
   return '○';
 }
-const PDF_EXPORT_PRO_ONLY = false; // flip to true once billing is live to gate PDF export behind Pro
+const PDF_EXPORT_PRO_ONLY = true; // PDF report export is a Pro feature (Copy-as-text stays free)
 
 function flattenDaySessions(dayState) {
   const sessionsMap = (dayState && dayState.sessions) || {};
@@ -3388,6 +3402,8 @@ function openReportModal(dStr) {
   reportSummaryLine.textContent = `${t('todayFocusLabel')} ${fmtShort(dayFocusTotal)} · ${t('todayBreakLabel')} ${fmtShort(dayBreakTotal)}`;
 
   currentReportEntries = flat;
+  const pdfBtn = document.getElementById('reportPdfBtn');
+  if (pdfBtn) pdfBtn.textContent = (PDF_EXPORT_PRO_ONLY && !isProUser()) ? t('reportPdfBtn') + ' 🔒' : t('reportPdfBtn');
   reportTreeList.innerHTML = '';
   if (flat.length === 0) {
     reportTreeList.innerHTML = `<div class="empty-msg">${t('calendarEmpty')}</div>`;
@@ -3962,6 +3978,60 @@ function renderInsights() {
     const ht = Math.round((s / hmax) * 100);
     return `<div class="ins-bar${s === 0 ? ' dim' : ''}" style="height:${Math.max(2, ht)}%" title="${h}:00 · ${fmtShort(s)}"><span class="ins-cap">${h % 6 === 0 ? h : ''}</span></div>`;
   }).join('');
+}
+
+// ---- re-engagement / upsell nudges (value-first, dismissible, rate-limited) ----
+const NUDGE_KEY = 'sproutWork_nudge';
+function loadNudgeState() { try { return JSON.parse(localStorage.getItem(NUDGE_KEY) || '{}'); } catch (e) { return {}; } }
+function saveNudgeState(s) { localStorage.setItem(NUDGE_KEY, JSON.stringify(s)); }
+function hideNudge() { const b = document.getElementById('nudgeBanner'); if (b) b.style.display = 'none'; }
+function showNudge(icon, text, cta, action) {
+  document.getElementById('nudgeIcon').textContent = icon;
+  document.getElementById('nudgeText').textContent = text;
+  const btn = document.getElementById('nudgeCta');
+  btn.textContent = cta;
+  btn.onclick = () => { hideNudge(); action(); };
+  document.getElementById('nudgeBanner').style.display = 'flex';
+}
+function openInsights(range) {
+  statsRange = range || 'week';
+  statsTabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.range === statsRange));
+  statsOverlay.classList.add('show');
+  renderStats();
+  renderInsights();
+}
+function checkNudges() {
+  if (state.dayEnded) return;
+  const banner = document.getElementById('nudgeBanner');
+  if (!banner || banner.style.display === 'flex') return;
+  const ns = loadNudgeState();
+  const now = Date.now();
+  const focusMap = loadDayFocusMap();
+  const today = new Date();
+  const thisMonth = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}`;
+
+  // (all users) monthly recap — first open of a new month, if last month had focus
+  if (ns.recapMonth !== thisMonth) {
+    const lm = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lmKey = `${lm.getFullYear()}-${pad2(lm.getMonth() + 1)}`;
+    let total = 0, days = 0;
+    Object.entries(focusMap).forEach(([d, sec]) => { if (d.startsWith(lmKey) && sec > 0) { total += sec; days++; } });
+    ns.recapMonth = thisMonth; saveNudgeState(ns); // mark regardless so it computes once/month
+    if (total > 0) {
+      showNudge('📅', t('nudgeMonthly', { total: fmtShort(total), days }), t('nudgeSeeInsights'), () => openInsights('month'));
+      return;
+    }
+  }
+
+  // (free users) weekly focus nudge — at most once / 7 days, when engaged (≥3 active days)
+  if (!isProUser() && (!ns.weeklyShownAt || ns.weeklyShownAt < now - 7 * 86400000)) {
+    let weekSec = 0, activeDays = 0;
+    for (let i = 0; i < 7; i++) { const d = new Date(today); d.setDate(d.getDate() - i); const s = focusMap[localDateStr(d)] || 0; if (s > 0) { weekSec += s; activeDays++; } }
+    if (activeDays >= 3 && weekSec > 0) {
+      showNudge('🔥', t('nudgeWeekly', { total: fmtShort(weekSec), days: activeDays }), t('nudgeSeeInsights'), () => openInsights('week'));
+      ns.weeklyShownAt = now; saveNudgeState(ns);
+    }
+  }
 }
 
 /* ---------- dashboard grid (drag & resize) + widgets ---------- */
@@ -4834,6 +4904,8 @@ function startApp() {
   checkSleepResume();
   checkBreakOverrun();
   restoreWebIdleDetector();
+  document.getElementById('nudgeClose').addEventListener('click', hideNudge);
+  setTimeout(checkNudges, 800); // after initial render settles
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
