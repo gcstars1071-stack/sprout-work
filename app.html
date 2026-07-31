@@ -996,6 +996,27 @@
   </div>
 </div>
 
+<!-- break ran long past clock-out time -->
+<div class="overlay" id="breakOverrunOverlay" style="display:none;">
+  <div class="modal" style="max-width:440px; text-align:center;">
+    <div style="font-size:28px; margin-bottom:8px;">☕</div>
+    <h2 id="breakOverrunTitle" style="margin:0 0 10px; font-size:17px;"></h2>
+    <p id="breakOverrunBody" style="font-size:14px; color:var(--dim); margin:0 0 16px; line-height:1.6;"></p>
+    <div style="background:var(--card2); border-radius:10px; padding:12px 16px; margin-bottom:16px; text-align:left; font-size:13px; line-height:1.8;">
+      <div id="breakOverrunInfo" style="color:var(--accent2);"></div>
+    </div>
+    <div id="breakCustomWrap" style="display:none; margin-bottom:16px; align-items:center; justify-content:center; gap:8px;">
+      <input type="number" id="breakCustomMin" min="0" style="width:90px; background:var(--card2); border:none; border-radius:8px; padding:9px 11px; color:var(--text); font-size:14px; text-align:center;" />
+      <span style="font-size:13px; color:var(--dim);" data-i18n="customMinUnit">min</span>
+      <button class="btn-primary" id="breakCustomApply" style="font-size:13px; padding:8px 14px;"></button>
+    </div>
+    <div class="modal-foot" style="justify-content:center; gap:12px;">
+      <button class="btn-ghost" id="breakCustomToggle"></button>
+      <button class="btn-primary" id="breakEndAtWorkBtn"></button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/gridstack@9.5.0/dist/gridstack-all.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -1201,6 +1222,7 @@ const TRANSLATIONS = {
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
     nativeRecordingBody: 'Recording in progress — tap to open and log your work.', overtimeNotifyBody: '"{{title}}" is still running past its planned time. Finish or switch tasks.',
     sleepResumeHeading: 'You were away', sleepResumeBody: 'You were away from "{{title}}" for about {{gap}}.\nCount that time in the record?', sleepIncludeInfo: '⏱ Include: total recorded time becomes {{total}}', sleepExcludeInfo: '⏱ Exclude: keep current record of {{current}}', sleepIncludeBtn: 'Include', sleepExcludeBtn: 'Exclude (keep current)',
+    breakOverrunHeading: 'Your break ran long', breakOverrunBody: 'A break has been running for {{elapsed}}, past your clock-out time ({{workEnd}}). How should it be recorded?', breakOverrunInfo: '⏱ End at {{workEnd}}: keeps {{kept}} of break, then clocks out', breakEndAtWorkBtn: 'End at {{workEnd}}', breakCustomToggle: 'Set break length', breakCustomApply: 'Apply',
     idleNotifyTitle: 'Away detected', idleNotifyBody: "No activity for {{min}} min. Let's log what you were doing.", idleWarnTitle: 'Away detected', idleWarnBody: "No activity for {{min}} min, but you're still within your planned time — still recording.", openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Your name', reportTreeLabel: "Today's tasks", reportWorkNoteLabel: 'Notes', reportWorkNotePh: "Notes about today's work...", reportPersonalNoteLabel: 'Personal notes', reportPersonalNotePh: 'Anything else, not work-related...', reportCopyBtn: 'Copy as text', reportSaveBtn: 'Save', reportSaved: 'Saved.', reportCopied: 'Copied to clipboard.', reportCopyFailed: 'Could not copy — please try again.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF export is a Pro feature.',
     maxClocksAlert: 'You can add up to {{max}} digital clocks.',
     dDaySelectDate: 'Pick a date', dDayLabelPh: 'Goal name', stickyPh: 'Write a note',
@@ -1243,6 +1265,7 @@ const TRANSLATIONS = {
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
     nativeRecordingBody: '기록 중 — 탭하여 열고 업무를 기록하세요.', overtimeNotifyBody: '"{{title}}" 예정 시간을 넘겨 계속 진행 중이에요. 종료 또는 전환해주세요.',
     sleepResumeHeading: '자리를 비운 것이 감지되었어요', sleepResumeBody: '"{{title}}" 작업 중 약 {{gap}} 동안 자리를 비웠어요.\n그 시간도 기록에 포함할까요?', sleepIncludeInfo: '⏱ 포함 시: 총 기록 시간이 {{total}}이 돼요', sleepExcludeInfo: '⏱ 제외 시: 현재까지 기록된 {{current}} 유지', sleepIncludeBtn: '포함하기', sleepExcludeBtn: '제외 (현재 기록 유지)',
+    breakOverrunHeading: '휴식이 오래 지속되었어요', breakOverrunBody: '휴식이 {{elapsed}} 동안 기록 중이고, 퇴근 시각({{workEnd}})을 넘겼어요. 어떻게 기록할까요?', breakOverrunInfo: '⏱ {{workEnd}}에 종료: 휴식 {{kept}}만 남기고 퇴근 처리', breakEndAtWorkBtn: '{{workEnd}}에 종료', breakCustomToggle: '휴식 시간 직접 입력', breakCustomApply: '적용',
     idleNotifyTitle: '자리 비움 감지', idleNotifyBody: '{{min}}분간 활동이 없었어요. 무엇을 하고 계셨는지 기록해주세요.', idleWarnTitle: '자리 비움 감지', idleWarnBody: '{{min}}분간 활동이 없지만 아직 계획 시간 이내라 기록은 계속되고 있어요.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: '이름', reportTreeLabel: '오늘 한 일', reportWorkNoteLabel: '업무 노트', reportWorkNotePh: '오늘 업무에 대한 메모...', reportPersonalNoteLabel: '개인 노트', reportPersonalNotePh: '업무 외 메모...', reportCopyBtn: '텍스트로 복사', reportSaveBtn: '저장', reportSaved: '저장되었습니다.', reportCopied: '클립보드에 복사되었습니다.', reportCopyFailed: '복사에 실패했습니다. 다시 시도해주세요.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'PDF 내보내기는 Pro 전용 기능입니다.',
     maxClocksAlert: '디지털시계는 최대 {{max}}개까지 추가할 수 있습니다.',
     dDaySelectDate: '날짜를 선택하세요', dDayLabelPh: '목표 이름', stickyPh: '메모를 입력하세요',
@@ -1285,6 +1308,7 @@ const TRANSLATIONS = {
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
     nativeRecordingBody: 'Đang ghi nhận — chạm để mở và ghi lại công việc.', overtimeNotifyBody: '"{{title}}" vẫn đang chạy quá thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
     sleepResumeHeading: 'Phát hiện vắng mặt', sleepResumeBody: 'Bạn đã vắng mặt khỏi "{{title}}" khoảng {{gap}}.\nTính khoảng thời gian đó vào bản ghi?', sleepIncludeInfo: '⏱ Bao gồm: tổng thời gian ghi nhận sẽ là {{total}}', sleepExcludeInfo: '⏱ Loại trừ: giữ nguyên {{current}} đã ghi nhận', sleepIncludeBtn: 'Bao gồm', sleepExcludeBtn: 'Loại trừ (giữ nguyên)',
+    breakOverrunHeading: 'Giờ nghỉ kéo dài', breakOverrunBody: 'Một lần nghỉ đã chạy {{elapsed}}, quá giờ tan ca ({{workEnd}}). Ghi nhận thế nào?', breakOverrunInfo: '⏱ Kết thúc lúc {{workEnd}}: giữ {{kept}} nghỉ rồi tan ca', breakEndAtWorkBtn: 'Kết thúc lúc {{workEnd}}', breakCustomToggle: 'Nhập thời gian nghỉ', breakCustomApply: 'Áp dụng',
     idleNotifyTitle: 'Phát hiện vắng mặt', idleNotifyBody: 'Không có hoạt động trong {{min}} phút. Hãy ghi lại bạn đã làm gì.', idleWarnTitle: 'Phát hiện vắng mặt', idleWarnBody: 'Không có hoạt động trong {{min}} phút, nhưng vẫn trong thời gian dự kiến — vẫn đang ghi nhận.', openReportBtn: '📋 Daily Report', reportTitle: 'Daily Report', reportNamePh: 'Tên của bạn', reportTreeLabel: 'Công việc hôm nay', reportWorkNoteLabel: 'Ghi chú công việc', reportWorkNotePh: 'Ghi chú về công việc hôm nay...', reportPersonalNoteLabel: 'Ghi chú cá nhân', reportPersonalNotePh: 'Những việc khác, không liên quan công việc...', reportCopyBtn: 'Sao chép văn bản', reportSaveBtn: 'Lưu', reportSaved: 'Đã lưu.', reportCopied: 'Đã sao chép vào clipboard.', reportCopyFailed: 'Không thể sao chép — vui lòng thử lại.', reportPdfBtn: '📄 PDF', reportPdfProOnly: 'Xuất PDF là tính năng Pro.',
     maxClocksAlert: 'Bạn chỉ có thể thêm tối đa {{max}} đồng hồ số.',
     dDaySelectDate: 'Chọn một ngày', dDayLabelPh: 'Tên mục tiêu', stickyPh: 'Nhập ghi chú',
@@ -2191,6 +2215,81 @@ function checkSleepResume() {
 document.getElementById('sleepIncludeBtn').addEventListener('click', includeSleepTime);
 document.getElementById('sleepExcludeBtn').addEventListener('click', excludeSleepTime);
 
+/* ---------- break ran long past clock-out ----------
+   If a break was left running and now extends well past the configured work-hours
+   end (e.g. you left on a break without clocking out and opened the app at home),
+   offer to end it at the clock-out time or keep a specific amount. */
+let breakOverrunSession = null;
+let breakOverrunWorkEndMs = 0;
+const BREAK_OVERRUN_GRACE_MS = 20 * 60 * 1000; // only prompt once ~20min past work-end
+
+function checkBreakOverrun() {
+  if (breakOverrunSession) return;
+  const active = state.activeId ? state.sessions[state.activeId] : null;
+  if (!active || active.category !== 'break') return;
+  const lastIv = active.intervals[active.intervals.length - 1];
+  if (!lastIv || lastIv.type !== 'focus' || lastIv.end !== null) return; // must be running
+  const startDate = new Date(active.createdAt);
+  const workEnd = new Date(startDate); workEnd.setHours(WORK_HOURS_END, 0, 0, 0);
+  const workEndMs = workEnd.getTime();
+  if (workEndMs <= active.createdAt) return;              // break began after work-end — not this case
+  if (Date.now() < workEndMs + BREAK_OVERRUN_GRACE_MS) return; // not meaningfully over yet
+  showBreakOverrunModal(active, workEndMs);
+}
+
+function fmtClock(ms) {
+  const d = new Date(ms);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function showBreakOverrunModal(session, workEndMs) {
+  breakOverrunSession = session;
+  breakOverrunWorkEndMs = workEndMs;
+  const elapsed = focusSeconds(session);
+  const untilWorkEnd = Math.max(0, (workEndMs - session.createdAt) / 1000);
+  document.getElementById('breakOverrunTitle').textContent = t('breakOverrunHeading');
+  document.getElementById('breakOverrunBody').textContent =
+    t('breakOverrunBody', { elapsed: fmtShort(elapsed), workEnd: fmtClock(workEndMs) });
+  document.getElementById('breakOverrunInfo').textContent =
+    t('breakOverrunInfo', { workEnd: fmtClock(workEndMs), kept: fmtShort(untilWorkEnd) });
+  document.getElementById('breakEndAtWorkBtn').textContent = t('breakEndAtWorkBtn', { workEnd: fmtClock(workEndMs) });
+  document.getElementById('breakCustomToggle').textContent = t('breakCustomToggle');
+  document.getElementById('breakCustomApply').textContent = t('breakCustomApply');
+  const wrap = document.getElementById('breakCustomWrap');
+  wrap.style.display = 'none';
+  document.getElementById('breakCustomMin').value = Math.round(untilWorkEnd / 60);
+  document.getElementById('breakOverrunOverlay').style.display = 'flex';
+}
+
+// close the running break at `endMs`, mark it done, and clock out for the day
+function settleBreakAt(endMs) {
+  const s = breakOverrunSession;
+  if (!s) return;
+  const lastIv = s.intervals[s.intervals.length - 1];
+  if (lastIv && lastIv.end === null) lastIv.end = Math.max(lastIv.start, endMs);
+  finishSession(s);
+  state.dayEnded = true;
+  closeBreakOverrunModal();
+  persist('break_overrun_settled');
+  render();
+}
+
+function closeBreakOverrunModal() {
+  document.getElementById('breakOverrunOverlay').style.display = 'none';
+  breakOverrunSession = null;
+}
+
+document.getElementById('breakEndAtWorkBtn').addEventListener('click', () => settleBreakAt(breakOverrunWorkEndMs));
+document.getElementById('breakCustomToggle').addEventListener('click', () => {
+  const wrap = document.getElementById('breakCustomWrap');
+  wrap.style.display = wrap.style.display === 'none' ? 'flex' : 'none';
+});
+document.getElementById('breakCustomApply').addEventListener('click', () => {
+  if (!breakOverrunSession) return;
+  const mins = Math.max(0, parseInt(document.getElementById('breakCustomMin').value, 10) || 0);
+  settleBreakAt(breakOverrunSession.createdAt + mins * 60 * 1000);
+});
+
 /* ---------- idle detection (15min) ---------- */
 let IDLE_LIMIT_MS = 15 * 60 * 1000;
 let lastActivity = Date.now();
@@ -2329,6 +2428,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     // returning to the tab after the machine may have slept — check the away-gap first
     if (typeof checkSleepResume === 'function') checkSleepResume();
+    if (typeof checkBreakOverrun === 'function') checkBreakOverrun();
     markActivity();
   }
 });
@@ -4324,6 +4424,7 @@ function startApp() {
   setInterval(updateLiveWidgets, 1000);
   setInterval(updateMiniStats, 30000);
   checkSleepResume();
+  checkBreakOverrun();
   restoreWebIdleDetector();
 
   if ('serviceWorker' in navigator) {
