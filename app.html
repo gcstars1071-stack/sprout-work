@@ -523,10 +523,20 @@
   }
   .cal-cell.empty { background: transparent; cursor: default; }
   .cal-cell.has-data { background: color-mix(in srgb, var(--accent2) 22%, var(--card2)); }
+  /* focus-time heat: red (low) → amber (mid) → green (high) */
+  .cal-cell.focus-low  { background: color-mix(in srgb, #ef4444 26%, var(--card2)); }
+  .cal-cell.focus-mid  { background: color-mix(in srgb, #f59e0b 30%, var(--card2)); }
+  .cal-cell.focus-high { background: color-mix(in srgb, #22c55e 32%, var(--card2)); }
   .cal-cell.today { outline: 1px solid var(--accent2); }
   .cal-cell.selected { background: var(--accent2); color: var(--on-accent2); font-weight:600; }
   .cal-dot { width: calc(4px * var(--cal-scale)); height: calc(4px * var(--cal-scale)); border-radius:50%; background: var(--accent2); margin-top: calc(2px * var(--cal-scale)); }
+  .cal-cell.focus-low .cal-dot  { background: #ef4444; }
+  .cal-cell.focus-mid .cal-dot  { background: #f59e0b; }
+  .cal-cell.focus-high .cal-dot { background: #22c55e; }
   .cal-cell.selected .cal-dot { background: var(--on-accent2); }
+  .cal-legend { display:flex; gap:calc(10px * var(--cal-scale)); justify-content:center; margin-top:calc(8px * var(--cal-scale)); font-size:calc(10px * var(--cal-scale)); color:var(--dim); flex-wrap:wrap; }
+  .cal-legend span { display:inline-flex; align-items:center; gap:4px; }
+  .cal-legend i { width:8px; height:8px; border-radius:2px; display:inline-block; }
   .cal-detail { margin-top: calc(14px * var(--cal-scale)); border-top: 1px solid #33334d; padding-top: calc(12px * var(--cal-scale)); }
   .cal-detail h3 { font-size: calc(12px * var(--cal-scale)); color: var(--dim); font-weight:500; margin:0 0 calc(8px * var(--cal-scale)); }
 </style>
@@ -1166,7 +1176,7 @@ const TRANSLATIONS = {
     treeTitle: "Today's task tree", planTitle: "Tomorrow's plan (unfinished)", planEmpty: 'Nothing unfinished to carry over', planAddTodo: 'Add to Todo List',
     yesterdayTitle: 'Done yesterday', todayTitle: 'Done today', emptyToday: 'No tasks recorded yet', emptyYesterday: 'No tasks recorded yesterday',
     todoTitle: 'Todo List', todoAddAria: 'Add a task', todoInputPh: 'Enter a task name', todoAdd: 'Add', todoEmpty: 'No tasks yet',
-    calendarTitle: 'Calendar', calendarEmpty: 'No tasks recorded',
+    calendarTitle: 'Calendar', calendarEmpty: 'No tasks recorded', calFocusTitle: 'Focus {{time}}', calLegendLow: '< 2h', calLegendMid: '2–4h', calLegendHigh: '4h+',
     widgetPanelTitle: 'Add widget',
     widgetDigitalClock: '🕐 Digital clock', widgetAnalogClock: '🕰️ Analog clock', widgetSticky: '📝 Sticky note',
     widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetTodayTime: "⏱️ Today's time", todayFocusLabel: 'Focus time today', todayBreakLabel: 'Break time today', promoteDropLabel: 'Drop here to move to top level', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
@@ -1208,7 +1218,7 @@ const TRANSLATIONS = {
     treeTitle: '오늘의 업무 트리', planTitle: '내일 계획 (미완료 가지)', planEmpty: '내일로 넘길 미완료 업무가 없습니다', planAddTodo: 'Todo List에 추가',
     yesterdayTitle: '어제 한 일', todayTitle: '오늘 한 일', emptyToday: '아직 기록된 업무가 없습니다', emptyYesterday: '어제는 기록된 업무가 없습니다',
     todoTitle: 'Todo List', todoAddAria: '할 일 추가', todoInputPh: '업무 이름을 입력하세요', todoAdd: '추가', todoEmpty: '할 일이 없습니다',
-    calendarTitle: '캘린더', calendarEmpty: '기록된 업무가 없습니다',
+    calendarTitle: '캘린더', calendarEmpty: '기록된 업무가 없습니다', calFocusTitle: '집중 {{time}}', calLegendLow: '2시간 미만', calLegendMid: '2~4시간', calLegendHigh: '4시간 이상',
     widgetPanelTitle: '위젯 추가',
     widgetDigitalClock: '🕐 디지털시계', widgetAnalogClock: '🕰️ 아날로그시계', widgetSticky: '📝 스티키 노트',
     widgetDday: '📅 D-Day 카운트다운', widgetQuote: '💬 오늘의 한마디', widgetMinistats: '📊 미니 통계 카드', widgetTodayTime: '⏱️ 오늘의 시간', todayFocusLabel: '오늘 집중시간', todayBreakLabel: '오늘 휴식시간', promoteDropLabel: '여기에 놓으면 최상위로 이동', widgetAd: '📢 광고 영역', adNotConfigured: '광고 영역 — 코드에 AdSense 게시자/슬롯 ID를 입력하세요.', adDesktopUnavailable: '광고는 웹 버전에서만 사용할 수 있습니다 (데스크톱 앱 제외).',
@@ -1250,7 +1260,7 @@ const TRANSLATIONS = {
     treeTitle: 'Cây công việc hôm nay', planTitle: 'Kế hoạch ngày mai (chưa xong)', planEmpty: 'Không có việc tồn đọng', planAddTodo: 'Thêm vào danh sách việc',
     yesterdayTitle: 'Việc đã làm hôm qua', todayTitle: 'Việc đã làm hôm nay', emptyToday: 'Chưa có việc nào', emptyYesterday: 'Không có việc nào hôm qua',
     todoTitle: 'Danh sách công việc', todoAddAria: 'Thêm việc', todoInputPh: 'Nhập tên công việc', todoAdd: 'Thêm', todoEmpty: 'Chưa có việc nào',
-    calendarTitle: 'Lịch', calendarEmpty: 'Không có việc nào',
+    calendarTitle: 'Lịch', calendarEmpty: 'Không có việc nào', calFocusTitle: 'Tập trung {{time}}', calLegendLow: '< 2h', calLegendMid: '2–4h', calLegendHigh: '4h+',
     widgetPanelTitle: 'Thêm tiện ích',
     widgetDigitalClock: '🕐 Đồng hồ số', widgetAnalogClock: '🕰️ Đồng hồ kim', widgetSticky: '📝 Ghi chú dán',
     widgetDday: '📅 Đếm ngược D-Day', widgetQuote: '💬 Câu nói hôm nay', widgetMinistats: '📊 Thẻ thống kê nhỏ', widgetTodayTime: '⏱️ Thời gian hôm nay', todayFocusLabel: 'Thời gian tập trung hôm nay', todayBreakLabel: 'Thời gian nghỉ hôm nay', promoteDropLabel: 'Thả vào đây để đưa lên cấp cao nhất', widgetAd: '📢 Ô quảng cáo', adNotConfigured: 'Ô quảng cáo — nhập ID nhà xuất bản/ID đơn vị AdSense trong mã nguồn.', adDesktopUnavailable: 'Quảng cáo chỉ khả dụng ở phiên bản web (không có ở ứng dụng desktop).',
@@ -2971,9 +2981,13 @@ function renderCalendar() {
     const dStr = `${calYear}-${pad2(calMonth + 1)}-${pad2(day)}`;
     const dayState = dStr === todayStr ? state : loadStateForDate(dStr);
     const hasData = dayState && Object.keys(dayState.sessions).length > 0;
+    const focusSec = hasData ? dayFocusSeconds(dayState) : 0;
+    const level = focusLevelClass(focusSec); // '', focus-low, focus-mid, focus-high
 
     const cell = document.createElement('div');
-    cell.className = 'cal-cell' + (hasData ? ' has-data' : '') + (dStr === todayKey ? ' today' : '') + (dStr === selectedCalDate ? ' selected' : '');
+    cell.className = 'cal-cell' + (hasData ? ' has-data' : '') + (level ? ' ' + level : '')
+      + (dStr === todayKey ? ' today' : '') + (dStr === selectedCalDate ? ' selected' : '');
+    if (focusSec > 0) cell.title = t('calFocusTitle', { time: fmtShort(focusSec) });
     cell.innerHTML = `<span>${day}</span>` + (hasData ? '<span class="cal-dot"></span>' : '');
     cell.addEventListener('click', () => {
       selectedCalDate = dStr;
@@ -2982,6 +2996,36 @@ function renderCalendar() {
     });
     calGrid.appendChild(cell);
   }
+
+  // legend (replace any previous one so it doesn't accumulate across re-renders)
+  const prevLegend = calGrid.parentElement.querySelector('.cal-legend');
+  if (prevLegend) prevLegend.remove();
+  const legend = document.createElement('div');
+  legend.className = 'cal-legend';
+  legend.innerHTML =
+    `<span><i style="background:#ef4444"></i>${t('calLegendLow')}</span>` +
+    `<span><i style="background:#f59e0b"></i>${t('calLegendMid')}</span>` +
+    `<span><i style="background:#22c55e"></i>${t('calLegendHigh')}</span>`;
+  calGrid.parentElement.insertBefore(legend, calGrid.nextSibling);
+}
+
+// total focused (non-break) seconds recorded on a given day's state
+function dayFocusSeconds(dayState) {
+  if (!dayState || !dayState.sessions) return 0;
+  let total = 0;
+  for (const s of Object.values(dayState.sessions)) {
+    if (s.category === 'break') continue;
+    total += focusSeconds(s);
+  }
+  return total;
+}
+// FOCUS_LEVELS thresholds in minutes: low < 120 ≤ mid < 240 ≤ high
+function focusLevelClass(sec) {
+  const min = sec / 60;
+  if (min <= 0) return '';
+  if (min >= 240) return 'focus-high';
+  if (min >= 120) return 'focus-mid';
+  return 'focus-low';
 }
 
 function showCalDetail(dStr) {
