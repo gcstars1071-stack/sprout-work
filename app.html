@@ -494,6 +494,20 @@
   .todaytime-widget .row.focus .num { color: var(--accent2); }
   .todaytime-widget .row.break .num { color: var(--warn); }
   .todaytime-widget .row .lbl { font-size:12px; color:var(--dim); margin-top:2px; }
+  /* daily timeline (gantt) widget */
+  .timeline-widget { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+  .timeline-empty { flex:1; display:flex; align-items:center; justify-content:center; color:var(--dim); font-size:13px; }
+  .tl-labelw { width:84px; }
+  .timeline-hours { position:relative; height:14px; margin-left:84px; margin-bottom:4px; flex-shrink:0; }
+  .timeline-hour { position:absolute; transform:translateX(-50%); font-size:9px; color:var(--dim); top:0; }
+  .timeline-hour::before { content:''; position:absolute; left:50%; top:12px; width:1px; height:6px; background:#33334d; }
+  .timeline-body { flex:1; overflow-y:auto; overflow-x:hidden; padding-right:2px; }
+  .timeline-row { display:flex; align-items:center; height:22px; }
+  .timeline-row .tl-label { width:84px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-right:6px; font-size:11px; color:var(--text); }
+  .timeline-row .tl-track { position:relative; flex:1; height:13px; background:var(--card2); border-radius:4px; }
+  .tl-seg { position:absolute; top:0; height:100%; border-radius:3px; min-width:2px; cursor:default; }
+  .tl-seg.running { animation: tl-pulse 1.6s ease-in-out infinite; }
+  @keyframes tl-pulse { 0%,100%{opacity:1;} 50%{opacity:.55;} }
   .ad-widget { height:100%; width:100%; }
   .ad-placeholder {
     height:100%; display:flex; align-items:center; justify-content:center; text-align:center;
@@ -578,6 +592,7 @@
         <button data-widget="quote" data-i18n="widgetQuote">💬 Quote of the day</button>
         <button data-widget="ministats" data-i18n="widgetMinistats">📊 Mini stats card</button>
         <button data-widget="todaytime" data-i18n="widgetTodayTime">⏱️ Today's time</button>
+        <button data-widget="timeline" data-i18n="widgetTimeline">📊 Today's timeline</button>
         <button data-widget="ad" id="adWidgetBtn" data-i18n="widgetAd">📢 Ad slot</button>
       </div>
     </div>
@@ -1200,7 +1215,7 @@ const TRANSLATIONS = {
     calendarTitle: 'Calendar', calendarEmpty: 'No tasks recorded', calFocusTitle: 'Focus {{time}}', calLegendLow: '< 2h', calLegendMid: '2–4h', calLegendHigh: '4h+',
     widgetPanelTitle: 'Add widget',
     widgetDigitalClock: '🕐 Digital clock', widgetAnalogClock: '🕰️ Analog clock', widgetSticky: '📝 Sticky note',
-    widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetTodayTime: "⏱️ Today's time", todayFocusLabel: 'Focus time today', todayBreakLabel: 'Break time today', promoteDropLabel: 'Drop here to move to top level', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
+    widgetDday: '📅 D-Day countdown', widgetQuote: '💬 Quote of the day', widgetMinistats: '📊 Mini stats card', widgetTodayTime: "⏱️ Today's time", widgetTimeline: "📊 Today's timeline", timelineEmpty: 'No time recorded yet today', todayFocusLabel: 'Focus time today', todayBreakLabel: 'Break time today', promoteDropLabel: 'Drop here to move to top level', widgetAd: '📢 Ad slot', adNotConfigured: 'Ad slot — set your AdSense publisher/slot ID in the code.', adDesktopUnavailable: 'Ads are only available in the web version (not the desktop app).',
     modalHeadingDefault: 'What would you like to do?', modalTitlePh: 'Enter new task title',
     modalCancel: 'Cancel', modalStartNew: 'Start new task', resumeArrow: 'Resume →', waiting: 'waiting', switchTooltip: 'Click to switch to this task', frequentTooltip: 'Click to fill in the task name', timeIsUpFlash: '⏰ Time is up!',
     parentIndependent: 'Independent task', parentSubtaskOf: 'Subtask of "{{title}}"', addSubtask: 'Add a subtask',
@@ -1243,7 +1258,7 @@ const TRANSLATIONS = {
     calendarTitle: '캘린더', calendarEmpty: '기록된 업무가 없습니다', calFocusTitle: '집중 {{time}}', calLegendLow: '2시간 미만', calLegendMid: '2~4시간', calLegendHigh: '4시간 이상',
     widgetPanelTitle: '위젯 추가',
     widgetDigitalClock: '🕐 디지털시계', widgetAnalogClock: '🕰️ 아날로그시계', widgetSticky: '📝 스티키 노트',
-    widgetDday: '📅 D-Day 카운트다운', widgetQuote: '💬 오늘의 한마디', widgetMinistats: '📊 미니 통계 카드', widgetTodayTime: '⏱️ 오늘의 시간', todayFocusLabel: '오늘 집중시간', todayBreakLabel: '오늘 휴식시간', promoteDropLabel: '여기에 놓으면 최상위로 이동', widgetAd: '📢 광고 영역', adNotConfigured: '광고 영역 — 코드에 AdSense 게시자/슬롯 ID를 입력하세요.', adDesktopUnavailable: '광고는 웹 버전에서만 사용할 수 있습니다 (데스크톱 앱 제외).',
+    widgetDday: '📅 D-Day 카운트다운', widgetQuote: '💬 오늘의 한마디', widgetMinistats: '📊 미니 통계 카드', widgetTodayTime: '⏱️ 오늘의 시간', widgetTimeline: '📊 오늘 타임라인', timelineEmpty: '오늘 기록된 시간이 없습니다', todayFocusLabel: '오늘 집중시간', todayBreakLabel: '오늘 휴식시간', promoteDropLabel: '여기에 놓으면 최상위로 이동', widgetAd: '📢 광고 영역', adNotConfigured: '광고 영역 — 코드에 AdSense 게시자/슬롯 ID를 입력하세요.', adDesktopUnavailable: '광고는 웹 버전에서만 사용할 수 있습니다 (데스크톱 앱 제외).',
     modalHeadingDefault: '무엇을 할까요?', modalTitlePh: '새 업무 제목 입력',
     modalCancel: '취소', modalStartNew: '새 업무 시작', resumeArrow: '복귀 →', waiting: '대기', switchTooltip: '클릭하여 이 업무로 전환', frequentTooltip: '클릭하여 업무명 입력', timeIsUpFlash: '⏰ 시간 초과!',
     parentIndependent: '독립 작업', parentSubtaskOf: '"{{title}}"의 하위작업', addSubtask: '하위작업 추가',
@@ -1286,7 +1301,7 @@ const TRANSLATIONS = {
     calendarTitle: 'Lịch', calendarEmpty: 'Không có việc nào', calFocusTitle: 'Tập trung {{time}}', calLegendLow: '< 2h', calLegendMid: '2–4h', calLegendHigh: '4h+',
     widgetPanelTitle: 'Thêm tiện ích',
     widgetDigitalClock: '🕐 Đồng hồ số', widgetAnalogClock: '🕰️ Đồng hồ kim', widgetSticky: '📝 Ghi chú dán',
-    widgetDday: '📅 Đếm ngược D-Day', widgetQuote: '💬 Câu nói hôm nay', widgetMinistats: '📊 Thẻ thống kê nhỏ', widgetTodayTime: '⏱️ Thời gian hôm nay', todayFocusLabel: 'Thời gian tập trung hôm nay', todayBreakLabel: 'Thời gian nghỉ hôm nay', promoteDropLabel: 'Thả vào đây để đưa lên cấp cao nhất', widgetAd: '📢 Ô quảng cáo', adNotConfigured: 'Ô quảng cáo — nhập ID nhà xuất bản/ID đơn vị AdSense trong mã nguồn.', adDesktopUnavailable: 'Quảng cáo chỉ khả dụng ở phiên bản web (không có ở ứng dụng desktop).',
+    widgetDday: '📅 Đếm ngược D-Day', widgetQuote: '💬 Câu nói hôm nay', widgetMinistats: '📊 Thẻ thống kê nhỏ', widgetTodayTime: '⏱️ Thời gian hôm nay', widgetTimeline: '📊 Dòng thời gian hôm nay', timelineEmpty: 'Chưa ghi nhận thời gian nào hôm nay', todayFocusLabel: 'Thời gian tập trung hôm nay', todayBreakLabel: 'Thời gian nghỉ hôm nay', promoteDropLabel: 'Thả vào đây để đưa lên cấp cao nhất', widgetAd: '📢 Ô quảng cáo', adNotConfigured: 'Ô quảng cáo — nhập ID nhà xuất bản/ID đơn vị AdSense trong mã nguồn.', adDesktopUnavailable: 'Quảng cáo chỉ khả dụng ở phiên bản web (không có ở ứng dụng desktop).',
     modalHeadingDefault: 'Bạn muốn làm gì?', modalTitlePh: 'Nhập tên công việc mới',
     modalCancel: 'Hủy', modalStartNew: 'Bắt đầu việc mới', resumeArrow: 'Tiếp tục →', waiting: 'đang chờ', switchTooltip: 'Nhấp để chuyển sang việc này', frequentTooltip: 'Nhấp để điền tên công việc', timeIsUpFlash: '⏰ Hết giờ!',
     parentIndependent: 'Việc độc lập', parentSubtaskOf: 'Việc con của "{{title}}"', addSubtask: 'Thêm việc con',
@@ -1980,6 +1995,7 @@ function render() {
   renderPlan();
   renderHistoryLists();
   renderTodos();
+  renderTimelineWidgets();
   applyDayEndedVisuals();
   syncNativeSchedule();
 }
@@ -3830,6 +3846,8 @@ function buildWidgetEl(type, id, data) {
       <div class="row focus"><div class="num" data-todaytime-focus>0</div><div class="lbl">${t('todayFocusLabel')}</div></div>
       <div class="row break"><div class="num" data-todaytime-break>0</div><div class="lbl">${t('todayBreakLabel')}</div></div>
     </div>`;
+  } else if (type === 'timeline') {
+    el.innerHTML = `${widgetRemoveBtn(id)}<div class="timeline-widget" data-timeline-widget></div>`;
   } else if (type === 'ad') {
     // free-tier users can move/resize the ad slot but not remove it; Pro removes ads entirely (see pricing)
     el.innerHTML = `${isProUser() ? widgetRemoveBtn(id) : ''}<div class="ad-widget" data-ad-widget></div>`;
@@ -3899,6 +3917,79 @@ function updateDdayWidget(el) {
   numEl.textContent = days === 0 ? 'D-Day' : (days > 0 ? `D-${days}` : `D+${Math.abs(days)}`);
 }
 
+// deterministic color per task title so a task keeps the same bar color
+function taskColor(session) {
+  if (session.category === 'break') return '#f59e0b';
+  let h = 0;
+  const str = session.title || '';
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360;
+  return `hsl(${h}, 55%, 58%)`;
+}
+
+// Draws today's focus intervals as a horizontal gantt: one row per task, colored
+// segments positioned by their real start/end times, with an hour axis on top.
+function renderTimelineWidgets() {
+  const containers = document.querySelectorAll('[data-timeline-widget]');
+  if (!containers.length) return;
+
+  const rows = [];
+  let minT = Infinity, maxT = -Infinity;
+  const nowMs = Date.now();
+  Object.values(state.sessions)
+    .filter(s => s.status !== 'cancelled')
+    .sort((a, b) => a.createdAt - b.createdAt)
+    .forEach(s => {
+      const ivs = s.intervals.filter(iv => iv.type === 'focus');
+      if (!ivs.length) return;
+      let has = false;
+      ivs.forEach(iv => {
+        const end = iv.end === null ? nowMs : iv.end;
+        if (end - iv.start < 1000) return; // skip sub-second blips
+        minT = Math.min(minT, iv.start); maxT = Math.max(maxT, end); has = true;
+      });
+      if (has) rows.push({ session: s, ivs });
+    });
+
+  containers.forEach(container => {
+    if (!rows.length) {
+      container.innerHTML = `<div class="timeline-empty">${t('timelineEmpty')}</div>`;
+      return;
+    }
+    const axisStart = new Date(minT); axisStart.setMinutes(0, 0, 0);
+    const axisEnd = new Date(maxT); axisEnd.setHours(axisEnd.getHours() + (axisEnd.getMinutes() || axisEnd.getSeconds() ? 1 : 0), 0, 0, 0);
+    const a0 = axisStart.getTime(), a1 = axisEnd.getTime();
+    const span = Math.max(1, a1 - a0);
+    const pct = t => ((t - a0) / span) * 100;
+
+    // hour ticks (skip some if too many hours to avoid crowding)
+    const hours = Math.round(span / 3600000);
+    const step = hours > 10 ? 2 : 1;
+    let hoursHtml = '';
+    for (let h = 0; h <= hours; h += step) {
+      const label = (axisStart.getHours() + h) % 24;
+      hoursHtml += `<span class="timeline-hour" style="left:${(h / hours) * 100}%">${label}</span>`;
+    }
+
+    let rowsHtml = '';
+    rows.forEach(({ session, ivs }) => {
+      const color = taskColor(session);
+      let segs = '';
+      ivs.forEach(iv => {
+        const end = iv.end === null ? nowMs : iv.end;
+        if (end - iv.start < 1000) return;
+        const left = pct(iv.start), width = Math.max(0.6, pct(end) - pct(iv.start));
+        const running = iv.end === null ? ' running' : '';
+        const mins = Math.round((end - iv.start) / 60000);
+        segs += `<div class="tl-seg${running}" style="left:${left}%; width:${width}%; background:${color};" title="${escapeHtml(session.title)} · ${fmtShort((end - iv.start) / 1000)}"></div>`;
+      });
+      const icon = session.category === 'break' ? '☕ ' : '';
+      rowsHtml += `<div class="timeline-row"><div class="tl-label" title="${escapeHtml(session.title)}">${icon}${escapeHtml(session.title)}</div><div class="tl-track">${segs}</div></div>`;
+    });
+
+    container.innerHTML = `<div class="timeline-hours">${hoursHtml}</div><div class="timeline-body">${rowsHtml}</div>`;
+  });
+}
+
 function updateLiveWidgets() {
   const now = new Date();
   document.querySelectorAll('[data-clock-widget]').forEach(wrap => {
@@ -3920,7 +4011,11 @@ function updateLiveWidgets() {
   });
   document.querySelectorAll('[data-ddday-id]').forEach(el => updateDdayWidget(el.closest('.widget-card')));
   updateTodayTime();
+  // refresh the timeline every ~5s so the running bar grows, without thrashing scroll
+  if (nowMsForTimeline() - lastTimelineRenderAt > 5000) { lastTimelineRenderAt = nowMsForTimeline(); renderTimelineWidgets(); }
 }
+let lastTimelineRenderAt = 0;
+function nowMsForTimeline() { return Date.now(); }
 function updateTodayTime() {
   const focusEls = document.querySelectorAll('[data-todaytime-focus]');
   const breakEls = document.querySelectorAll('[data-todaytime-break]');
@@ -3967,6 +4062,7 @@ function addWidget(type, id, data, gridOpts) {
   const el = buildWidgetEl(type, id, data);
   const defaults = { id, w: 3, h: 3, autoPosition: true };
   if (type === 'ad') Object.assign(defaults, { w: 3, h: 3, minW: 3, minH: 2 });
+  if (type === 'timeline') Object.assign(defaults, { w: 6, h: 3, minW: 3, minH: 2 });
   const opts = Object.assign(defaults, gridOpts || {});
   dashboardGrid.addWidget(wrapAsGridStackContent(el), opts);
 }
