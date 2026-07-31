@@ -130,6 +130,9 @@
   }
   .start-form input::placeholder { color: var(--dim); }
   .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .pomo-toggle { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; background:var(--card2); color:var(--text); border-radius:10px; padding:9px 12px; font-size:13px; margin-bottom:12px; }
+  .pomo-toggle.on { background:#e2503b; color:#fff; }
+  .pomo-toggle .pomo-hint { font-size:11px; opacity:.75; }
   .presets button {
     background: var(--card2);
     color: var(--text);
@@ -639,6 +642,7 @@
       <div class="title" style="margin-bottom:18px;" data-i18n="startQuestion">What will you focus on now?</div>
       <input type="text" id="startTitle" data-i18n-ph="startTitlePh" placeholder="e.g. Draft the report" />
       <div class="presets freq-row" id="startFrequent"></div>
+      <button type="button" id="pomoToggleBtn" class="pomo-toggle"><span data-i18n="pomoToggle">🍅 Pomodoro</span><span id="pomoToggleHint" class="pomo-hint"></span></button>
       <div class="presets" id="startPresets">
         <button data-min="5" class="active">5 min</button>
         <button data-min="15">15 min</button>
@@ -909,6 +913,16 @@
       <div style="font-size:11px; color:var(--dim); margin-top:6px; line-height:1.5;" data-i18n="settingsSystemIdleHint">Also counts activity in other apps (Chrome/Edge only). Requires a one-time permission.</div>
     </div>
 
+    <div class="settings-section" id="pomoSettingsSection">
+      <div class="settings-label" data-i18n="pomoSettingsLabel">🍅 Pomodoro (Pro)</div>
+      <div class="settings-row" style="gap:10px; flex-wrap:wrap;">
+        <label style="font-size:12px; color:var(--dim);"><span data-i18n="pomoWorkLbl">Focus</span> <input type="number" id="pomoWorkInput" min="1" max="180" class="preset-min-input" style="width:56px;"></label>
+        <label style="font-size:12px; color:var(--dim);"><span data-i18n="pomoBreakLbl">Break</span> <input type="number" id="pomoBreakInput" min="1" max="60" class="preset-min-input" style="width:56px;"></label>
+        <label style="font-size:12px; color:var(--dim);"><span data-i18n="pomoLongLbl">Long break</span> <input type="number" id="pomoLongInput" min="1" max="120" class="preset-min-input" style="width:56px;"></label>
+        <label style="font-size:12px; color:var(--dim);"><span data-i18n="pomoCyclesLbl">Long break every</span> <input type="number" id="pomoCyclesInput" min="2" max="12" class="preset-min-input" style="width:56px;"></label>
+      </div>
+    </div>
+
     <div class="settings-section">
       <div class="settings-label" data-i18n="settingsDefaultPresets">Default timer presets (minutes)</div>
       <div class="settings-row">
@@ -1153,7 +1167,9 @@ const DEFAULT_APP_SETTINGS = {
   presetMinutes: [5, 15, 25],
   fontScale: 'medium',
   lang: 'en',
-  plan: 'free' // 'free' | 'pro' — no billing wired up yet, so this always defaults to 'free'
+  plan: 'free', // 'free' | 'pro' — no billing wired up yet, so this always defaults to 'free'
+  // Pomodoro auto-cycle (Pro): work → short break → … → long break every N cycles
+  pomodoro: { enabled: false, workMin: 25, breakMin: 5, longBreakMin: 15, cyclesPerLong: 4 }
 };
 function isProUser() { return appSettings.plan === 'pro'; }
 function loadAppSettings() {
@@ -1232,6 +1248,7 @@ const TRANSLATIONS = {
     settingsDataMgmt: 'Data management', exportData: 'Export (JSON)', resetData: 'Reset all', resetConfirm: 'Reset all Sprout Work data? This cannot be undone.',
     settingsLanguage: 'Language', thisWeekFocus: 'Focus time this week', continueWithGoogle: 'Continue with Google', authOr: 'or', authEmailPh: 'Email', authPasswordPh: 'Password', authSignup: 'Sign up', authLogin: 'Log in', authCheckEmail: 'Check your email to confirm your account.', authInvalid: 'Incorrect email or password.', authFillBoth: 'Enter both email and password.', authError: 'Something went wrong. Please try again.', customColorLabel: 'Custom', customAccentLabel: 'Accent', customAccent2Label: 'Buttons', sendFeedback: 'Send feedback', feedbackTitle: 'Send feedback', feedbackCategoryLabel: "What's this about?", feedbackBug: 'Bug', feedbackFeature: 'Improvement', feedbackWidget: 'Widget request', feedbackOther: 'Other', feedbackPh: "Tell us what happened or what you'd like to see...", feedbackSubmit: 'Send', feedbackEmpty: 'Please write a message first.', feedbackError: 'Could not send — please try again.', feedbackThanks: 'Thanks! Your feedback was sent.', upgradeToPro: '⭐ Upgrade to Pro', guestLimitTaskMsg: "You've created 5 tasks as a guest — sign up free to keep going. Everything you've done so far will be saved to your new account.", guestLimitClockoutMsg: 'Sign up free to clock out and save your work — everything you\'ve done so far will be saved to your new account.', guestProfileName: 'Guest', guestProfileHint: 'Sign up to save your work', guestSignupLink: '✍️ Sign up to save your work', deleteAccount: 'Delete account', deleteAccountConfirm: 'Deleting your account will permanently erase all of your task history. Have you downloaded a backup of your data? This cannot be undone — continue?', deleteAccountError: 'Could not delete your account — please try again or contact support.',
     overtimeStatus: 'Time is up — finish or switch tasks (reminds every 5 min)',
+    pomoToggle: '🍅 Pomodoro', pomoOff: 'off', pomoPhaseWork: 'Focus', pomoPhaseBreak: 'Break', pomoCycleLabel: 'cycle {{n}}/{{total}}', pomoBreakTitle: '🍅 Break time', pomoBreakBody: 'Nice focus! Take a {{min}}-min break.', pomoLongBreakBody: 'Great set! Take a longer {{min}}-min break.', pomoFocusTitle: '🍅 Back to focus', pomoFocusBody: 'Break over — starting the next focus session.', pomoProOnly: 'Pomodoro auto-cycle is a Pro feature.', pomoSettingsLabel: '🍅 Pomodoro (Pro)', pomoWorkLbl: 'Focus', pomoBreakLbl: 'Break', pomoLongLbl: 'Long break', pomoCyclesLbl: 'Long break every',
     breakSessionTitle: 'Break', topLevelTask: 'top-level task', todayLabel: 'Today', yesterdayLabel: 'Yesterday',
     inProgress: 'In progress', waitingStatus: 'Waiting', paused: 'paused (', closeParen: ')', unfinished: 'unfinished',
     alarmNotifyTitle: "Time's up", alarmNotifyBody: '"{{title}}" has reached its planned time. Please finish or switch tasks.',
@@ -1275,6 +1292,7 @@ const TRANSLATIONS = {
     settingsDataMgmt: '데이터 관리', exportData: '내보내기 (JSON)', resetData: '전체 초기화', resetConfirm: '정말로 모든 Sprout Work 데이터를 초기화할까요? 이 작업은 되돌릴 수 없습니다.',
     settingsLanguage: '언어', thisWeekFocus: '이번주 집중시간', continueWithGoogle: 'Google로 계속하기', authOr: '또는', authEmailPh: '이메일', authPasswordPh: '비밀번호', authSignup: '회원가입', authLogin: '로그인', authCheckEmail: '이메일을 확인해서 계정을 인증해주세요.', authInvalid: '이메일 또는 비밀번호가 올바르지 않습니다.', authFillBoth: '이메일과 비밀번호를 모두 입력해주세요.', authError: '문제가 발생했습니다. 다시 시도해주세요.', customColorLabel: '직접 선택', customAccentLabel: '강조색', customAccent2Label: '버튼색', sendFeedback: '피드백 보내기', feedbackTitle: '피드백 보내기', feedbackCategoryLabel: '어떤 내용인가요?', feedbackBug: '오류 신고', feedbackFeature: '개선 제안', feedbackWidget: '위젯 요청', feedbackOther: '기타', feedbackPh: '어떤 문제가 있었는지, 또는 어떤 기능을 원하시는지 적어주세요...', feedbackSubmit: '보내기', feedbackEmpty: '내용을 먼저 입력해주세요.', feedbackError: '전송에 실패했습니다. 다시 시도해주세요.', feedbackThanks: '감사합니다! 피드백이 전송되었습니다.', upgradeToPro: '⭐ Pro로 업그레이드', guestLimitTaskMsg: '게스트로 5개의 작업을 만들었어요 — 계속하려면 무료로 가입해주세요. 지금까지의 기록은 새 계정에 그대로 저장됩니다.', guestLimitClockoutMsg: '퇴근하고 오늘 기록을 저장하려면 무료로 가입해주세요. 지금까지의 기록은 새 계정에 그대로 저장됩니다.', guestProfileName: '게스트', guestProfileHint: '가입하면 기록이 저장됩니다', guestSignupLink: '✍️ 가입하고 기록 저장하기', deleteAccount: '회원 탈퇴', deleteAccountConfirm: '계정을 삭제하면 사용자의 모든 업무 기록이 영구적으로 삭제됩니다. 기록 보관을 위해 백업 데이터를 받으셨나요? 이 작업은 되돌릴 수 없습니다. 계속하시겠어요?', deleteAccountError: '계정 삭제에 실패했습니다. 다시 시도하거나 문의해주세요.',
     overtimeStatus: '예정시간 초과 — 종료 또는 전환해주세요 (5분마다 알림)',
+    pomoToggle: '🍅 뽀모도로', pomoOff: '꺼짐', pomoPhaseWork: '집중', pomoPhaseBreak: '휴식', pomoCycleLabel: '{{n}}/{{total}} 사이클', pomoBreakTitle: '🍅 휴식 시간', pomoBreakBody: '집중 완료! {{min}}분 휴식하세요.', pomoLongBreakBody: '한 세트 완료! {{min}}분 긴 휴식을 가지세요.', pomoFocusTitle: '🍅 다시 집중', pomoFocusBody: '휴식 끝 — 다음 집중을 시작합니다.', pomoProOnly: '뽀모도로 자동 순환은 Pro 전용 기능입니다.', pomoSettingsLabel: '🍅 뽀모도로 (Pro)', pomoWorkLbl: '집중', pomoBreakLbl: '휴식', pomoLongLbl: '긴 휴식', pomoCyclesLbl: '긴 휴식 주기',
     breakSessionTitle: '휴식', topLevelTask: '최상위 업무', todayLabel: '오늘', yesterdayLabel: '어제',
     inProgress: '진행 중', waitingStatus: '대기 중', paused: '(멈춤 ', closeParen: ')', unfinished: '미완료',
     alarmNotifyTitle: '시간 종료', alarmNotifyBody: '"{{title}}" 예정 시간이 끝났어요. 작업 종료 또는 업무 전환을 해주세요.',
@@ -1318,6 +1336,7 @@ const TRANSLATIONS = {
     settingsDataMgmt: 'Quản lý dữ liệu', exportData: 'Xuất (JSON)', resetData: 'Đặt lại tất cả', resetConfirm: 'Đặt lại toàn bộ dữ liệu Sprout Work? Không thể hoàn tác.',
     settingsLanguage: 'Ngôn ngữ', thisWeekFocus: 'Thời gian tập trung tuần này', continueWithGoogle: 'Tiếp tục với Google', authOr: 'hoặc', authEmailPh: 'Email', authPasswordPh: 'Mật khẩu', authSignup: 'Đăng ký', authLogin: 'Đăng nhập', authCheckEmail: 'Hãy kiểm tra email để xác nhận tài khoản.', authInvalid: 'Email hoặc mật khẩu không đúng.', authFillBoth: 'Vui lòng nhập cả email và mật khẩu.', authError: 'Đã xảy ra lỗi. Vui lòng thử lại.', customColorLabel: 'Tùy chỉnh', customAccentLabel: 'Màu nhấn', customAccent2Label: 'Màu nút', sendFeedback: 'Gửi phản hồi', feedbackTitle: 'Gửi phản hồi', feedbackCategoryLabel: 'Đây là về điều gì?', feedbackBug: 'Lỗi', feedbackFeature: 'Cải tiến', feedbackWidget: 'Yêu cầu tiện ích', feedbackOther: 'Khác', feedbackPh: 'Hãy cho chúng tôi biết điều gì đã xảy ra hoặc bạn muốn thấy gì...', feedbackSubmit: 'Gửi', feedbackEmpty: 'Vui lòng nhập nội dung trước.', feedbackError: 'Gửi không thành công — vui lòng thử lại.', feedbackThanks: 'Cảm ơn! Phản hồi của bạn đã được gửi.', upgradeToPro: '⭐ Nâng cấp lên Pro', guestLimitTaskMsg: 'Bạn đã tạo 5 công việc ở chế độ khách — hãy đăng ký miễn phí để tiếp tục. Mọi thứ bạn đã làm sẽ được lưu vào tài khoản mới.', guestLimitClockoutMsg: 'Hãy đăng ký miễn phí để tan ca và lưu lại công việc của bạn — mọi thứ bạn đã làm sẽ được lưu vào tài khoản mới.', guestProfileName: 'Khách', guestProfileHint: 'Đăng ký để lưu công việc của bạn', guestSignupLink: '✍️ Đăng ký để lưu công việc của bạn', deleteAccount: 'Xóa tài khoản', deleteAccountConfirm: 'Xóa tài khoản sẽ xóa vĩnh viễn toàn bộ lịch sử công việc của bạn. Bạn đã tải bản sao lưu dữ liệu chưa? Không thể hoàn tác — tiếp tục?', deleteAccountError: 'Không thể xóa tài khoản — vui lòng thử lại hoặc liên hệ hỗ trợ.',
     overtimeStatus: 'Đã hết thời gian — hãy hoàn thành hoặc chuyển việc (nhắc lại mỗi 5 phút)',
+    pomoToggle: '🍅 Pomodoro', pomoOff: 'tắt', pomoPhaseWork: 'Tập trung', pomoPhaseBreak: 'Nghỉ', pomoCycleLabel: 'chu kỳ {{n}}/{{total}}', pomoBreakTitle: '🍅 Giờ nghỉ', pomoBreakBody: 'Tập trung tốt! Nghỉ {{min}} phút.', pomoLongBreakBody: 'Hoàn thành một set! Nghỉ dài {{min}} phút.', pomoFocusTitle: '🍅 Quay lại tập trung', pomoFocusBody: 'Hết giờ nghỉ — bắt đầu phiên tập trung tiếp theo.', pomoProOnly: 'Pomodoro tự động là tính năng Pro.', pomoSettingsLabel: '🍅 Pomodoro (Pro)', pomoWorkLbl: 'Tập trung', pomoBreakLbl: 'Nghỉ', pomoLongLbl: 'Nghỉ dài', pomoCyclesLbl: 'Nghỉ dài mỗi',
     breakSessionTitle: 'Nghỉ', topLevelTask: 'việc gốc', todayLabel: 'Hôm nay', yesterdayLabel: 'Hôm qua',
     inProgress: 'Đang làm', waitingStatus: 'Đang chờ', paused: '(tạm dừng ', closeParen: ')', unfinished: 'chưa xong',
     alarmNotifyTitle: 'Hết giờ', alarmNotifyBody: '"{{title}}" đã hết thời gian dự kiến. Hãy hoàn thành hoặc chuyển việc.',
@@ -1610,12 +1629,14 @@ function finishSession(session) {
   session.status = 'done';
   state.waitingIds = state.waitingIds.filter(id => id !== session.id);
   if (state.activeId === session.id) state.activeId = null;
+  if (state.pomo && state.pomo.workTaskId === session.id) state.pomo.on = false;
 }
 function cancelSession(session) {
   closeCurrentInterval(session);
   session.status = 'cancelled';
   state.waitingIds = state.waitingIds.filter(id => id !== session.id);
   if (state.activeId === session.id) state.activeId = null;
+  if (state.pomo && state.pomo.workTaskId === session.id) state.pomo.on = false;
 }
 
 /* ---------- DOM refs ---------- */
@@ -1996,6 +2017,7 @@ function render() {
   renderHistoryLists();
   renderTodos();
   renderTimelineWidgets();
+  updatePomoToggle();
   applyDayEndedVisuals();
   syncNativeSchedule();
 }
@@ -2085,7 +2107,18 @@ function tick() {
   if (tickCount % 60 === 0) localStorage.setItem(LAST_SEEN_KEY, String(nowT));
   checkDateRollover();
   const active = state.activeId ? state.sessions[state.activeId] : null;
-  if (active) {
+  if (active && pomoOn()) {
+    // Pomodoro: show the current phase's remaining, auto-advance at the boundary
+    const rem = pomoRemaining();
+    timeDisplayEl.textContent = fmt(rem);
+    timeDisplayEl.classList.toggle('overtime', false);
+    const cfg = pomoCfg();
+    const label = state.pomo.phase === 'work' ? t('pomoPhaseWork') : t('pomoPhaseBreak');
+    statusLineEl.textContent = `🍅 ${label} · ${t('pomoCycleLabel', { n: state.pomo.completed % (cfg.cyclesPerLong || 4) + (state.pomo.phase === 'work' ? 1 : 0), total: cfg.cyclesPerLong || 4 })}`;
+    statusLineEl.classList.remove('alarm');
+    flashTitle(false);
+    if (rem <= 0) pomodoroTransition();
+  } else if (active) {
     const fs = focusSeconds(active);
     const remaining = active.plannedSeconds - fs;
     timeDisplayEl.textContent = fmt(remaining);
@@ -2107,6 +2140,55 @@ function tick() {
   // live-update waiting durations / tree timers
   renderTree();
   checkIdle();
+}
+
+/* ---------- Pomodoro auto-cycle (Pro) ----------
+   When on, a task runs in work→break→work cycles. The countdown shows the current
+   phase's remaining time (independent of the task's cumulative focus), and at each
+   phase boundary we auto-pause/resume and start/finish a break. A long break replaces
+   the short one every `cyclesPerLong` completed work cycles. */
+function pomoCfg() { return appSettings.pomodoro || {}; }
+function pomoOn() { return isProUser() && state.pomo && state.pomo.on; }
+function pomoRemaining() {
+  if (!state.pomo) return 0;
+  return state.pomo.targetSec - (Date.now() - state.pomo.phaseStartMs) / 1000;
+}
+function startPomodoro(taskId) {
+  if (!isProUser()) return;
+  state.pomo = {
+    on: true, phase: 'work', workTaskId: taskId, completed: 0,
+    targetSec: (pomoCfg().workMin || 25) * 60, phaseStartMs: Date.now()
+  };
+}
+function stopPomodoro() { if (state.pomo) state.pomo.on = false; }
+
+function pomodoroTransition() {
+  const p = state.pomo, cfg = pomoCfg();
+  if (p.phase === 'work') {
+    p.completed += 1;
+    const task = state.sessions[p.workTaskId];
+    if (task && state.activeId === p.workTaskId) pauseSession(task);
+    const isLong = p.completed % (cfg.cyclesPerLong || 4) === 0;
+    const bm = isLong ? (cfg.longBreakMin || 15) : (cfg.breakMin || 5);
+    startBreak(null, bm);
+    p.phase = 'break'; p.targetSec = bm * 60; p.phaseStartMs = Date.now();
+    beep();
+    notify(t('pomoBreakTitle'), t(isLong ? 'pomoLongBreakBody' : 'pomoBreakBody', { min: bm }));
+  } else {
+    const brk = state.activeId ? state.sessions[state.activeId] : null;
+    if (brk && brk.category === 'break') finishSession(brk);
+    const task = state.sessions[p.workTaskId];
+    if (task && task.status !== 'done' && task.status !== 'cancelled') {
+      resumeSession(task);
+    } else {
+      p.on = false; // the task is gone — stop cycling
+    }
+    p.phase = 'work'; p.targetSec = (cfg.workMin || 25) * 60; p.phaseStartMs = Date.now();
+    beep();
+    notify(t('pomoFocusTitle'), t('pomoFocusBody'));
+  }
+  persist('pomodoro_transition');
+  render();
 }
 
 /* ---------- sleep / computer-off resume ---------- */
@@ -2496,10 +2578,54 @@ startBtn.addEventListener('click', () => {
   const title = startTitleInput.value.trim();
   if (!title) { startTitleInput.focus(); return; }
   if (guestLimitBlocks()) { requireAccountForGuestLimit('task'); return; }
-  const session = createSession(title, selectedStartMin * 60, null);
+  const usePomo = isProUser() && pomoCfg().enabled;
+  const planned = usePomo ? (pomoCfg().workMin || 25) * 60 : selectedStartMin * 60;
+  const session = createSession(title, planned, null);
   state.activeId = session.id;
+  if (usePomo) startPomodoro(session.id);
   startTitleInput.value = '';
   render();
+});
+
+function renderPomoSettings() {
+  const sec = document.getElementById('pomoSettingsSection');
+  if (!sec) return;
+  sec.style.opacity = isProUser() ? '1' : '0.5';
+  const cfg = pomoCfg();
+  const set = (id, v) => { const el = document.getElementById(id); if (el) { el.value = v; el.disabled = !isProUser(); } };
+  set('pomoWorkInput', cfg.workMin); set('pomoBreakInput', cfg.breakMin);
+  set('pomoLongInput', cfg.longBreakMin); set('pomoCyclesInput', cfg.cyclesPerLong);
+}
+[['pomoWorkInput', 'workMin', 1, 180], ['pomoBreakInput', 'breakMin', 1, 60], ['pomoLongInput', 'longBreakMin', 1, 120], ['pomoCyclesInput', 'cyclesPerLong', 2, 12]].forEach(([id, key, lo, hi]) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('change', () => {
+    if (!isProUser()) return;
+    let v = parseInt(el.value, 10);
+    if (isNaN(v)) v = pomoCfg()[key];
+    v = Math.max(lo, Math.min(hi, v));
+    el.value = v;
+    appSettings.pomodoro[key] = v;
+    saveAppSettings();
+    updatePomoToggle();
+  });
+});
+
+const pomoToggleBtn = document.getElementById('pomoToggleBtn');
+function updatePomoToggle() {
+  if (!pomoToggleBtn) return;
+  const cfg = pomoCfg();
+  const on = isProUser() && cfg.enabled;
+  pomoToggleBtn.classList.toggle('on', on);
+  const hint = document.getElementById('pomoToggleHint');
+  if (!isProUser()) hint.textContent = '🔒 PRO';
+  else hint.textContent = on ? `${cfg.workMin}·${cfg.breakMin}·${cfg.longBreakMin}` : t('pomoOff');
+}
+pomoToggleBtn.addEventListener('click', () => {
+  if (!isProUser()) { window.location.href = 'upgrade.html'; return; }
+  appSettings.pomodoro.enabled = !appSettings.pomodoro.enabled;
+  saveAppSettings();
+  updatePomoToggle();
 });
 
 let pendingRevert = null; // { id, kind: 'finish' | 'switch' | 'cancel' } — lets "취소" undo and return to the task that was running
@@ -3416,6 +3542,7 @@ customAccent2Input.addEventListener('input', () => {
 function renderSettingsUI() {
   renderNotifyPermissionUI();
   renderSystemIdleUI();
+  renderPomoSettings();
   modeTabs.querySelectorAll('button').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.mode === themeSettings.mode);
   });
