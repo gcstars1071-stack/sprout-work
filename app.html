@@ -1902,9 +1902,19 @@ function notify(title, body) {
     }).catch(() => {});
     return;
   }
-  // plain browser fallback — only works while the tab is open
-  if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification(title, { body, requireInteraction: true }); } catch (e) {}
+  // plain browser — only works while the tab is open (foreground or background)
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const opts = { body, icon: 'icon.png', badge: 'icon.png', tag: 'sprout-work', renotify: true, requireInteraction: true };
+  // Prefer the service worker: registration.showNotification() works on mobile Chrome,
+  // where the `new Notification()` constructor is forbidden (it throws). Fall back to
+  // the constructor on desktop browsers without an active registration.
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then(reg => {
+      if (reg && reg.showNotification) reg.showNotification(title, opts);
+      else { try { new Notification(title, opts); } catch (e) {} }
+    }).catch(() => { try { new Notification(title, opts); } catch (e) {} });
+  } else {
+    try { new Notification(title, opts); } catch (e) {}
   }
 }
 
@@ -4973,9 +4983,11 @@ function startApp() {
   setTimeout(checkNudges, 800); // after initial render settles
 
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
-    });
+    // register now if the page already finished loading (startApp usually runs after
+    // the 'load' event, so a plain load-listener would never fire) — otherwise wait
+    const registerSW = () => navigator.serviceWorker.register('sw.js').catch(() => {});
+    if (document.readyState === 'complete') registerSW();
+    else window.addEventListener('load', registerSW);
   }
 }
 applyI18n(); // translate the auth gate itself even before login
