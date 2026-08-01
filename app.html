@@ -2052,8 +2052,11 @@ function checkAlarm(session) {
   if (fs >= session.plannedSeconds + session.alarmNextAt) {
     beep();
     notify(t('alarmNotifyTitle'), t('alarmNotifyBody', { title: session.title }));
-    session.alarmNextAt += 300; // next alarm in 5 min
     persist('alarm_fired', { sessionId: session.id, title: session.title });
+    // advance to the next 5-min boundary strictly AFTER the current elapsed time.
+    // If a lot of overtime piled up while the tab was backgrounded/asleep, this fires
+    // once and jumps ahead — instead of replaying every missed 5-min window as a burst.
+    session.alarmNextAt = (Math.floor(overtime / 300) + 1) * 300;
   }
   return true;
 }
@@ -4973,9 +4976,14 @@ function startApp() {
   renderHistoryLists();
   renderCalendar();
   initDashboard();
-  setInterval(tick, 1000);
-  setInterval(updateLiveWidgets, 1000);
-  setInterval(updateMiniStats, 30000);
+  // clear any prior loops so a second startApp (e.g. sign-out → guest) never stacks
+  // duplicate tick loops — which would fire every notification 2×, 3×, …
+  if (window.__swIntervals) window.__swIntervals.forEach(clearInterval);
+  window.__swIntervals = [
+    setInterval(tick, 1000),
+    setInterval(updateLiveWidgets, 1000),
+    setInterval(updateMiniStats, 30000)
+  ];
   checkSleepResume();
   checkBreakOverrun();
   restoreWebIdleDetector();
