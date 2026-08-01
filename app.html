@@ -2581,6 +2581,7 @@ document.addEventListener('visibilitychange', () => {
     // returning to the tab after the machine may have slept — check the away-gap first
     if (typeof checkSleepResume === 'function') checkSleepResume();
     if (typeof checkBreakOverrun === 'function') checkBreakOverrun();
+    if (typeof cloudRefresh === 'function') cloudRefresh(); // pick up changes from other devices
     markActivity();
   }
 });
@@ -4694,11 +4695,79 @@ function startGuestApp() {
 }
 
 /* ---------- cloud sync (per-user key/value mirror of localStorage) ---------- */
+// remember what we just wrote so the realtime echo of our own change is ignored
+const recentCloudWrites = {}; // key -> { json, ts }
 function cloudSet(key, value) {
   if (!currentUser) return;
+  try { recentCloudWrites[key] = { json: JSON.stringify(value), ts: Date.now() }; } catch (e) {}
   supabaseClient.from('user_data').upsert({
     user_id: currentUser.id, data_key: key, data_value: value, updated_at: new Date().toISOString()
   }).then(({ error }) => { if (error) console.error('cloudSet failed', key, error); });
+}
+
+// re-read every in-memory copy from localStorage (after the cloud overwrites it)
+function reloadInMemoryFromLocal() {
+  state = loadState();
+  nextIdCounter = Object.keys(state.sessions).length
+    ? Math.max(...Object.keys(state.sessions).map(Number)) + 1 : 1;
+  appSettings = loadAppSettings();
+  themeSettings = loadThemeSettings();
+  todos = loadTodos();
+  planDismissed = loadPlanDismissed();
+}
+
+/* ---------- realtime cross-device sync ----------
+   Subscribe to this user's rows in user_data; when another device writes, apply the
+   change here immediately. Requires Realtime to be enabled for the user_data table
+   in the Supabase dashboard (Database → Replication). */
+let realtimeChannel = null;
+function setupRealtimeSync() {
+  if (!currentUser || realtimeChannel) return;
+  realtimeChannel = supabaseClient
+    .channel('user_data_' + currentUser.id)
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'user_data', filter: 'user_id=eq.' + currentUser.id },
+      payload => { try { applyRemoteRow(payload.new); } catch (e) { console.error('realtime apply failed', e); } })
+    .subscribe();
+}
+function teardownRealtimeSync() {
+  if (realtimeChannel) { try { supabaseClient.removeChannel(realtimeChannel); } catch (e) {} realtimeChannel = null; }
+}
+function applyRemoteRow(row) {
+  if (!row || !row.data_key) return;
+  const key = row.data_key;
+  const json = JSON.stringify(row.data_value);
+  // ignore the echo of our own recent write (same value within 10s)
+  const rec = recentCloudWrites[key];
+  if (rec && rec.json === json && Date.now() - rec.ts < 10000) return;
+  if (localStorage.getItem(key) === json) return; // already up to date
+  localStorage.setItem(key, json);
+  reloadInMemoryFromLocal();
+  applyAppSettings(); applyTheme(); applyI18n();
+  render();
+  if (typeof renderCalendar === 'function') renderCalendar();
+}
+
+// lightweight full refresh from cloud (used when the tab regains focus) — overwrites
+// local keys with the cloud copy without the destructive wipe cloudPullAll does
+let lastCloudRefreshAt = 0;
+async function cloudRefresh() {
+  if (!currentUser) return;
+  if (Date.now() - lastCloudRefreshAt < 3000) return; // debounce
+  lastCloudRefreshAt = Date.now();
+  const { data, error } = await supabaseClient.from('user_data').select('data_key,data_value');
+  if (error || !data) return;
+  let changed = false;
+  data.forEach(row => {
+    const json = JSON.stringify(row.data_value);
+    if (localStorage.getItem(row.data_key) !== json) { localStorage.setItem(row.data_key, json); changed = true; }
+  });
+  if (changed) {
+    reloadInMemoryFromLocal();
+    applyAppSettings(); applyTheme(); applyI18n();
+    render();
+    if (typeof renderCalendar === 'function') renderCalendar();
+  }
 }
 function clearLocalAppData() {
   Object.keys(localStorage)
@@ -4722,13 +4791,7 @@ async function cloudPullAll() {
   if (error || !data) return;
   data.forEach(row => localStorage.setItem(row.data_key, JSON.stringify(row.data_value)));
   // re-read everything already-loaded-at-parse-time now that the cloud copy has overwritten localStorage
-  state = loadState();
-  nextIdCounter = Object.keys(state.sessions).length
-    ? Math.max(...Object.keys(state.sessions).map(Number)) + 1 : 1;
-  appSettings = loadAppSettings();
-  themeSettings = loadThemeSettings();
-  todos = loadTodos();
-  planDismissed = loadPlanDismissed();
+  reloadInMemoryFromLocal();
 }
 function cloudPushAllFromGuest() {
   // guest signed up — push whatever they already built locally up to their brand-new account
@@ -4757,6 +4820,7 @@ function showApp(user) {
   }
   // any login while there's unsaved guest work must push it up, never silently wipe it —
   // don't rely solely on the gate flag, since login can also happen through other entry points
+  setupRealtimeSync(); // live cross-device sync (idempotent)
   if (guestMigrationPending || (wasGuest && guestSessionCount() > 0)) {
     guestMigrationPending = false;
     cloudPushAllFromGuest();
@@ -4783,6 +4847,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session) showApp(session.user);
   if (event === 'SIGNED_OUT') {
     // don't leave a logged-out session's data sitting in localStorage where the next guest could see it
+    teardownRealtimeSync();
     clearLocalAppData();
     appStarted = false;
     startGuestApp();
