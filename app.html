@@ -3116,8 +3116,11 @@ function renderPlan() {
   // the active task and its ancestors are "in progress right now", not carry-over —
   // a parent whose child is running shouldn't show up as an unfinished plan item
   const inProgressIds = new Set();
-  let cur = state.activeId ? state.sessions[state.activeId] : null;
-  while (cur) { inProgressIds.add(cur.id); cur = cur.parentId != null ? state.sessions[cur.parentId] : null; }
+  const addChain = (id) => { let c = id ? state.sessions[id] : null; while (c) { inProgressIds.add(c.id); c = c.parentId != null ? state.sessions[c.parentId] : null; } };
+  addChain(state.activeId);
+  // a Pomodoro work task is paused during its break, but it's still "in progress" —
+  // don't let it drop into Tomorrow's plan while the break timer runs
+  if (state.pomo && state.pomo.on && state.pomo.workTaskId) addChain(state.pomo.workTaskId);
   const todayUnfinished = Object.values(state.sessions)
     .filter(s => s.status !== 'done' && s.status !== 'cancelled' && s.category !== 'break' && !inProgressIds.has(s.id))
     .map(s => ({ session: s, sessionsMap: state.sessions, label: t('todayLabel'), dateStr: todayDate }));
