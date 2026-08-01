@@ -2176,16 +2176,20 @@ function tick() {
   checkDateRollover();
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (active && pomoOn()) {
-    // Pomodoro: show the current phase's remaining, auto-advance at the boundary
-    const rem = pomoRemaining();
-    timeDisplayEl.textContent = fmt(rem);
-    timeDisplayEl.classList.toggle('overtime', false);
-    const cfg = pomoCfg();
-    const label = state.pomo.phase === 'work' ? t('pomoPhaseWork') : t('pomoPhaseBreak');
-    statusLineEl.textContent = `🍅 ${label} · ${t('pomoCycleLabel', { n: state.pomo.completed % (cfg.cyclesPerLong || 4) + (state.pomo.phase === 'work' ? 1 : 0), total: cfg.cyclesPerLong || 4 })}`;
-    statusLineEl.classList.remove('alarm');
-    flashTitle(false);
-    if (rem <= 0) pomodoroTransition();
+    // Pomodoro: advance the phase FIRST if this boundary was reached, so we never
+    // paint one stale frame of the old phase (which looked like the mode flickering)
+    if (pomoRemaining() <= 0) pomodoroTransition();
+    // re-read: the transition may have swapped the active session / phase
+    const pa = state.activeId ? state.sessions[state.activeId] : null;
+    if (pa && pomoOn()) {
+      const cfg = pomoCfg();
+      timeDisplayEl.textContent = fmt(pomoRemaining());
+      timeDisplayEl.classList.toggle('overtime', false);
+      const label = state.pomo.phase === 'work' ? t('pomoPhaseWork') : t('pomoPhaseBreak');
+      statusLineEl.textContent = `🍅 ${label} · ${t('pomoCycleLabel', { n: state.pomo.completed % (cfg.cyclesPerLong || 4) + (state.pomo.phase === 'work' ? 1 : 0), total: cfg.cyclesPerLong || 4 })}`;
+      statusLineEl.classList.remove('alarm');
+      flashTitle(false);
+    }
   } else if (active) {
     const fs = focusSeconds(active);
     const remaining = active.plannedSeconds - fs;
