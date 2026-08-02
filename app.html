@@ -2701,6 +2701,7 @@ let pendingRevert = null; // { id, kind: 'finish' | 'switch' | 'cancel' } — le
 finishBtn.addEventListener('click', () => {
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (!active) return;
+  stopPomodoro(); // user took manual control — don't leave a Pomodoro half-running
   pendingRevert = { id: active.id, kind: 'finish' };
   finishSession(active);
   render();
@@ -2710,6 +2711,7 @@ finishBtn.addEventListener('click', () => {
 document.getElementById('cancelTaskBtn').addEventListener('click', () => {
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (!active) return;
+  stopPomodoro();
   pendingRevert = { id: active.id, kind: 'cancel' };
   cancelSession(active);
   render();
@@ -2720,8 +2722,14 @@ document.querySelectorAll('#extendTimeRow button[data-extend]').forEach(btn => {
   btn.addEventListener('click', () => {
     const active = state.activeId ? state.sessions[state.activeId] : null;
     if (!active) return;
-    active.plannedSeconds += Number(btn.dataset.extend) * 60;
-    active.alarmNextAt = null; // re-arm the alarm against the new planned time
+    const add = Number(btn.dataset.extend) * 60;
+    if (pomoOn()) {
+      // in Pomodoro, the countdown is the current phase — extend that phase
+      state.pomo.targetSec += add;
+    } else {
+      active.plannedSeconds += add;
+      active.alarmNextAt = null; // re-arm the alarm against the new planned time
+    }
     render();
   });
 });
@@ -2733,6 +2741,7 @@ function applyExtendButtonLabels() {
 
 switchBtn.addEventListener('click', () => {
   const active = state.activeId ? state.sessions[state.activeId] : null;
+  stopPomodoro();
   if (active) {
     pendingRevert = { id: active.id, kind: 'switch' };
     pauseSession(active);
@@ -2843,6 +2852,7 @@ modalCancel.addEventListener('click', () => {
 document.getElementById('leaveBtn').addEventListener('click', () => {
   if (!currentUser) { closeModal(); requireAccountForGuestLimit('clockout'); return; }
   // commit whatever just happened (finish/switch) — don't revert, just stop for the day
+  stopPomodoro();
   resolveIdle();
   pendingRevert = null;
   state.activeId = null;
@@ -2870,6 +2880,7 @@ document.getElementById('leaveBtnStart').addEventListener('click', () => {
   } else {
     if (!currentUser) { requireAccountForGuestLimit('clockout'); return; }
     // 퇴근: lock the dashboard (flip + fade) until clocking back in
+    stopPomodoro();
     state.dayEnded = true;
     msg.textContent = t('leaveMsg');
     msg.style.display = 'block';
