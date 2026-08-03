@@ -2289,7 +2289,12 @@ function findAwaySession(lastSeenMs) {
   if (active && active.category !== 'break') {
     const lastIv = active.intervals[active.intervals.length - 1];
     if (lastIv && lastIv.type === 'focus' && lastIv.end === null) {
-      return { session: active, mode: 'active' };
+      // Only trust the gap if our heartbeat belongs to THIS device's run of this
+      // interval. If lastSeen predates the interval's start, the interval was
+      // started elsewhere (arrived via cloud sync) or the heartbeat is stale — the
+      // away time can't be attributed here, so don't show a bogus "45h away" prompt.
+      if (lastSeenMs >= lastIv.start - 60000) return { session: active, mode: 'active' };
+      return null;
     }
   }
   // 2) a session idle-detection just paused, its last focus interval closing near lastSeen
