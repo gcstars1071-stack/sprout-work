@@ -1260,11 +1260,20 @@ function applyPresetMinutesToButtons() {
       btn.textContent = formatMinutes(mins);
     });
   });
-  // keep the tracked "currently selected" minute values in sync with whichever button is marked active
+  // keep the tracked "currently selected" minute value in sync with the ACTIVE button.
+  // (Previously this always reset to the first preset — so picking 15/25/30 and then
+  // any re-render/sync silently snapped the selection back to 5 minutes.)
   const firstMin = appSettings.presetMinutes[0];
-  if (typeof selectedStartMin !== 'undefined' && startPresets.querySelector('button.active')?.dataset.min !== 'custom') selectedStartMin = firstMin;
-  if (typeof selectedModalMin !== 'undefined' && modalPresets.querySelector('button.active')?.dataset.min !== 'custom') selectedModalMin = firstMin;
-  if (typeof selectedTodoMin !== 'undefined' && todoPresets.querySelector('button.active')?.dataset.min !== 'custom') selectedTodoMin = firstMin;
+  const activeMin = (group) => {
+    const b = group && group.querySelector('button.active');
+    if (!b) return firstMin;               // nothing selected → first preset
+    if (b.dataset.min === 'custom') return null; // custom is tracked by its input — leave it
+    const v = parseInt(b.dataset.min, 10);
+    return isNaN(v) ? firstMin : v;
+  };
+  if (typeof selectedStartMin !== 'undefined') { const v = activeMin(startPresets); if (v != null) selectedStartMin = v; }
+  if (typeof selectedModalMin !== 'undefined') { const v = activeMin(modalPresets); if (v != null) selectedModalMin = v; }
+  if (typeof selectedTodoMin !== 'undefined') { const v = activeMin(todoPresets); if (v != null) selectedTodoMin = v; }
 }
 
 /* ---------- i18n (en default, ko, vi) ---------- */
