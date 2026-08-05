@@ -148,6 +148,7 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 #pwOverlay,#signupOverlay,#resetOverlay,#adminLoginOverlay,#procOverlay{z-index:90}
+#setOverlay,#addMemberOverlay{z-index:60}
 .overlay.on{display:flex}
 .modal{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);width:440px;max-width:100%;max-height:92vh;overflow:auto}
 .modal h3{padding:16px 18px;font-size:15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--surface)}
@@ -312,12 +313,15 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
   </div>
 
   <div class="subbar">
-    <span class="proj-name"><span class="ic">📁</span>2026 Q3 릴리스</span>
+    <span class="proj-name"><span class="ic">📁</span><select class="f" id="periodSel" title="기간 선택"></select></span>
     <input class="search" id="search" placeholder="업무 검색…">
     <select class="f" id="fAssignee"></select>
     <select class="f" id="fPriority">
       <option value="all">우선순위 전체</option>
       <option value="high">높음</option><option value="mid">보통</option><option value="low">낮음</option>
+    </select>
+    <select class="f" id="fStatus2">
+      <option value="all">상태 전체</option><option value="active">진행 중</option><option value="done">완료</option>
     </select>
     <div class="toggle" id="fDue"><span class="ic">⏰</span>기한 임박(7일)</div>
     <span class="tz"><span class="ic">🌐</span><span id="tzInfo"></span></span>
@@ -328,7 +332,7 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
     <div class="view" id="view-board"><div class="board" id="board"></div></div>
     <div class="view" id="view-mine">
       <div class="mw">
-        <div class="who"><span style="font-size:14px;color:var(--text-2)">담당자</span><select id="userSel"></select></div>
+        <div class="who"><span style="font-size:14px;color:var(--text-2)">보기 대상</span><select id="userSel"></select></div>
         <p class="mw-cap">기한 임박순으로 정렬됩니다. 체크하면 완료 처리됩니다.</p>
         <div id="mineList"></div>
         <div class="load">
@@ -371,9 +375,10 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
 <!-- ORG EDITOR MODAL -->
 <div class="overlay" id="orgOverlay">
   <div class="modal" style="width:600px">
-    <h3><span>조직도 편집</span><button class="close" id="orgClose">×</button></h3>
+    <h3><span>조직도 · 구성원 관리</span><button class="close" id="orgClose">×</button></h3>
     <div class="body">
-      <p style="font-size:12px;color:var(--text-2)">각 구성원의 상사(보고 대상)와 직함을 지정하면 로그인 조직도에 반영됩니다. (관리자만 가능)</p>
+      <p style="font-size:12px;color:var(--text-2)">구성원을 추가하고, 역할·상사·직함을 지정하면 로그인 조직도에 반영됩니다. (관리자만 가능)</p>
+      <button class="btn" id="orgAdd" style="align-self:flex-start;font-size:12px"><span class="ic">＋</span> 구성원 추가</button>
       <div class="chartwrap" style="border:1px solid var(--border);border-radius:10px;background:var(--surface-2)"><div class="tree" id="orgPreview"></div></div>
       <div id="orgRows"></div>
     </div>
@@ -387,9 +392,30 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
     <h3><span>사용자·권한 관리</span><button class="close" id="uClose">×</button></h3>
     <div class="body">
       <p style="font-size:12px;color:var(--text-2)">역할을 바꾸면 권한이 즉시 적용됩니다. 접속 상태와 비밀번호 재설정도 여기서 관리합니다.</p>
+      <button class="btn" id="uAdd" style="align-self:flex-start;font-size:12px"><span class="ic">＋</span> 구성원 추가</button>
       <div id="uList"></div>
     </div>
     <div class="foot"><button class="btn primary" id="uDone">완료</button></div>
+  </div>
+</div>
+
+<!-- ADD MEMBER -->
+<div class="overlay" id="addMemberOverlay">
+  <div class="modal" style="width:410px">
+    <h3><span>구성원 추가</span><button class="close" id="amClose">×</button></h3>
+    <div class="body">
+      <p style="font-size:12px;color:var(--text-2)">계정이 즉시 생성됩니다. 초기 비밀번호를 알려주면 본인이 로그인 후 변경할 수 있습니다.</p>
+      <div class="fld"><label>이름 *</label><input id="amName" placeholder="예: 김하나"></div>
+      <div class="fld"><label>이메일(로그인 ID) *</label><input id="amEmail" placeholder="예: hana@company.com" autocomplete="off"></div>
+      <div class="fld"><label>초기 비밀번호 *</label><input id="amPw" placeholder="본인이 나중에 변경 가능"></div>
+      <div class="row2">
+        <div class="fld"><label>역할</label><select id="amRole"><option value="member">팀원</option><option value="lead">팀장</option><option value="viewer">뷰어</option><option value="admin">관리자</option></select></div>
+        <div class="fld"><label>상사</label><select id="amMgr"></select></div>
+      </div>
+      <div class="fld"><label>직함</label><input id="amTitle" placeholder="예: 백엔드 개발"></div>
+      <div class="pwerr" id="amErr" hidden></div>
+    </div>
+    <div class="foot"><button class="btn" id="amCancel">취소</button><button class="btn primary" id="amSave">추가</button></div>
   </div>
 </div>
 
@@ -571,11 +597,14 @@ const I18N={
   "할 일":{en:"To do",vi:"Cần làm"},"진행":{en:"In progress",vi:"Đang làm"},"검토":{en:"Review",vi:"Kiểm tra"},
   "높음":{en:"High",vi:"Cao"},"보통":{en:"Medium",vi:"Trung bình"},"낮음":{en:"Low",vi:"Thấp"},
   "담당자 전체":{en:"All assignees",vi:"Tất cả người phụ trách"},"우선순위 전체":{en:"All priorities",vi:"Tất cả ưu tiên"},
+  "전체 기간":{en:"All periods",vi:"Tất cả kỳ"},"상태 전체":{en:"All statuses",vi:"Tất cả trạng thái"},"진행 중":{en:"In progress",vi:"Đang làm"},"보기 대상":{en:"Viewing",vi:"Đang xem"},
   "기한 임박(7일)":{en:"Due soon (7d)",vi:"Sắp hết hạn (7 ngày)"},"담당자":{en:"Assignee",vi:"Người phụ trách"},
   "업무 트리":{en:"Task tree",vi:"Cây công việc"},"이번 주 업무 부하":{en:"This week's workload",vi:"Khối lượng tuần này"},
   "오늘":{en:"Today",vi:"Hôm nay"},"이번 주":{en:"This week",vi:"Tuần này"},"지연":{en:"Overdue",vi:"Trễ hạn"},"이후":{en:"Later",vi:"Sau này"},
   "가입 · 재설정 요청":{en:"Sign-up · reset requests",vi:"Yêu cầu đăng ký · đặt lại"},"등록된 회사":{en:"Registered companies",vi:"Công ty đã đăng ký"},
   "사용자·권한 관리":{en:"Users & roles",vi:"Người dùng & quyền"},"조직도 편집":{en:"Edit org chart",vi:"Sửa sơ đồ tổ chức"},
+  "조직도 · 구성원 관리":{en:"Org chart · members",vi:"Sơ đồ · thành viên"},
+  "구성원을 추가하고, 역할·상사·직함을 지정하면 로그인 조직도에 반영됩니다. (관리자만 가능)":{en:"Add members and set role, manager, and title; it reflects in the login org chart. (Admin only)",vi:"Thêm thành viên và đặt vai trò, quản lý, chức danh; sẽ hiển thị trong sơ đồ đăng nhập. (Chỉ quản trị)"},
   "공개 범위":{en:"Visibility",vi:"Phạm vi hiển thị"},"전체 공개":{en:"Everyone",vi:"Mọi người"},"우리 팀만":{en:"My team only",vi:"Chỉ nhóm tôi"},
   "🔒 우리 팀":{en:"🔒 Team only",vi:"🔒 Chỉ nhóm"},
   "🌐 전체 공개":{en:"🌐 Everyone",vi:"🌐 Mọi người"},"🔒 우리 팀만":{en:"🔒 My team only",vi:"🔒 Chỉ nhóm tôi"},"— 없음 (최상위)":{en:"— None (top level)",vi:"— Không (cấp cao nhất)"},
@@ -602,6 +631,10 @@ const I18N={
   "이메일":{en:"Email",vi:"Email"},"회사 코드(ID) *":{en:"Company code (ID) *",vi:"Mã công ty (ID) *"},"회사명":{en:"Company name",vi:"Tên công ty"},"회사 비밀번호 *":{en:"Company password *",vi:"Mật khẩu công ty *"},
   "현재 비밀번호":{en:"Current password",vi:"Mật khẩu hiện tại"},"새 비밀번호":{en:"New password",vi:"Mật khẩu mới"},"새 비밀번호 확인":{en:"Confirm new password",vi:"Xác nhận mật khẩu mới"},"내 비밀번호 변경":{en:"Change my password",vi:"Đổi mật khẩu của tôi"},
   "직함":{en:"Title",vi:"Chức danh"},"상사":{en:"Manager",vi:"Quản lý"},
+  "구성원 추가":{en:"Add member",vi:"Thêm thành viên"},"추가":{en:"Add",vi:"Thêm"},"역할":{en:"Role",vi:"Vai trò"},
+  "이름 *":{en:"Name *",vi:"Tên *"},"이메일(로그인 ID) *":{en:"Email (login ID) *",vi:"Email (ID đăng nhập) *"},"초기 비밀번호 *":{en:"Initial password *",vi:"Mật khẩu ban đầu *"},
+  "계정이 즉시 생성됩니다. 초기 비밀번호를 알려주면 본인이 로그인 후 변경할 수 있습니다.":{en:"The account is created immediately. Share the initial password; the user can change it after logging in.",vi:"Tài khoản được tạo ngay. Chia sẻ mật khẩu ban đầu; người dùng có thể đổi sau khi đăng nhập."},
+  "예: 김하나":{en:"e.g. Jane Kim",vi:"vd: Jane Kim"},"예: hana@company.com":{en:"e.g. hana@company.com",vi:"vd: hana@company.com"},"본인이 나중에 변경 가능":{en:"User can change it later",vi:"Người dùng có thể đổi sau"},"예: 백엔드 개발":{en:"e.g. Backend dev",vi:"vd: Lập trình backend"},
   "테스트 회사 코드:":{en:"Test company code:",vi:"Mã công ty thử:"},"· 비밀번호:":{en:"· password:",vi:"· mật khẩu:"},
   "SproutWork 도메인 아래":{en:"Under the SproutWork domain,",vi:"Dưới tên miền SproutWork,"},"는 회사 단위로 분리된 워크스페이스입니다.":{en:" is a per-company workspace.",vi:" là không gian làm việc riêng theo công ty."},
   "예: SPROUT":{en:"e.g. SPROUT",vi:"vd: SPROUT"},"업무 검색…":{en:"Search tasks…",vi:"Tìm việc…"},"예: PG 연동 구현":{en:"e.g. Integrate PG",vi:"vd: Tích hợp PG"},
@@ -656,6 +689,10 @@ function parse(s){const d=new Date(s+"T00:00:00");d.setHours(0,0,0,0);return d;}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function monday(d){const x=new Date(d);const w=(x.getDay()+6)%7;return addDays(x,-w);}
 function daysBetween(a,b){return Math.round((b-a)/DAY);}
+function quarterOf(dateStr){const d=parse(dateStr);return d.getFullYear()+"-Q"+(Math.floor(d.getMonth()/3)+1);}
+function quarterRange(key){const p=key.split("-Q");const y=+p[0],q=+p[1],m0=(q-1)*3;return {s:new Date(y,m0,1),e:new Date(y,m0+3,0)};}
+function taskInPeriod(t,key){if(!key||key==="all")return true;const r=quarterRange(key);return parse(t.start)<=r.e&&parse(t.end)>=r.s;}
+function allPeriods(){const set={};(state.tasks||[]).forEach(t=>{if(t.start)set[quarterOf(t.start)]=1;if(t.end)set[quarterOf(t.end)]=1;});return Object.keys(set).sort();}
 function person(id){return people.find(p=>p.id===id)||{initials:"?",name:"미지정",bg:"var(--surface-1)",fg:"var(--text-2)"};}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h*33)^s.charCodeAt(i))>>>0;return "h"+h;}
@@ -679,7 +716,7 @@ function seed(){
     managers:{jh:null,mk:"jh",sr:"jh",dv:"mk",yj:"sr"},
     titles:{jh:"프로젝트 리드",mk:"백엔드 팀장",sr:"프로덕트 팀장",dv:"백엔드 개발",yj:"이해관계자"},
     passwords:pw,
-    online:["mk","sr"],
+    online:[],
     tasks:[
       {id:A,parent:null,title:"결제 시스템 개편",user:"mk",status:"doing",prio:"high",start:D(-9),end:D(18),prog:48,open:true,visibility:"team"},
       {id:id(),parent:A,title:"API 스펙 확정",user:"mk",status:"done",prio:"mid",start:D(-9),end:D(-3),prog:100,open:true},
@@ -784,11 +821,14 @@ function can(action,t){
 }
 
 /* ---------- filtering ---------- */
-let filter={q:"",assignee:"all",prio:"all",due:false};
+let filter={q:"",assignee:"all",prio:"all",due:false,period:"all",status2:"all"};
 function matches(t){
   if(filter.q&&!t.title.toLowerCase().includes(filter.q.toLowerCase()))return false;
   if(filter.assignee!=="all"&&t.user!==filter.assignee)return false;
   if(filter.prio!=="all"&&t.prio!==filter.prio)return false;
+  if(filter.status2==="done"&&t.status!=="done")return false;
+  if(filter.status2==="active"&&t.status==="done")return false;
+  if(!taskInPeriod(t,filter.period))return false;
   if(filter.due){const dd=fmtDD(t.end,t.status);if(!dd||daysBetween(today(),parse(t.end))>7)return false;}
   return true;
 }
@@ -888,7 +928,7 @@ function bindDrag(){
 /* ---------- my work ---------- */
 function renderMine(){
   const uid=state.currentUser,list=document.getElementById("mineList");
-  const mine=state.tasks.filter(t=>t.user===uid&&children(t.id).length===0&&visibleToMe(t));
+  const mine=state.tasks.filter(t=>t.user===uid&&visibleToMe(t)&&taskInPeriod(t,filter.period));
   const groups={overdue:[],today:[],week:[],later:[],done:[]};
   mine.forEach(t=>{
     if(t.status==="done"){groups.done.push(t);return;}
@@ -937,9 +977,17 @@ function renderChrome(){
   document.getElementById("resetBtn").hidden=u.role!=="admin";
   const fa=document.getElementById("fAssignee");
   if(fa.options.length===0)fa.innerHTML='<option value="all">담당자 전체</option>'+people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+  // 기간 선택기(업무 날짜에서 자동 구성)
+  const ps=document.getElementById("periodSel");
+  if(ps){const per=allPeriods();if(filter.period!=="all"&&per.indexOf(filter.period)<0)filter.period="all";
+    ps.innerHTML='<option value="all">전체 기간</option>'+per.map(k=>{const pp=k.split("-Q");return '<option value="'+k+'">'+pp[0]+" Q"+pp[1]+'</option>';}).join("");
+    ps.value=filter.period;}
+  // 보기 대상: 관리자·팀장만 타인 조회 가능, 그 외 본인 고정
+  const canPick=(u.role==="admin"||u.role==="lead");
+  if(!canPick)state.currentUser=u.id;
   const us=document.getElementById("userSel");
   if(us.options.length===0)us.innerHTML=people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
-  us.value=state.currentUser;
+  us.value=state.currentUser;us.disabled=!canPick;
   const done=state.tasks.filter(t=>t.status==="done").length;
   document.getElementById("tzInfo").textContent="3개 타임존 · 오늘 "+(today().getMonth()+1)+"월 "+today().getDate()+"일 · 완료 "+done+"/"+state.tasks.length;
 }
@@ -997,6 +1045,21 @@ async function submitLogin(){
   document.getElementById("pwOverlay").classList.remove("on");
   await doLogin(id);
 }
+/* ---- 실시간 접속 현황(Supabase Realtime Presence) ---- */
+let presenceChannel=null;
+function syncPresence(){if(!presenceChannel)return;try{state.online=Object.keys(presenceChannel.presenceState());}catch(e){}renderPresence();}
+function joinPresence(){
+  if(!sb||!state.orgId||!state.session)return;
+  leavePresence();
+  const u=me();
+  presenceChannel=sb.channel("presence-org-"+state.orgId,{config:{presence:{key:state.session}}});
+  presenceChannel.on("presence",{event:"sync"},syncPresence)
+    .on("presence",{event:"join"},syncPresence)
+    .on("presence",{event:"leave"},syncPresence)
+    .subscribe(async(status)=>{if(status==="SUBSCRIBED"){try{await presenceChannel.track({user_id:state.session,name:u?u.name:"",at:Date.now()});}catch(e){}}});
+}
+function leavePresence(){if(presenceChannel&&sb){try{sb.removeChannel(presenceChannel);}catch(e){}}presenceChannel=null;}
+
 async function doLogin(id){
   state.session=id;state.currentUser=id;
   if(dbMode)state.online=[id];else if(!isOnline(id))state.online.push(id);
@@ -1005,10 +1068,12 @@ async function doLogin(id){
   document.getElementById("login").classList.remove("on");
   document.getElementById("app").hidden=false;
   switchView(state.view||"gantt");renderAll();
+  if(dbMode&&sb)joinPresence();
 }
 function doLogout(){
+  leavePresence();
   if(sb){try{sb.auth.signOut();}catch(e){}}
-  state.online=state.online.filter(x=>x!==state.session);
+  state.online=[];
   state.session=null;save();
   document.getElementById("app").hidden=true;
   renderLoginChart();
@@ -1041,8 +1106,9 @@ async function enterCompany(){
   document.getElementById("login").classList.add("on");
 }
 function switchCompany(){
+  leavePresence();
   if(sb){try{sb.auth.signOut();}catch(e){}}
-  state.companyUnlocked=false;state.session=null;save();
+  state.companyUnlocked=false;state.session=null;state.online=[];save();
   document.getElementById("login").classList.remove("on");
   document.getElementById("app").hidden=true;
   document.getElementById("coCode").value="";document.getElementById("coPw").value="";
@@ -1172,16 +1238,38 @@ function openSetPw(targetId,requireCurrent){
   document.getElementById("setOverlay").classList.add("on");
   setTimeout(()=>document.getElementById(requireCurrent?"setCur":"setNew").focus(),30);
 }
-function saveSetPw(){
+async function saveSetPw(){
   if(!setTarget)return;const u=me();if(!u||(u.role!=="admin"&&u.id!==setTarget))return;
   const err=document.getElementById("setErr");
   const cur=document.getElementById("setCur").value, nw=document.getElementById("setNew").value, nw2=document.getElementById("setNew2").value;
-  if(setRequireCur&&!verifyPw(setTarget,cur)){err.textContent="현재 비밀번호가 올바르지 않습니다.";err.hidden=false;return;}
   if(!nw){err.textContent="새 비밀번호를 입력하세요.";err.hidden=false;return;}
   if(nw!==nw2){err.textContent="새 비밀번호 확인이 일치하지 않습니다.";err.hidden=false;return;}
-  state.passwords[setTarget]=hash(nw);save();
+  const btn=document.getElementById("setSave");btn.disabled=true;btn.textContent="저장 중…";
+  const done=()=>{btn.disabled=false;btn.textContent="저장";};
+  if(dbMode&&sb){
+    if(setTarget===u.id){ // 본인 변경
+      if(setRequireCur){
+        const em=(person(u.id).email)||(u.id+"@"+LOGIN_DOMAIN);
+        const r=await sb.auth.signInWithPassword({email:em,password:cur});
+        if(r.error){done();err.textContent="현재 비밀번호가 올바르지 않습니다.";err.hidden=false;return;}
+      }
+      const {error}=await sb.auth.updateUser({password:nw});
+      done();if(error){err.textContent="변경 실패: "+error.message;err.hidden=false;return;}
+    }else{ // 관리자가 타인 비밀번호 초기화
+      const {error}=await sb.rpc("admin_reset_member_password",{p_member_id:setTarget,p_password:nw});
+      done();if(error){err.textContent="초기화 실패: "+error.message;err.hidden=false;return;}
+    }
+    document.getElementById("setOverlay").classList.remove("on");setTarget=null;
+    if(document.getElementById("uOverlay").classList.contains("on"))renderUsers();
+  if(document.getElementById("orgOverlay").classList.contains("on"))renderOrgEditor();
+    return;
+  }
+  // 오프라인 폴백
+  if(setRequireCur&&!verifyPw(setTarget,cur)){done();err.textContent="현재 비밀번호가 올바르지 않습니다.";err.hidden=false;return;}
+  state.passwords[setTarget]=hash(nw);save();done();
   document.getElementById("setOverlay").classList.remove("on");setTarget=null;
   if(document.getElementById("uOverlay").classList.contains("on"))renderUsers();
+  if(document.getElementById("orgOverlay").classList.contains("on"))renderOrgEditor();
 }
 
 /* ---------- user mgmt ---------- */
@@ -1193,10 +1281,46 @@ function renderUsers(){
       '<span class="un">'+esc(p.name)+(p.id===state.session?' (나)':'')+'</span>'+
       '<span class="ostat" style="background:'+(on?"var(--ok-bg)":"var(--surface-1)")+';color:'+(on?"var(--ok-fg)":"var(--text-3)")+'">'+(on?"접속중":"오프라인")+'</span>'+
       '<select data-role="'+p.id+'">'+opts+'</select>'+
-      '<button class="ubtn" data-pw="'+p.id+'">비번 재설정</button></div>';
+      '<button class="ubtn" data-pw="'+p.id+'">비번 재설정</button>'+
+      (p.id===state.session?'':'<button class="ubtn danger" data-del="'+p.id+'">삭제</button>')+'</div>';
   }).join("");
 }
 function openUsers(){if(!can("manageUsers"))return;renderUsers();document.getElementById("uOverlay").classList.add("on");}
+function openAddMember(){
+  if(!can("manageUsers"))return;
+  ["amName","amEmail","amPw","amTitle"].forEach(i=>document.getElementById(i).value="");
+  document.getElementById("amRole").value="member";
+  document.getElementById("amMgr").innerHTML='<option value="">— 없음(최상위)</option>'+people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+  document.getElementById("amErr").hidden=true;
+  document.getElementById("addMemberOverlay").classList.add("on");
+  setTimeout(()=>document.getElementById("amName").focus(),30);
+}
+async function saveAddMember(){
+  const err=document.getElementById("amErr");err.hidden=true;
+  const name=document.getElementById("amName").value.trim(), email=document.getElementById("amEmail").value.trim(), pw=document.getElementById("amPw").value;
+  if(!name||!email||!pw){err.textContent="이름·이메일·초기 비밀번호는 필수입니다.";err.hidden=false;return;}
+  if(!sb){err.textContent="서버 연결이 필요합니다.";err.hidden=false;return;}
+  const btn=document.getElementById("amSave");btn.disabled=true;btn.textContent="추가 중…";
+  const {error}=await sb.rpc("admin_create_member",{p_name:name,p_email:email,p_password:pw,p_role:document.getElementById("amRole").value,p_manager_id:document.getElementById("amMgr").value||null,p_title:document.getElementById("amTitle").value.trim()});
+  btn.disabled=false;btn.textContent="추가";
+  if(error){err.textContent="추가 실패: "+error.message;err.hidden=false;return;}
+  document.getElementById("addMemberOverlay").classList.remove("on");
+  if(state.orgId)await loadOrgMembers(state.orgId);
+  renderLoginChart();renderAll();
+  if(document.getElementById("uOverlay").classList.contains("on"))renderUsers();
+  if(document.getElementById("orgOverlay").classList.contains("on"))renderOrgEditor();
+}
+async function deleteMember(id){
+  if(!can("manageUsers")||!sb)return;
+  const p=person(id);
+  if(!confirm("'"+(p.name||"")+"' 구성원을 삭제할까요? 로그인 계정도 함께 삭제됩니다."))return;
+  const {error}=await sb.rpc("admin_delete_member",{p_member_id:id});
+  if(error){alert("삭제 실패: "+error.message);return;}
+  if(state.orgId)await loadOrgMembers(state.orgId);
+  renderLoginChart();renderAll();
+  if(document.getElementById("uOverlay").classList.contains("on"))renderUsers();
+  if(document.getElementById("orgOverlay").classList.contains("on"))renderOrgEditor();
+}
 
 /* ---------- org editor ---------- */
 function renderOrgEditor(){
@@ -1204,10 +1328,13 @@ function renderOrgEditor(){
   document.getElementById("orgRows").innerHTML=people.map(p=>{
     const invalid=people.filter(x=>x.id!==p.id&&wouldCycle(p.id,x.id)).map(x=>x.id);
     const opts='<option value="">— 최상위 (상사 없음)</option>'+people.filter(x=>x.id!==p.id&&invalid.indexOf(x.id)<0).map(x=>'<option value="'+x.id+'"'+(state.managers[p.id]===x.id?" selected":"")+'>'+esc(x.name)+'</option>').join("");
+    const roleOpts=Object.keys(ROLES).map(r=>'<option value="'+r+'"'+(roleOf(p.id)===r?" selected":"")+'>'+ROLES[r].label+'</option>').join("");
     return '<div class="urow"><div class="mini-av" style="background:'+p.bg+';color:'+p.fg+'">'+p.initials+'</div>'+
-      '<span class="un">'+esc(p.name)+'</span>'+
+      '<span class="un">'+esc(p.name)+(p.id===state.session?' (나)':'')+'</span>'+
+      '<select data-orole="'+p.id+'" title="역할">'+roleOpts+'</select>'+
       '<input class="tinp" data-title="'+p.id+'" value="'+esc(state.titles[p.id]||"")+'" placeholder="직함">'+
-      '<span style="font-size:11px;color:var(--text-3)">상사</span><select data-mgr="'+p.id+'">'+opts+'</select></div>';
+      '<span style="font-size:11px;color:var(--text-3)">상사</span><select data-mgr="'+p.id+'">'+opts+'</select>'+
+      (p.id===state.session?'':'<button class="ubtn danger" data-odel="'+p.id+'">삭제</button>')+'</div>';
   }).join("");
 }
 function openOrg(){if(!can("manageUsers"))return;renderOrgEditor();document.getElementById("orgOverlay").classList.add("on");}
@@ -1367,6 +1494,8 @@ function bind(){
   document.getElementById("search").addEventListener("input",e=>{filter.q=e.target.value;renderAll();});
   document.getElementById("fAssignee").addEventListener("change",e=>{filter.assignee=e.target.value;renderAll();});
   document.getElementById("fPriority").addEventListener("change",e=>{filter.prio=e.target.value;renderAll();});
+  document.getElementById("fStatus2").addEventListener("change",e=>{filter.status2=e.target.value;renderAll();});
+  document.getElementById("periodSel").addEventListener("change",e=>{filter.period=e.target.value;renderAll();});
   document.getElementById("fDue").addEventListener("click",e=>{filter.due=!filter.due;e.currentTarget.classList.toggle("on",filter.due);renderAll();});
   document.getElementById("userSel").addEventListener("change",e=>{state.currentUser=e.target.value;save();renderMine();});
 
@@ -1392,7 +1521,12 @@ function bind(){
   document.getElementById("uDone").addEventListener("click",()=>document.getElementById("uOverlay").classList.remove("on"));
   document.getElementById("uOverlay").addEventListener("click",e=>{if(e.target.id==="uOverlay")document.getElementById("uOverlay").classList.remove("on");});
   document.getElementById("uList").addEventListener("change",async e=>{const s=e.target.closest("[data-role]");if(s){state.roles[s.dataset.role]=s.value;if(dbMode&&sb){await sb.from("members").update({role:s.value}).eq("id",s.dataset.role);}else{save();}renderAll();renderUsers();}});
-  document.getElementById("uList").addEventListener("click",e=>{const b=e.target.closest("[data-pw]");if(b)openSetPw(b.dataset.pw,false);});
+  document.getElementById("uList").addEventListener("click",e=>{const b=e.target.closest("[data-pw]");if(b){openSetPw(b.dataset.pw,false);return;}const d=e.target.closest("[data-del]");if(d)deleteMember(d.dataset.del);});
+  document.getElementById("uAdd").addEventListener("click",openAddMember);
+  document.getElementById("amClose").addEventListener("click",()=>document.getElementById("addMemberOverlay").classList.remove("on"));
+  document.getElementById("amCancel").addEventListener("click",()=>document.getElementById("addMemberOverlay").classList.remove("on"));
+  document.getElementById("amSave").addEventListener("click",saveAddMember);
+  document.getElementById("addMemberOverlay").addEventListener("click",e=>{if(e.target.id==="addMemberOverlay")document.getElementById("addMemberOverlay").classList.remove("on");});
 
   // set pw
   document.getElementById("setClose").addEventListener("click",()=>{document.getElementById("setOverlay").classList.remove("on");setTarget=null;});
@@ -1404,10 +1538,13 @@ function bind(){
   document.getElementById("orgClose").addEventListener("click",()=>document.getElementById("orgOverlay").classList.remove("on"));
   document.getElementById("orgDone").addEventListener("click",()=>document.getElementById("orgOverlay").classList.remove("on"));
   document.getElementById("orgOverlay").addEventListener("click",e=>{if(e.target.id==="orgOverlay")document.getElementById("orgOverlay").classList.remove("on");});
+  document.getElementById("orgAdd").addEventListener("click",openAddMember);
   document.getElementById("orgRows").addEventListener("change",async e=>{
-    const m=e.target.closest("[data-mgr]");if(m){const pid=m.dataset.mgr,val=m.value||null;if(val&&wouldCycle(pid,val)){renderOrgEditor();return;}state.managers[pid]=val;if(dbMode&&sb){await sb.from("members").update({manager_id:val}).eq("id",pid);}else{save();}renderOrgEditor();renderPresence();return;}
-    const ti=e.target.closest("[data-title]");if(ti){const v=ti.value.trim();state.titles[ti.dataset.title]=v;if(dbMode&&sb){await sb.from("members").update({title:v}).eq("id",ti.dataset.title);}else{save();}renderOrgEditor();}
+    const m=e.target.closest("[data-mgr]");if(m){const pid=m.dataset.mgr,val=m.value||null;if(val&&wouldCycle(pid,val)){renderOrgEditor();return;}state.managers[pid]=val;if(dbMode&&sb){await sb.from("members").update({manager_id:val}).eq("id",pid);}else{save();}renderOrgEditor();renderLoginChart();renderPresence();return;}
+    const ro=e.target.closest("[data-orole]");if(ro){state.roles[ro.dataset.orole]=ro.value;if(dbMode&&sb){await sb.from("members").update({role:ro.value}).eq("id",ro.dataset.orole);}else{save();}renderAll();renderOrgEditor();return;}
+    const ti=e.target.closest("[data-title]");if(ti){const v=ti.value.trim();state.titles[ti.dataset.title]=v;if(dbMode&&sb){await sb.from("members").update({title:v}).eq("id",ti.dataset.title);}else{save();}renderOrgEditor();renderLoginChart();}
   });
+  document.getElementById("orgRows").addEventListener("click",e=>{const d=e.target.closest("[data-odel]");if(d)deleteMember(d.dataset.odel);});
 
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();["uOverlay","orgOverlay","setOverlay","pwOverlay"].forEach(id=>document.getElementById(id).classList.remove("on"));}});
 }
@@ -1425,6 +1562,7 @@ function bind(){
       await loadTasks(state.orgId);
       document.getElementById("login").classList.remove("on");document.getElementById("app").hidden=false;
       switchView(state.view||"gantt");renderAll();
+      if(sb)joinPresence();
     }else{
       if(sb&&authed){try{await sb.auth.signOut();}catch(e){}}
       state.session=null;document.getElementById("login").classList.add("on");document.getElementById("app").hidden=true;
