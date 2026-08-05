@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SproutDesk — 원격 팀 업무 관리</title>
+<style>
+:root{
+  --bg:#f6f6f4; --surface:#ffffff; --surface-1:#f1efe8; --surface-2:#fbfaf7;
+  --text:#26261f; --text-2:#6b6a61; --text-3:#9b9a90;
+  --border:#e6e4dc; --border-strong:#d3d1c7;
+  --accent:#534AB7; --accent-bg:#EEEDFE; --accent-fg:#3C3489;
+  --radius:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 6px 24px rgba(0,0,0,.07);
+  --done:#1D9E75; --doing:#378ADD; --review:#EF9F27; --todo:#888780;
+  --danger:#E24B4A; --danger-bg:#FCEBEB; --danger-fg:#A32D2D;
+  --warn-bg:#FAEEDA; --warn-fg:#854F0B;
+  --ok-bg:#E1F5EE; --ok-fg:#0F6E56;
+  --blue-bg:#E6F1FB; --blue-fg:#185FA5;
+  --font:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1a18; --surface:#26261f; --surface-1:#2f2f28; --surface-2:#222220;
+    --text:#eceae2; --text-2:#a8a79d; --text-3:#78776f;
+    --border:#3a3a33; --border-strong:#4a4a42;
+    --accent:#8b83e6; --accent-bg:#2b2952; --accent-fg:#c9c5f6;
+    --shadow:0 1px 3px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.4);
+    --danger-bg:#3a1f1f; --danger-fg:#f0a0a0;
+    --warn-bg:#3a2e17; --warn-fg:#e6b76a;
+    --ok-bg:#173a30; --ok-fg:#7fd4b5;
+    --blue-bg:#17293a; --blue-fg:#8fc0e6;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+.app{max-width:1180px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+[hidden]{display:none !important}
+
+.top{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;flex-wrap:wrap}
+.brandcol{display:flex;flex-direction:column;align-items:flex-start}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
+.logo .mark{width:26px;height:26px;border-radius:7px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px}
+.presence{display:flex;align-items:center;margin-top:6px;min-height:22px}
+.plabel{font-size:11px;color:var(--text-2);display:flex;align-items:center;gap:5px;margin-right:7px;white-space:nowrap}
+.pdotg{width:7px;height:7px;border-radius:50%;background:var(--done);flex:none}
+.pav{width:22px;height:22px;border-radius:50%;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);margin-left:-5px}
+.tabs{display:flex;gap:3px;background:var(--surface-1);border-radius:9px;padding:3px}
+.tab{border:none;background:transparent;color:var(--text-2);font-size:13px;padding:6px 13px;border-radius:6px;display:flex;align-items:center;gap:5px;transition:.12s}
+.tab.on{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 0 0 1px var(--border)}
+.tab:hover:not(.on){color:var(--text)}
+.spacer{margin-left:auto}
+.top-right{display:flex;align-items:center;gap:8px}
+.btn{border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:13px;padding:7px 12px;border-radius:var(--radius);display:inline-flex;align-items:center;gap:5px;transition:.12s;white-space:nowrap}
+.btn:hover{background:var(--surface-1)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{opacity:.9}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--text-2)}
+.btn.ghost:hover{background:var(--surface-1);color:var(--text)}
+.ic{font-style:normal;line-height:1}
+.userchip{display:flex;align-items:center;gap:7px;padding:4px 6px 4px 4px;border:1px solid var(--border);border-radius:20px;background:var(--surface-2);cursor:pointer}
+.userchip:hover{border-color:var(--border-strong)}
+.userchip .nm{font-size:12px;font-weight:500}
+.mini-av{width:21px;height:21px;border-radius:50%;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.rbadge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap}
+
+.subbar{display:flex;align-items:center;gap:10px;padding:10px 18px;background:var(--surface-2);border-bottom:1px solid var(--border);flex-wrap:wrap;font-size:12px}
+.proj-name{font-weight:600;display:flex;align-items:center;gap:6px}
+.search{border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:6px 10px;font-size:13px;color:var(--text);width:170px}
+.search:focus{outline:none;border-color:var(--accent)}
+select.f{border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:6px 8px;font-size:12px;color:var(--text)}
+.toggle{display:flex;align-items:center;gap:6px;color:var(--text-2);cursor:pointer;user-select:none;padding:5px 9px;border-radius:7px;border:1px solid var(--border);background:var(--surface)}
+.toggle.on{background:var(--danger-bg);border-color:var(--danger-fg);color:var(--danger-fg);font-weight:500}
+.tz{margin-left:auto;color:var(--text-2);display:flex;align-items:center;gap:5px}
+
+.main{flex:1;overflow:auto}
+.view{display:none}
+.view.on{display:block}
+
+.gwrap{min-width:760px}
+.ghead{display:grid;grid-template-columns:300px 1fr;background:var(--surface-2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+.ghead .l{padding:9px 16px;font-size:11px;color:var(--text-2);font-weight:600}
+.weeks{display:grid}
+.weeks .w{padding:9px 4px;text-align:center;font-size:10px;color:var(--text-2);border-left:1px solid var(--border)}
+.grow{display:grid;grid-template-columns:300px 1fr;border-bottom:1px solid var(--border);min-height:42px;align-items:center}
+.grow:hover{background:var(--surface-2)}
+.grow.done .nm{color:var(--text-3);text-decoration:line-through}
+.gl{padding:8px 16px;display:flex;align-items:center;gap:8px;min-width:0}
+.tw{width:14px;flex:none;display:flex;justify-content:center}
+.caret{background:none;border:none;color:var(--text-2);font-size:10px;width:14px;height:14px;display:flex;align-items:center;justify-content:center;border-radius:3px}
+.caret:hover{background:var(--surface-1)}
+.sdot{width:7px;height:7px;border-radius:50%;flex:none}
+.nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;cursor:pointer}
+.gl.parent .nm{font-weight:600}
+.rowmeta{display:flex;align-items:center;gap:6px;flex:none}
+.dd{font-size:10px;padding:2px 7px;border-radius:11px;font-weight:600;white-space:nowrap}
+.rowadd{opacity:0;border:none;background:none;color:var(--text-3);font-size:15px;width:20px;height:20px;border-radius:4px}
+.grow:hover .rowadd{opacity:1}
+.rowadd:hover{background:var(--surface-1);color:var(--accent)}
+.gr{position:relative;height:42px;border-left:1px solid var(--border);cursor:pointer}
+.gr .grid{position:absolute;inset:0;display:grid}
+.gr .grid span{border-left:1px solid var(--border)}
+.gbar{position:absolute;top:11px;height:20px;border-radius:5px;display:flex;align-items:center;padding:0 7px;font-size:10px;font-weight:600;overflow:hidden;min-width:22px;color:#fff}
+.gbar .fill{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.30)}
+.gbar .lab{position:relative;z-index:1;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.15)}
+.todayline{position:absolute;top:0;bottom:0;width:2px;background:var(--danger);z-index:4;pointer-events:none}
+.todayline b{position:absolute;top:-1px;left:3px;font-size:8px;color:var(--danger);font-weight:700;background:var(--surface);padding:0 2px;border-radius:2px}
+
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px}
+.bcol{background:var(--surface-2);border-radius:10px;padding:10px}
+.bcol.dragover{outline:2px dashed var(--accent);outline-offset:-2px}
+.bcolh{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px;padding:0 4px}
+.bcolh .cnt{background:var(--surface-1);border-radius:20px;padding:1px 8px;font-size:11px}
+.bcards{min-height:80px}
+.bcard{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 11px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.bcard[draggable=true]{cursor:grab}
+.bcard:hover{border-color:var(--border-strong)}
+.bcard.dragging{opacity:.4}
+.bcard.due{border-color:var(--danger-fg);box-shadow:0 0 0 1px var(--danger-fg)}
+.bcard .bt{font-size:13px;margin-bottom:6px;line-height:1.4}
+.bcard .bpath{font-size:10px;color:var(--text-3);margin-bottom:8px}
+.bcard .bf{display:flex;align-items:center;justify-content:space-between}
+.pill{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600}
+
+.mw{max-width:640px;margin:0 auto;padding:20px 18px}
+.who{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.who select{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:7px 10px;font-size:14px;color:var(--text);font-weight:500}
+.mw-cap{font-size:12px;color:var(--text-2);margin-bottom:6px}
+.grp-h{display:flex;align-items:baseline;gap:8px;margin:20px 0 4px}
+.grp-h .t{font-size:14px;font-weight:600}
+.grp-h .c{font-size:11px;color:var(--text-3)}
+.mrow{display:flex;align-items:center;gap:11px;padding:11px 6px;border-bottom:1px solid var(--border);cursor:pointer}
+.mrow:hover{background:var(--surface-2)}
+.mrow.done .mt .ttl{color:var(--text-3);text-decoration:line-through}
+.cbx{width:18px;height:18px;border-radius:5px;border:2px solid var(--border-strong);flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;background:transparent}
+.cbx.checked{background:var(--done);border-color:var(--done)}
+.cbx.locked{opacity:.4;cursor:not-allowed}
+.mt{flex:1}
+.mt .path{font-size:11px;color:var(--text-3)}
+.empty{color:var(--text-3);font-size:12px;padding:8px 6px}
+.load{margin-top:24px;background:var(--surface-2);border-radius:10px;padding:14px 16px}
+.load-h{display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);margin-bottom:9px}
+.load-h b{color:var(--text);font-weight:600}
+.lbar{height:8px;border-radius:5px;background:var(--border);overflow:hidden}
+.lbar>i{display:block;height:100%;border-radius:5px;transition:width .3s}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+#pwOverlay,#signupOverlay,#resetOverlay,#adminLoginOverlay,#procOverlay{z-index:90}
+.overlay.on{display:flex}
+.modal{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);width:440px;max-width:100%;max-height:92vh;overflow:auto}
+.modal h3{padding:16px 18px;font-size:15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--surface)}
+.modal .body{padding:16px 18px;display:flex;flex-direction:column;gap:13px}
+.modal .foot{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface)}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld label{font-size:12px;color:var(--text-2);font-weight:500}
+.fld input,.fld select{border:1px solid var(--border);background:var(--surface-2);border-radius:8px;padding:9px 11px;font-size:14px;color:var(--text);font-family:inherit;width:100%}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.fld input:disabled,.fld select:disabled{opacity:.55;cursor:not-allowed}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.seg{display:flex;gap:5px}
+.seg button{flex:1;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);padding:7px;border-radius:7px;font-size:12px;font-weight:500}
+.seg button.on{color:#fff;border-color:transparent}
+.seg.locked button{opacity:.55;pointer-events:none}
+.close{border:none;background:none;color:var(--text-3);font-size:22px;line-height:1;width:26px;height:26px;border-radius:6px}
+.close:hover{background:var(--surface-1);color:var(--text)}
+.del{color:var(--danger-fg);border-color:transparent;background:none;margin-right:auto}
+.del:hover{background:var(--danger-bg)}
+.progwrap{display:flex;align-items:center;gap:10px}
+.progwrap input[type=range]{flex:1;accent-color:var(--accent)}
+.progwrap input[type=range]:disabled{opacity:.5}
+.progwrap span{font-size:13px;font-weight:600;min-width:40px;text-align:right}
+.rohint{font-size:12px;color:var(--text-2);background:var(--surface-1);border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:7px}
+.visbadge{font-size:10px;padding:1px 7px;border-radius:20px;background:var(--surface-1);color:var(--text-2);font-weight:600;white-space:nowrap;flex:none;margin-right:2px}
+.vishelp{font-size:11px;color:var(--text-3);margin-top:2px}
+.pwerr{font-size:12px;color:var(--danger-fg);background:var(--danger-bg);border-radius:8px;padding:8px 11px}
+.footer-note{text-align:center;padding:14px;color:var(--text-3);font-size:11px}
+
+/* company gate */
+.company{position:fixed;inset:0;background:var(--bg);z-index:84;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:auto}
+.company.on{display:flex}
+.company .brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:600;margin-bottom:6px}
+.company .brand .mark{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
+.company .sub{color:var(--text-2);font-size:13px;margin-bottom:24px}
+.company .note{margin-top:22px;font-size:11px;color:var(--text-3);max-width:460px;text-align:center;line-height:1.7}
+.gatecard{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:22px;width:340px;max-width:100%;display:flex;flex-direction:column;gap:14px}
+.langsel{border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:5px 8px;font-size:12px;color:var(--text-2);cursor:pointer}
+.langsel:focus{outline:none;border-color:var(--accent)}
+.gatelinks{display:flex;align-items:center;justify-content:center;gap:10px;font-size:12px;color:var(--text-3);margin-top:2px}
+.gatelinks a{color:var(--text-2);cursor:pointer;text-decoration:none}
+.gatelinks a:hover{color:var(--accent);text-decoration:underline}
+
+/* platform admin console */
+.adminc{position:fixed;inset:0;background:var(--bg);z-index:86;display:none;flex-direction:column}
+.adminc.on{display:flex}
+.ac-top{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border)}
+.ac-body{flex:1;overflow:auto;max-width:860px;width:100%;margin:0 auto;padding:20px}
+.ac-sec{margin-bottom:26px}
+.ac-h{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;margin-bottom:12px}
+.ac-cnt{background:var(--danger-bg);color:var(--danger-fg);border-radius:20px;padding:1px 10px;font-size:12px;font-weight:600}
+.ac-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.ac-req{display:flex;align-items:flex-start;gap:12px}
+.ac-req .info{flex:1;min-width:0}
+.ac-req .rt{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.ac-req .rmeta{font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.6}
+.ac-req .acts{display:flex;gap:6px;flex:none}
+.rtype{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.ac-orow{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:var(--surface)}
+.ac-orow .ocode{font-family:var(--font-mono,monospace);font-weight:600;background:var(--surface-1);padding:3px 9px;border-radius:6px;font-size:13px}
+.ac-orow .oname{flex:1;font-size:14px}
+.ac-orow .ometa{font-size:12px;color:var(--text-2)}
+.ac-empty{color:var(--text-3);font-size:13px;padding:16px;text-align:center;border:1px dashed var(--border);border-radius:12px}
+.btn.sm{font-size:12px;padding:5px 10px}
+.btn.danger{color:var(--danger-fg);border-color:var(--border)}
+.btn.danger:hover{background:var(--danger-bg)}
+
+/* login */
+.login{position:fixed;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow:auto}
+.login.on{display:flex}
+.login .brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:600;margin-bottom:6px}
+.login .brand .mark{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px}
+.login .sub{color:var(--text-2);font-size:13px;margin-bottom:26px}
+.chartwrap{width:100%;max-width:920px;overflow-x:auto;padding:6px 2px 10px}
+.login .note{margin-top:24px;font-size:11px;color:var(--text-3);max-width:560px;text-align:center;line-height:1.7}
+
+/* org chart (nested-list tree) */
+.tree{display:flex;justify-content:center;min-width:max-content;margin:0 auto}
+.tree ul{display:flex;justify-content:center;padding-top:20px;position:relative}
+.tree li{list-style:none;position:relative;padding:20px 12px 0;text-align:center}
+.tree li::before,.tree li::after{content:'';position:absolute;top:0;right:50%;border-top:1.5px solid var(--border-strong);width:50%;height:20px}
+.tree li::after{right:auto;left:50%;border-left:1.5px solid var(--border-strong)}
+.tree li:only-child::before,.tree li:only-child::after{display:none}
+.tree li:only-child{padding-top:20px}
+.tree li:first-child::before,.tree li:last-child::after{border:0 none}
+.tree li:last-child::before{border-right:1.5px solid var(--border-strong);border-radius:0 6px 0 0}
+.tree li:first-child::after{border-radius:6px 0 0 0}
+.tree ul::before{content:'';position:absolute;top:0;left:50%;border-left:1.5px solid var(--border-strong);width:0;height:20px}
+.tree>ul{padding-top:0}
+.tree>ul::before{display:none}
+.tree>ul>li::before,.tree>ul>li::after{display:none}
+.tree>ul>li{padding-top:0}
+.node{display:inline-flex;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--border);border-radius:12px;padding:12px 14px 11px;background:var(--surface);min-width:118px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.node.clk{cursor:pointer;transition:.12s}
+.node.clk:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px)}
+.npic{position:relative;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600}
+.npic .dot{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border-radius:50%;background:var(--done);border:2px solid var(--surface)}
+.nn{font-weight:600;font-size:13px}
+.nt{font-size:11px;color:var(--text-2)}
+
+/* user mgmt / org editor rows */
+.urow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.urow .un{flex:1;font-size:13px;font-weight:500;min-width:60px}
+.urow select,.urow .tinp{border:1px solid var(--border);background:var(--surface-2);border-radius:7px;padding:6px 8px;font-size:12px;color:var(--text)}
+.urow .tinp{width:96px}
+.ubtn{font-size:11px;padding:5px 8px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text-2)}
+.ubtn:hover{background:var(--surface-1);color:var(--text)}
+.ostat{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap}
+
+@media(max-width:640px){.board{grid-template-columns:1fr}.tabs{order:3;width:100%;justify-content:center}}
+</style>
+</head>
+<body>
+
+<!-- COMPANY GATE (first page) -->
+<div class="company" id="company">
+  <div class="brand"><span class="mark">◆</span>SproutDesk</div>
+  <div class="sub">회사 코드와 비밀번호를 입력해 입장하세요</div>
+  <div class="gatecard">
+    <div class="fld"><label>회사 코드</label><input id="coCode" placeholder="예: SPROUT" autocomplete="off"></div>
+    <div class="fld"><label>비밀번호</label><input id="coPw" type="password" placeholder="회사 비밀번호" autocomplete="off"></div>
+    <div class="pwerr" id="coErr" hidden>회사 코드 또는 비밀번호가 올바르지 않습니다.</div>
+    <button class="btn primary" id="coEnter" style="width:100%;justify-content:center;padding:11px">입장</button>
+    <div class="gatelinks"><a id="lnkSignup">회원가입 요청</a><span>·</span><a id="lnkReset">비밀번호 찾기</a></div>
+  </div>
+  <div class="note">테스트 회사 코드: <b>SPROUT</b> · 비밀번호: <b>sprout</b><br>SproutWork 도메인 아래 <b>SproutDesk</b>는 회사 단위로 분리된 워크스페이스입니다.</div>
+  <button class="btn ghost" id="lnkAdmin" style="margin-top:10px;font-size:12px"><span class="ic">🔑</span> 플랫폼 관리자 로그인</button>
+  <select class="langsel" style="margin-top:14px"><option value="ko">한국어</option><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+</div>
+
+<!-- LOGIN (org chart) -->
+<div class="login" id="login">
+  <div class="brand"><span class="mark">◆</span>SproutDesk</div>
+  <div class="sub">조직도에서 본인을 선택해 로그인하세요</div>
+  <div class="chartwrap"><div class="tree" id="loginChart"></div></div>
+  <button class="btn ghost" id="switchCo" style="margin-top:16px">← 다른 회사 코드로 입장</button>
+  <select class="langsel" style="margin-top:12px"><option value="ko">한국어</option><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+  <div class="note">테스트 비밀번호: <b>1234</b> · 비밀번호는 <b>관리자와 본인만</b> 변경할 수 있습니다.<br>⚠️ 프로토타입 로그인으로, 역할·권한 흐름 테스트용입니다. 실제 보안(서버 인증)은 아닙니다.</div>
+</div>
+
+<div class="app" id="app" hidden>
+  <div class="top">
+    <div class="brandcol">
+      <div class="logo"><span class="mark">◆</span>SproutDesk</div>
+      <div class="presence" id="presence"></div>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-v="gantt"><span class="ic">🌳</span>트리·간트</button>
+      <button class="tab" data-v="board"><span class="ic">📋</span>보드</button>
+      <button class="tab" data-v="mine"><span class="ic">✓</span>내 할 일</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="top-right">
+      <select class="langsel"><option value="ko">한국어</option><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+      <button class="btn" id="orgBtn" hidden><span class="ic">🗂</span>조직도</button>
+      <button class="btn" id="usersBtn" hidden><span class="ic">🔑</span>권한</button>
+      <button class="btn primary" id="newBtn" hidden><span class="ic">＋</span>새 업무</button>
+      <button class="btn ghost" id="resetBtn" title="샘플 데이터로 초기화" hidden>↺</button>
+      <div class="userchip" id="userchip" title="내 계정 · 비밀번호 변경"></div>
+      <button class="btn ghost" id="logoutBtn" title="로그아웃"><span class="ic">⎋</span></button>
+    </div>
+  </div>
+
+  <div class="subbar">
+    <span class="proj-name"><span class="ic">📁</span>2026 Q3 릴리스</span>
+    <input class="search" id="search" placeholder="업무 검색…">
+    <select class="f" id="fAssignee"></select>
+    <select class="f" id="fPriority">
+      <option value="all">우선순위 전체</option>
+      <option value="high">높음</option><option value="mid">보통</option><option value="low">낮음</option>
+    </select>
+    <div class="toggle" id="fDue"><span class="ic">⏰</span>기한 임박(7일)</div>
+    <span class="tz"><span class="ic">🌐</span><span id="tzInfo"></span></span>
+  </div>
+
+  <div class="main" id="main">
+    <div class="view on" id="view-gantt"><div class="gwrap"><div id="ghead"></div><div id="grows"></div></div></div>
+    <div class="view" id="view-board"><div class="board" id="board"></div></div>
+    <div class="view" id="view-mine">
+      <div class="mw">
+        <div class="who"><span style="font-size:14px;color:var(--text-2)">담당자</span><select id="userSel"></select></div>
+        <p class="mw-cap">기한 임박순으로 정렬됩니다. 체크하면 완료 처리됩니다.</p>
+        <div id="mineList"></div>
+        <div class="load">
+          <div class="load-h"><span>이번 주 업무 부하</span><b id="loadTxt"></b></div>
+          <div class="lbar"><i id="loadBar"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-note">SproutDesk 프로토타입 · 로그인하면 데이터가 서버(Supabase)에 저장·공유됩니다</div>
+</div>
+
+<!-- LOGIN PASSWORD MODAL -->
+<div class="overlay" id="pwOverlay">
+  <div class="modal" style="width:360px">
+    <h3><span>로그인</span><button class="close" id="pwClose">×</button></h3>
+    <div class="body" style="align-items:center;text-align:center">
+      <div id="pwWho"></div>
+      <div class="fld" style="width:100%;text-align:left"><label>비밀번호</label><input type="password" id="pwInput" placeholder="비밀번호" autocomplete="off"></div>
+      <div class="pwerr" id="pwErr" hidden>비밀번호가 올바르지 않습니다.</div>
+    </div>
+    <div class="foot"><button class="btn" id="pwCancel">취소</button><button class="btn primary" id="pwSubmit">로그인</button></div>
+  </div>
+</div>
+
+<!-- SET PASSWORD MODAL -->
+<div class="overlay" id="setOverlay">
+  <div class="modal" style="width:380px">
+    <h3><span id="setTitle">비밀번호 변경</span><button class="close" id="setClose">×</button></h3>
+    <div class="body">
+      <div class="fld" id="curWrap"><label>현재 비밀번호</label><input type="password" id="setCur" autocomplete="off"></div>
+      <div class="fld"><label>새 비밀번호</label><input type="password" id="setNew" autocomplete="off"></div>
+      <div class="fld"><label>새 비밀번호 확인</label><input type="password" id="setNew2" autocomplete="off"></div>
+      <div class="pwerr" id="setErr" hidden></div>
+    </div>
+    <div class="foot"><button class="btn" id="setCancel">취소</button><button class="btn primary" id="setSave">저장</button></div>
+  </div>
+</div>
+
+<!-- ORG EDITOR MODAL -->
+<div class="overlay" id="orgOverlay">
+  <div class="modal" style="width:600px">
+    <h3><span>조직도 편집</span><button class="close" id="orgClose">×</button></h3>
+    <div class="body">
+      <p style="font-size:12px;color:var(--text-2)">각 구성원의 상사(보고 대상)와 직함을 지정하면 로그인 조직도에 반영됩니다. (관리자만 가능)</p>
+      <div class="chartwrap" style="border:1px solid var(--border);border-radius:10px;background:var(--surface-2)"><div class="tree" id="orgPreview"></div></div>
+      <div id="orgRows"></div>
+    </div>
+    <div class="foot"><button class="btn primary" id="orgDone">완료</button></div>
+  </div>
+</div>
+
+<!-- USER MGMT MODAL -->
+<div class="overlay" id="uOverlay">
+  <div class="modal" style="width:480px">
+    <h3><span>사용자·권한 관리</span><button class="close" id="uClose">×</button></h3>
+    <div class="body">
+      <p style="font-size:12px;color:var(--text-2)">역할을 바꾸면 권한이 즉시 적용됩니다. 접속 상태와 비밀번호 재설정도 여기서 관리합니다.</p>
+      <div id="uList"></div>
+    </div>
+    <div class="foot"><button class="btn primary" id="uDone">완료</button></div>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3><span id="mTitle">새 업무</span><button class="close" id="mClose">×</button></h3>
+    <div class="body">
+      <div class="rohint" id="roHint" hidden><span class="ic">🔒</span><span id="roHintText"></span></div>
+      <div class="fld"><label>업무명</label><input id="fTitleInput" placeholder="예: PG 연동 구현"></div>
+      <div class="fld"><label>상위 업무</label><select id="fParent"></select></div>
+      <div class="fld" id="visFld" hidden><label>공개 범위</label>
+        <div class="seg" id="segVis">
+          <button data-vis="public">🌐 전체 공개</button><button data-vis="team">🔒 우리 팀만</button>
+        </div>
+        <div class="vishelp" id="visHelp"></div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>담당자</label><select id="fUser"></select></div>
+        <div class="fld"><label>우선순위</label>
+          <div class="seg" id="segPrio">
+            <button data-p="high">높음</button><button data-p="mid" class="on">보통</button><button data-p="low">낮음</button>
+          </div>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>시작일</label><input type="date" id="fStart"></div>
+        <div class="fld"><label>마감일</label><input type="date" id="fEnd"></div>
+      </div>
+      <div class="fld"><label>상태</label>
+        <div class="seg" id="segStatus">
+          <button data-s="todo" class="on">할 일</button><button data-s="doing">진행</button>
+          <button data-s="review">검토</button><button data-s="done">완료</button>
+        </div>
+      </div>
+      <div class="fld"><label>진척률</label>
+        <div class="progwrap"><input type="range" id="fProg" min="0" max="100" step="5" value="0"><span id="progVal">0%</span></div>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn del" id="mDelete" style="display:none">삭제</button>
+      <button class="btn" id="mCancel">닫기</button>
+      <button class="btn primary" id="mSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLATFORM ADMIN CONSOLE -->
+<div class="adminc" id="adminConsole">
+  <div class="ac-top">
+    <div class="logo"><span class="mark">◆</span>SproutDesk <span style="font-size:12px;color:var(--text-2);font-weight:500;margin-left:4px">관리자 콘솔</span></div>
+    <div class="spacer"></div>
+    <select class="langsel"><option value="ko">한국어</option><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
+    <button class="btn ghost" id="acLogout" title="로그아웃"><span class="ic">⎋</span> 로그아웃</button>
+  </div>
+  <div class="ac-body">
+    <div class="ac-sec">
+      <div class="ac-h"><span>가입 · 재설정 요청</span><span class="ac-cnt" id="acReqCnt">0</span></div>
+      <div id="acReqList"></div>
+    </div>
+    <div class="ac-sec">
+      <div class="ac-h"><span>등록된 회사</span><button class="btn" id="acNewCo" style="font-size:12px;padding:5px 10px"><span class="ic">＋</span> 새 회사 등록</button></div>
+      <div id="acOrgList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- REQ: 회원가입 요청 -->
+<div class="overlay" id="signupOverlay">
+  <div class="modal" style="width:400px">
+    <h3><span>회원가입 요청</span><button class="close" id="suClose">×</button></h3>
+    <div class="body">
+      <p style="font-size:12px;color:var(--text-2)">회사 사용 신청입니다. 관리자가 검토 후 회사 코드와 비밀번호를 발급합니다.</p>
+      <div class="fld"><label>회사명 *</label><input id="suCompany" placeholder="예: 새싹 주식회사"></div>
+      <div class="fld"><label>담당자 이름</label><input id="suName" placeholder="예: 홍길동"></div>
+      <div class="fld"><label>연락처(이메일/전화) *</label><input id="suContact" placeholder="예: hong@company.com"></div>
+      <div class="fld"><label>희망 회사 코드</label><input id="suCode" placeholder="예: SAESAK"></div>
+      <div class="fld"><label>메모</label><input id="suMsg" placeholder="요청 내용(선택)"></div>
+      <div class="pwerr" id="suErr" hidden></div>
+      <div class="rohint" id="suOk" hidden><span class="ic">✅</span>요청이 접수되었습니다. 관리자 승인 후 연락드립니다.</div>
+    </div>
+    <div class="foot"><button class="btn" id="suCancel">닫기</button><button class="btn primary" id="suSend">요청 보내기</button></div>
+  </div>
+</div>
+
+<!-- REQ: 비밀번호 찾기 -->
+<div class="overlay" id="resetOverlay">
+  <div class="modal" style="width:400px">
+    <h3><span>비밀번호 찾기</span><button class="close" id="rsClose">×</button></h3>
+    <div class="body">
+      <p style="font-size:12px;color:var(--text-2)">회사 코드 비밀번호 재설정 요청입니다. 관리자가 확인 후 새 비밀번호를 발급합니다.</p>
+      <div class="fld"><label>회사 코드 *</label><input id="rsCode" placeholder="예: SPROUT"></div>
+      <div class="fld"><label>담당자 이름</label><input id="rsName" placeholder="예: 홍길동"></div>
+      <div class="fld"><label>연락처(이메일/전화) *</label><input id="rsContact" placeholder="연락받을 곳"></div>
+      <div class="fld"><label>메모</label><input id="rsMsg" placeholder="요청 내용(선택)"></div>
+      <div class="pwerr" id="rsErr" hidden></div>
+      <div class="rohint" id="rsOk" hidden><span class="ic">✅</span>요청이 접수되었습니다. 관리자가 확인 후 연락드립니다.</div>
+    </div>
+    <div class="foot"><button class="btn" id="rsCancel">닫기</button><button class="btn primary" id="rsSend">요청 보내기</button></div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="overlay" id="adminLoginOverlay">
+  <div class="modal" style="width:360px">
+    <h3><span>플랫폼 관리자 로그인</span><button class="close" id="alClose">×</button></h3>
+    <div class="body">
+      <div class="fld"><label>이메일</label><input id="alEmail" placeholder="admin@sproutdesk.io" autocomplete="off"></div>
+      <div class="fld"><label>비밀번호</label><input id="alPw" type="password" autocomplete="off"></div>
+      <div class="pwerr" id="alErr" hidden></div>
+    </div>
+    <div class="foot"><button class="btn" id="alCancel">취소</button><button class="btn primary" id="alSubmit">로그인</button></div>
+  </div>
+</div>
+
+<!-- PROCESS REQUEST / REGISTER COMPANY -->
+<div class="overlay" id="procOverlay">
+  <div class="modal" style="width:400px">
+    <h3><span id="procTitle">회사 등록</span><button class="close" id="pcClose">×</button></h3>
+    <div class="body">
+      <div class="fld"><label>회사 코드(ID) *</label><input id="pcCode" placeholder="예: SAESAK"></div>
+      <div class="fld"><label>회사명</label><input id="pcName" placeholder="회사 이름"></div>
+      <div class="fld"><label>회사 비밀번호 *</label><input id="pcPw" placeholder="입장 비밀번호"></div>
+      <div class="pwerr" id="pcErr" hidden></div>
+    </div>
+    <div class="foot"><button class="btn" id="pcCancel">취소</button><button class="btn primary" id="pcSave">등록</button></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+"use strict";
+/* ===== Supabase 연결 ===== */
+const SUPABASE_URL="https://zinucebdvizjhovodzis.supabase.co";
+const SUPABASE_KEY="sb_publishable_xHalL-rxnpUTlKllS-r6GA_LpiWnwra";
+const LOGIN_DOMAIN="sprout.local";   // 데모 계정 이메일 도메인(실제 팀원은 실제 이메일 사용)
+const sb=(window.supabase&&SUPABASE_URL)?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+
+const DAY=86400000, STORAGE="flowdesk.v6";
+let people=[
+  {id:"jh",name:"정하늘",initials:"JH",bg:"#CECBF6",fg:"#3C3489",email:"jh@sprout.local"},
+  {id:"mk",name:"문경",initials:"MK",bg:"#9FE1CB",fg:"#0F6E56"},
+  {id:"sr",name:"서린",initials:"SR",bg:"#F5C4B3",fg:"#993C1D"},
+  {id:"dv",name:"David",initials:"DV",bg:"#B5D4F4",fg:"#0C447C"},
+  {id:"yj",name:"유진",initials:"YJ",bg:"#F4C0D1",fg:"#993556"}
+];
+const ROLES={
+  admin:{label:"관리자",bg:"var(--accent-bg)",fg:"var(--accent-fg)"},
+  lead:{label:"팀장",bg:"var(--blue-bg)",fg:"var(--blue-fg)"},
+  member:{label:"팀원",bg:"var(--ok-bg)",fg:"var(--ok-fg)"},
+  viewer:{label:"뷰어",bg:"var(--surface-1)",fg:"var(--text-2)"}
+};
+const STATUS={todo:{label:"할 일",color:"var(--todo)"},doing:{label:"진행",color:"var(--doing)"},review:{label:"검토",color:"var(--review)"},done:{label:"완료",color:"var(--done)"}};
+const BAR={todo:"#B4B2A9",doing:"#378ADD",review:"#EF9F27",done:"#1D9E75"};
+const PRIO={high:{label:"높음",bg:"var(--danger-bg)",fg:"var(--danger-fg)"},mid:{label:"보통",bg:"var(--warn-bg)",fg:"var(--warn-fg)"},low:{label:"낮음",bg:"var(--surface-1)",fg:"var(--text-2)"}};
+const PALETTE=[["#CECBF6","#3C3489"],["#9FE1CB","#0F6E56"],["#F5C4B3","#993C1D"],["#B5D4F4","#0C447C"],["#F4C0D1","#993556"],["#FAC775","#663306"],["#C0DD97","#3B6D11"],["#F09595","#791F1F"],["#AFA9EC","#26215C"],["#9FE1CB","#04342C"]];
+function pColor(i){const c=PALETTE[i%PALETTE.length];return{bg:c[0],fg:c[1]};}
+function initialsOf(name){return (String(name||"").trim().slice(0,2)||"?").toUpperCase();}
+
+/* ===== i18n (한국어/English/Tiếng Việt) ===== */
+const I18N={
+  "트리·간트":{en:"Tree · Gantt",vi:"Cây · Gantt"},"보드":{en:"Board",vi:"Bảng"},"내 할 일":{en:"My tasks",vi:"Việc của tôi"},
+  "조직도":{en:"Org chart",vi:"Sơ đồ tổ chức"},"권한":{en:"Roles",vi:"Phân quyền"},"새 업무":{en:"New task",vi:"Việc mới"},
+  "업무 편집":{en:"Edit task",vi:"Sửa việc"},"업무 보기":{en:"View task",vi:"Xem việc"},
+  "로그아웃":{en:"Log out",vi:"Đăng xuất"},"입장":{en:"Enter",vi:"Vào"},"확인 중…":{en:"Checking…",vi:"Đang kiểm tra…"},
+  "로그인":{en:"Log in",vi:"Đăng nhập"},"로그인 중…":{en:"Logging in…",vi:"Đang đăng nhập…"},"저장 중…":{en:"Saving…",vi:"Đang lưu…"},
+  "취소":{en:"Cancel",vi:"Hủy"},"저장":{en:"Save",vi:"Lưu"},"닫기":{en:"Close",vi:"Đóng"},"삭제":{en:"Delete",vi:"Xóa"},
+  "등록":{en:"Register",vi:"Đăng ký"},"완료":{en:"Done",vi:"Xong"},"요청 보내기":{en:"Send request",vi:"Gửi yêu cầu"},
+  "비번 재설정":{en:"Reset password",vi:"Đặt lại mật khẩu"},"새 회사 등록":{en:"New company",vi:"Thêm công ty"},"회사 등록":{en:"Register company",vi:"Đăng ký công ty"},
+  "회사 비밀번호 재설정":{en:"Reset company password",vi:"Đặt lại mật khẩu công ty"},
+  "회사 코드와 비밀번호를 입력해 입장하세요":{en:"Enter your company code and password",vi:"Nhập mã công ty và mật khẩu"},
+  "회사 코드":{en:"Company code",vi:"Mã công ty"},"비밀번호":{en:"Password",vi:"Mật khẩu"},"회사 비밀번호":{en:"Company password",vi:"Mật khẩu công ty"},
+  "회사 코드 또는 비밀번호가 올바르지 않습니다.":{en:"Company code or password is incorrect.",vi:"Mã công ty hoặc mật khẩu không đúng."},
+  "회원가입 요청":{en:"Sign-up request",vi:"Yêu cầu đăng ký"},"비밀번호 찾기":{en:"Forgot password",vi:"Quên mật khẩu"},
+  "플랫폼 관리자 로그인":{en:"Platform admin login",vi:"Đăng nhập quản trị viên"},"관리자 콘솔":{en:"Admin console",vi:"Bảng quản trị"},
+  "다른 회사 코드로 입장":{en:"Enter with another company code",vi:"Vào bằng mã công ty khác"},
+  "조직도에서 본인을 선택해 로그인하세요":{en:"Select yourself in the org chart to log in",vi:"Chọn bạn trong sơ đồ tổ chức để đăng nhập"},
+  "관리자":{en:"Admin",vi:"Quản trị"},"팀장":{en:"Team lead",vi:"Trưởng nhóm"},"팀원":{en:"Member",vi:"Thành viên"},"뷰어":{en:"Viewer",vi:"Người xem"},
+  "할 일":{en:"To do",vi:"Cần làm"},"진행":{en:"In progress",vi:"Đang làm"},"검토":{en:"Review",vi:"Kiểm tra"},
+  "높음":{en:"High",vi:"Cao"},"보통":{en:"Medium",vi:"Trung bình"},"낮음":{en:"Low",vi:"Thấp"},
+  "담당자 전체":{en:"All assignees",vi:"Tất cả người phụ trách"},"우선순위 전체":{en:"All priorities",vi:"Tất cả ưu tiên"},
+  "기한 임박(7일)":{en:"Due soon (7d)",vi:"Sắp hết hạn (7 ngày)"},"담당자":{en:"Assignee",vi:"Người phụ trách"},
+  "업무 트리":{en:"Task tree",vi:"Cây công việc"},"이번 주 업무 부하":{en:"This week's workload",vi:"Khối lượng tuần này"},
+  "오늘":{en:"Today",vi:"Hôm nay"},"이번 주":{en:"This week",vi:"Tuần này"},"지연":{en:"Overdue",vi:"Trễ hạn"},"이후":{en:"Later",vi:"Sau này"},
+  "가입 · 재설정 요청":{en:"Sign-up · reset requests",vi:"Yêu cầu đăng ký · đặt lại"},"등록된 회사":{en:"Registered companies",vi:"Công ty đã đăng ký"},
+  "사용자·권한 관리":{en:"Users & roles",vi:"Người dùng & quyền"},"조직도 편집":{en:"Edit org chart",vi:"Sửa sơ đồ tổ chức"},
+  "공개 범위":{en:"Visibility",vi:"Phạm vi hiển thị"},"전체 공개":{en:"Everyone",vi:"Mọi người"},"우리 팀만":{en:"My team only",vi:"Chỉ nhóm tôi"},
+  "🔒 우리 팀":{en:"🔒 Team only",vi:"🔒 Chỉ nhóm"},
+  "🌐 전체 공개":{en:"🌐 Everyone",vi:"🌐 Mọi người"},"🔒 우리 팀만":{en:"🔒 My team only",vi:"🔒 Chỉ nhóm tôi"},"— 없음 (최상위)":{en:"— None (top level)",vi:"— Không (cấp cao nhất)"},
+  "관리자만 가능":{en:"Admin only",vi:"Chỉ quản trị"},"업무명 *":{en:"Task name *",vi:"Tên việc *"},
+  "상위 업무":{en:"Parent task",vi:"Việc cấp trên"},"시작일":{en:"Start date",vi:"Ngày bắt đầu"},"마감일":{en:"Due date",vi:"Ngày hết hạn"},
+  "상태":{en:"Status",vi:"Trạng thái"},"진척률":{en:"Progress",vi:"Tiến độ"},"우선순위":{en:"Priority",vi:"Ưu tiên"},"업무명":{en:"Task name",vi:"Tên việc"},
+  "읽기 전용 — 이 업무를 수정할 권한이 없습니다.":{en:"Read-only — you can't edit this task.",vi:"Chỉ đọc — bạn không thể sửa việc này."},
+  "팀원 권한 — 담당자·상위 변경은 잠겨 있습니다.":{en:"Member — assignee/parent are locked.",vi:"Thành viên — người phụ trách/cấp trên bị khóa."},
+  "본인 업무 아래 하위 업무 — 담당자는 본인으로 지정됩니다.":{en:"Sub-task under your task — assigned to you.",vi:"Việc con dưới việc của bạn — giao cho bạn."},
+  "우리 팀 업무 트리 — 소유 팀은 바꿀 수 없고, 공개 범위를 설정할 수 있습니다.":{en:"Team task tree — owner team is fixed, you can set visibility.",vi:"Cây việc của nhóm — nhóm sở hữu cố định, bạn có thể đặt phạm vi hiển thị."},
+  "우리 팀 업무 트리 — 소유자는 본인, 공개 범위를 선택하세요.":{en:"Team task tree — you're the owner, choose visibility.",vi:"Cây việc của nhóm — bạn là chủ, hãy chọn phạm vi hiển thị."},
+  "우리 팀(소유자+팀원)과 관리자만 이 트리를 볼 수 있습니다.":{en:"Only your team (owner+members) and admins can see this tree.",vi:"Chỉ nhóm bạn (chủ+thành viên) và quản trị mới thấy cây này."},
+  "모든 구성원이 이 트리를 볼 수 있습니다.":{en:"Everyone in the company can see this tree.",vi:"Mọi người trong công ty đều thấy cây này."},
+  "기한 임박순으로 정렬됩니다. 체크하면 완료 처리됩니다.":{en:"Sorted by due date. Check to mark done.",vi:"Sắp xếp theo hạn. Tích để đánh dấu xong."},
+  "담당한 업무가 없습니다.":{en:"No assigned tasks.",vi:"Không có việc được giao."},"조건에 맞는 업무가 없습니다.":{en:"No matching tasks.",vi:"Không có việc phù hợp."},
+  "아직 요청이 없습니다.":{en:"No requests yet.",vi:"Chưa có yêu cầu."},"등록된 회사가 없습니다.":{en:"No registered companies.",vi:"Chưa có công ty."},
+  "가입":{en:"Sign-up",vi:"Đăng ký"},"비번재설정":{en:"Reset PW",vi:"Đặt lại MK"},"처리됨":{en:"Handled",vi:"Đã xử lý"},"거절됨":{en:"Rejected",vi:"Từ chối"},"거절":{en:"Reject",vi:"Từ chối"},
+  "회사 사용 신청입니다. 관리자가 검토 후 회사 코드와 비밀번호를 발급합니다.":{en:"Request to use SproutDesk. An admin will review and issue a company code and password.",vi:"Yêu cầu dùng SproutDesk. Quản trị sẽ duyệt và cấp mã công ty và mật khẩu."},
+  "회사 코드 비밀번호 재설정 요청입니다. 관리자가 확인 후 새 비밀번호를 발급합니다.":{en:"Company password reset request. An admin will verify and issue a new password.",vi:"Yêu cầu đặt lại mật khẩu công ty. Quản trị sẽ xác minh và cấp mật khẩu mới."},
+  "요청이 접수되었습니다. 관리자 승인 후 연락드립니다.":{en:"Request received. We'll contact you after admin approval.",vi:"Đã nhận yêu cầu. Chúng tôi sẽ liên hệ sau khi quản trị duyệt."},
+  "요청이 접수되었습니다. 관리자가 확인 후 연락드립니다.":{en:"Request received. An admin will contact you.",vi:"Đã nhận yêu cầu. Quản trị sẽ liên hệ với bạn."},
+  "회사명 *":{en:"Company name *",vi:"Tên công ty *"},"담당자 이름":{en:"Contact name",vi:"Tên người liên hệ"},"연락처(이메일/전화) *":{en:"Contact (email/phone) *",vi:"Liên hệ (email/điện thoại) *"},
+  "희망 회사 코드":{en:"Desired company code",vi:"Mã công ty mong muốn"},"메모":{en:"Note",vi:"Ghi chú"},"회사 코드 *":{en:"Company code *",vi:"Mã công ty *"},
+  "이메일":{en:"Email",vi:"Email"},"회사 코드(ID) *":{en:"Company code (ID) *",vi:"Mã công ty (ID) *"},"회사명":{en:"Company name",vi:"Tên công ty"},"회사 비밀번호 *":{en:"Company password *",vi:"Mật khẩu công ty *"},
+  "현재 비밀번호":{en:"Current password",vi:"Mật khẩu hiện tại"},"새 비밀번호":{en:"New password",vi:"Mật khẩu mới"},"새 비밀번호 확인":{en:"Confirm new password",vi:"Xác nhận mật khẩu mới"},"내 비밀번호 변경":{en:"Change my password",vi:"Đổi mật khẩu của tôi"},
+  "직함":{en:"Title",vi:"Chức danh"},"상사":{en:"Manager",vi:"Quản lý"},
+  "테스트 회사 코드:":{en:"Test company code:",vi:"Mã công ty thử:"},"· 비밀번호:":{en:"· password:",vi:"· mật khẩu:"},
+  "SproutWork 도메인 아래":{en:"Under the SproutWork domain,",vi:"Dưới tên miền SproutWork,"},"는 회사 단위로 분리된 워크스페이스입니다.":{en:" is a per-company workspace.",vi:" là không gian làm việc riêng theo công ty."},
+  "예: SPROUT":{en:"e.g. SPROUT",vi:"vd: SPROUT"},"업무 검색…":{en:"Search tasks…",vi:"Tìm việc…"},"예: PG 연동 구현":{en:"e.g. Integrate PG",vi:"vd: Tích hợp PG"},
+  "예: 새싹 주식회사":{en:"e.g. Saesak Inc.",vi:"vd: Công ty Saesak"},"예: 홍길동":{en:"e.g. John Doe",vi:"vd: Nguyễn Văn A"},"예: hong@company.com":{en:"e.g. hong@company.com",vi:"vd: hong@company.com"},
+  "예: SAESAK":{en:"e.g. SAESAK",vi:"vd: SAESAK"},"연락받을 곳":{en:"Where to reach you",vi:"Nơi liên hệ"},"요청 내용(선택)":{en:"Message (optional)",vi:"Nội dung (tùy chọn)"},
+  "회사 이름":{en:"Company name",vi:"Tên công ty"},"입장 비밀번호":{en:"Entry password",vi:"Mật khẩu vào"},
+  "각 구성원의 상사(보고 대상)와 직함을 지정하면 로그인 조직도에 반영됩니다. (관리자만 가능)":{en:"Set each member's manager and title; it reflects in the login org chart. (Admin only)",vi:"Đặt quản lý và chức danh cho từng thành viên; sẽ hiển thị trong sơ đồ đăng nhập. (Chỉ quản trị)"},
+  "역할을 바꾸면 권한이 즉시 적용됩니다. 접속 상태와 비밀번호 재설정도 여기서 관리합니다.":{en:"Changing a role applies immediately. Manage online status and password resets here too.",vi:"Đổi vai trò áp dụng ngay. Quản lý trạng thái trực tuyến và đặt lại mật khẩu tại đây."},
+  "접속중":{en:"online",vi:"trực tuyến"},"오프라인":{en:"offline",vi:"ngoại tuyến"},
+  "SproutDesk 프로토타입 · 로그인하면 데이터가 서버(Supabase)에 저장·공유됩니다":{en:"SproutDesk prototype · after login, data is stored and shared on the server (Supabase)",vi:"Bản mẫu SproutDesk · sau khi đăng nhập, dữ liệu được lưu và chia sẻ trên máy chủ (Supabase)"}
+};
+const I18N_RE=[
+  {re:/^(\d+)일 지남$/, en:m=>m[1]+" days overdue", vi:m=>"Quá "+m[1]+" ngày"},
+  {re:/^· (\d+)건$/, en:m=>"· "+m[1]+" items", vi:m=>"· "+m[1]+" mục"},
+  {re:/^접속 중 (\d+)$/, en:m=>m[1]+" online", vi:m=>m[1]+" trực tuyến"},
+  {re:/^구성원 (\d+)명$/, en:m=>m[1]+" members", vi:m=>m[1]+" thành viên"},
+  {re:/^(양호|주의|과부하) · (\d+)% \((\d+)건\)$/, en:m=>({양호:"Good",주의:"Caution",과부하:"Overloaded"}[m[1]])+" · "+m[2]+"% ("+m[3]+" items)", vi:m=>({양호:"Tốt",주의:"Chú ý",과부하:"Quá tải"}[m[1]])+" · "+m[2]+"% ("+m[3]+" mục)"},
+  {re:/^(\d+)개 타임존 · 오늘 (\d+)월 (\d+)일 · 완료 (\d+)\/(\d+)$/, en:m=>m[1]+" timezones · Today "+m[2]+"/"+m[3]+" · Done "+m[4]+"/"+m[5], vi:m=>m[1]+" múi giờ · Hôm nay "+m[3]+"/"+m[2]+" · Xong "+m[4]+"/"+m[5]},
+  {re:/^하위 업무 (\d+)개도 함께 삭제됩니다\. 계속할까요\?$/, en:m=>m[1]+" sub-tasks will also be deleted. Continue?", vi:m=>m[1]+" công việc con cũng sẽ bị xóa. Tiếp tục?"}
+];
+const _i18nOrig=new WeakMap(); let _i18nBusy=false,_i18nPend=false;
+function tstr(ko){
+  const L=(typeof state!=="undefined"&&state&&state.lang)||"ko"; if(L==="ko")return ko;
+  const key=ko.trim(); if(!key)return ko;
+  if(I18N[key]&&I18N[key][L])return ko.replace(key,I18N[key][L]);
+  for(const p of I18N_RE){const m=key.match(p.re);if(m)return p[L](m);}
+  return ko;
+}
+function t(ko){return tstr(ko);}
+function translateDOM(){
+  _i18nBusy=true;
+  const L=(state&&state.lang)||"ko";
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode(n){const p=n.parentNode;if(!p)return 2;const tg=p.nodeName;if(tg==="SCRIPT"||tg==="STYLE")return 2;if(!n.nodeValue||!n.nodeValue.trim())return 2;return 1;}});
+  const arr=[];while(w.nextNode())arr.push(w.currentNode);
+  arr.forEach(n=>{let ko=_i18nOrig.get(n);if(ko===undefined){ko=n.nodeValue;_i18nOrig.set(n,ko);}const tr=(L==="ko")?ko:tstr(ko);if(n.nodeValue!==tr)n.nodeValue=tr;});
+  document.querySelectorAll("[placeholder]").forEach(el=>{let ko=el.getAttribute("data-ph0");if(ko===null){ko=el.getAttribute("placeholder")||"";el.setAttribute("data-ph0",ko);}const tr=(L==="ko")?ko:tstr(ko);if(el.getAttribute("placeholder")!==tr)el.setAttribute("placeholder",tr);});
+  _i18nBusy=false;
+}
+function setLang(L){state.lang=L;save();document.querySelectorAll(".langsel").forEach(s=>{if(s.value!==L)s.value=L;});translateDOM();}
+function initI18n(){
+  if(!state.lang)state.lang="ko";
+  document.querySelectorAll(".langsel").forEach(s=>s.value=state.lang);
+  document.addEventListener("change",e=>{const s=e.target.closest&&e.target.closest(".langsel");if(s)setLang(s.value);});
+  const obs=new MutationObserver(()=>{if(!state||state.lang==="ko"||_i18nBusy||_i18nPend)return;_i18nPend=true;requestAnimationFrame(()=>{_i18nPend=false;translateDOM();});});
+  obs.observe(document.body,{childList:true,subtree:true,characterData:true});
+  if(state.lang!=="ko")translateDOM();
+}
+
+function today(){const d=new Date();d.setHours(0,0,0,0);return d;}
+function iso(d){const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");}
+function parse(s){const d=new Date(s+"T00:00:00");d.setHours(0,0,0,0);return d;}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function monday(d){const x=new Date(d);const w=(x.getDay()+6)%7;return addDays(x,-w);}
+function daysBetween(a,b){return Math.round((b-a)/DAY);}
+function person(id){return people.find(p=>p.id===id)||{initials:"?",name:"미지정",bg:"var(--surface-1)",fg:"var(--text-2)"};}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h*33)^s.charCodeAt(i))>>>0;return "h"+h;}
+function fmtDD(endStr,status){
+  if(status==="done")return null;
+  const diff=daysBetween(today(),parse(endStr));
+  if(diff<0)return{txt:Math.abs(diff)+"일 지남",bg:"var(--danger-bg)",fg:"var(--danger-fg)"};
+  if(diff===0)return{txt:"오늘",bg:"var(--danger-bg)",fg:"var(--danger-fg)"};
+  if(diff<=2)return{txt:"D-"+diff,bg:"var(--danger-bg)",fg:"var(--danger-fg)"};
+  if(diff<=7)return{txt:"D-"+diff,bg:"var(--warn-bg)",fg:"var(--warn-fg)"};
+  return{txt:"D-"+diff,bg:"var(--surface-1)",fg:"var(--text-2)"};
+}
+
+function seed(){
+  const t=today(); const D=n=>iso(addDays(t,n)); let n=0; const id=()=>"t"+(++n);
+  const A=id(),B=id(),C=id();
+  const pw={};people.forEach(p=>pw[p.id]=hash("1234"));
+  return {view:"gantt",session:null,currentUser:"dv",
+    company:{code:"SPROUT",pw:hash("sprout")},companyUnlocked:false,
+    roles:{jh:"admin",mk:"lead",sr:"lead",dv:"member",yj:"viewer"},
+    managers:{jh:null,mk:"jh",sr:"jh",dv:"mk",yj:"sr"},
+    titles:{jh:"프로젝트 리드",mk:"백엔드 팀장",sr:"프로덕트 팀장",dv:"백엔드 개발",yj:"이해관계자"},
+    passwords:pw,
+    online:["mk","sr"],
+    tasks:[
+      {id:A,parent:null,title:"결제 시스템 개편",user:"mk",status:"doing",prio:"high",start:D(-9),end:D(18),prog:48,open:true,visibility:"team"},
+      {id:id(),parent:A,title:"API 스펙 확정",user:"mk",status:"done",prio:"mid",start:D(-9),end:D(-3),prog:100,open:true},
+      {id:id(),parent:A,title:"PG 연동 구현",user:"dv",status:"doing",prio:"high",start:D(-2),end:D(9),prog:55,open:true},
+      {id:id(),parent:A,title:"환불 플로우 QA",user:"dv",status:"review",prio:"high",start:D(1),end:D(2),prog:30,open:true},
+      {id:B,parent:null,title:"온보딩 리디자인",user:"sr",status:"doing",prio:"mid",start:D(3),end:D(24),prog:15,open:true,visibility:"team"},
+      {id:id(),parent:B,title:"온보딩 화면 설계",user:"sr",status:"doing",prio:"mid",start:D(3),end:D(6),prog:40,open:true},
+      {id:id(),parent:B,title:"카피 다국어 검수",user:"sr",status:"todo",prio:"low",start:D(7),end:D(12),prog:0,open:true},
+      {id:C,parent:null,title:"모바일 알림 개선",user:"jh",status:"todo",prio:"mid",start:D(6),end:D(20),prog:0,open:true,visibility:"public"},
+      {id:id(),parent:C,title:"알림 카피 초안",user:"dv",status:"todo",prio:"mid",start:D(6),end:D(6),prog:0,open:true},
+      {id:id(),parent:C,title:"푸시 서버 연동",user:"mk",status:"todo",prio:"low",start:D(10),end:D(20),prog:0,open:true}
+    ]};
+}
+
+let state;
+function load(){
+  try{const raw=localStorage.getItem(STORAGE);if(raw){state=JSON.parse(raw);const s=seed();["roles","managers","titles","passwords","company"].forEach(k=>{if(!state[k])state[k]=s[k];});if(!Array.isArray(state.online))state.online=[];if(state.companyUnlocked===undefined)state.companyUnlocked=false;return;}}catch(e){}
+  state=seed();save();
+}
+function save(){try{localStorage.setItem(STORAGE,JSON.stringify(state));}catch(e){}}
+
+/* ===== DB(Supabase) 모드 ===== */
+let dbMode=false;
+async function loadOrgMembers(orgId){
+  if(!sb||!orgId)return false;
+  let res=await sb.from("members").select("id,name,initials,role,manager_id,title,email").eq("org_id",orgId);
+  if(res.error){res=await sb.from("members").select("id,name,initials,role,manager_id,title").eq("org_id",orgId);}
+  const data=res.data; if(res.error||!data||!data.length)return false;
+  people=data.map((m,i)=>({id:m.id,name:m.name,initials:m.initials||initialsOf(m.name),email:m.email||((m.initials||initialsOf(m.name)).toLowerCase()+"@"+LOGIN_DOMAIN),...pColor(i)}));
+  state.roles={};state.managers={};state.titles={};
+  data.forEach(m=>{state.roles[m.id]=m.role;state.managers[m.id]=m.manager_id||null;state.titles[m.id]=m.title||"";});
+  dbMode=true;return true;
+}
+function taskFromDb(t){return {id:t.id,parent:t.parent_id,title:t.title,user:t.assignee_id,status:t.status,prio:t.priority,start:t.start_date,end:t.end_date,prog:t.progress,visibility:t.visibility,open:true};}
+async function loadTasks(orgId){
+  if(!sb||!orgId)return false;
+  const {data,error}=await sb.from("tasks").select("*").eq("org_id",orgId);
+  if(error||!data)return false;
+  const openState={};(state.tasks||[]).forEach(t=>{openState[t.id]=t.open;});
+  state.tasks=data.map(t=>{const o=taskFromDb(t);if(openState[t.id]!==undefined)o.open=openState[t.id];return o;});
+  dbMode=true;return true;
+}
+function taskToDb(data){const row={org_id:state.orgId,parent_id:data.parent||null,title:data.title,assignee_id:data.user||null,status:data.status,priority:data.prio,start_date:data.start,end_date:data.end,progress:data.prog};if(data.visibility!==undefined)row.visibility=data.visibility;return row;}
+async function dbSaveTask(id,data){const row=taskToDb(data);if(id){return await sb.from("tasks").update(row).eq("id",id);}row.created_by=state.session;return await sb.from("tasks").insert(row);}
+async function dbUpdateTask(id,fields){return await sb.from("tasks").update(fields).eq("id",id);}
+
+function getTask(id){return state.tasks.find(t=>t.id===id);}
+function children(id){return state.tasks.filter(t=>t.parent===id);}
+function pathOf(t){const p=t.parent?getTask(t.parent):null;return p?p.title:"최상위";}
+function roleOf(id){return state.roles[id]||"viewer";}
+function me(){const id=state.session;return id?{...person(id),role:roleOf(id)}:null;}
+function rootOwner(t){let cur=t;while(cur&&cur.parent){cur=getTask(cur.parent);}return cur?cur.user:null;}
+function rootTask(t){let cur=t;while(cur&&cur.parent){cur=getTask(cur.parent);}return cur;}
+function isDescendantOf(userId,ancestorId){let cur=userId,g=0;while(cur&&g++<50){if(cur===ancestorId)return true;cur=state.managers[cur];}return false;}
+function treeAssignees(rootId){const set={};(function walk(id){const t=getTask(id);if(t)set[t.user]=1;children(id).forEach(c=>walk(c.id));})(rootId);return set;}
+function visibleToMe(t){
+  const root=rootTask(t);if(!root)return true;
+  if((root.visibility||"public")==="public")return true;
+  const u=me();if(!u)return false;
+  if(u.role==="admin")return true;                 // 관리자는 모두 열람
+  if(isDescendantOf(u.id,root.user))return true;    // 소유자의 팀(소유자+팀원)
+  if(treeAssignees(root.id)[u.id])return true;      // 트리 안에 배정된 업무가 있으면
+  return false;
+}
+function isOnline(id){return state.online.indexOf(id)>=0;}
+function verifyPw(id,pw){return state.passwords[id]===hash(pw);}
+
+/* ---- org helpers ---- */
+function reports(id){return people.filter(p=>state.managers[p.id]===id).map(p=>p.id);}
+function orgRoots(){return people.filter(p=>!state.managers[p.id]).map(p=>p.id);}
+function wouldCycle(pid,mgr){let cur=mgr,g=0;while(cur&&g++<50){if(cur===pid)return true;cur=state.managers[cur];}return false;}
+
+/* ---------- PERMISSIONS ---------- */
+function can(action,t){
+  const u=me(); if(!u)return false; const r=u.role;
+  if(r==="admin")return true;
+  if(action==="view")return true;
+  if(r==="viewer")return false;
+  if(action==="manageUsers")return false;
+  if(action==="createTop")return r==="lead";       // 팀장도 팀 업무 트리 생성 가능
+  if(!t)return false;
+  const mine=t.user===u.id, inDomain=rootOwner(t)===u.id;
+  if(r==="lead"){
+    switch(action){
+      case "createSub": return inDomain||mine;
+      case "edit":      return inDomain||mine;
+      case "assign":    return inDomain||mine;
+      case "status":    return inDomain||mine;
+      case "delete":    return inDomain;            // 본인 소유 트리(최상위 포함)·세부 삭제
+    }
+  }
+  if(r==="member"){
+    switch(action){
+      case "createSub": return mine;
+      case "status":    return mine;
+      case "edit":      return mine;
+      case "assign":    return false;
+      case "delete":    return mine&&t.parent!=null&&children(t.id).length===0;
+    }
+  }
+  return false;
+}
+
+/* ---------- filtering ---------- */
+let filter={q:"",assignee:"all",prio:"all",due:false};
+function matches(t){
+  if(filter.q&&!t.title.toLowerCase().includes(filter.q.toLowerCase()))return false;
+  if(filter.assignee!=="all"&&t.user!==filter.assignee)return false;
+  if(filter.prio!=="all"&&t.prio!==filter.prio)return false;
+  if(filter.due){const dd=fmtDD(t.end,t.status);if(!dd||daysBetween(today(),parse(t.end))>7)return false;}
+  return true;
+}
+function branchVisible(t){if(!visibleToMe(t))return false;if(matches(t))return true;return children(t.id).some(branchVisible);}
+
+/* ---------- gantt ---------- */
+function renderGantt(){
+  const tasks=state.tasks;
+  let min=null,max=null;
+  tasks.forEach(t=>{const s=parse(t.start),e=parse(t.end);if(!min||s<min)min=s;if(!max||e>max)max=e;});
+  if(!min){min=today();max=addDays(today(),14);}
+  const start=monday(min);
+  const weeks=Math.max(1,Math.ceil((daysBetween(start,max)+1)/7));
+  const total=weeks*7;
+  const pct=d=>daysBetween(start,parse(d))/total*100;
+  const head=document.getElementById("ghead");
+  let wh='<div class="l">업무 트리</div><div class="weeks" style="grid-template-columns:repeat('+weeks+',1fr)">';
+  for(let i=0;i<weeks;i++){const wd=addDays(start,i*7);wh+='<div class="w">'+(wd.getMonth()+1)+'/'+wd.getDate()+'</div>';}
+  head.innerHTML=wh+'</div>';
+  const todayPct=pct(iso(today()));
+  const rows=document.getElementById("grows");
+  let html="",todayLabeled=false;
+  function walk(list,depth){
+    list.sort((a,b)=>parse(a.start)-parse(b.start));
+    list.forEach(t=>{
+      if(!branchVisible(t))return;
+      const kids=children(t.id),isParent=kids.length>0,p=person(t.user),dd=fmtDD(t.end,t.status);
+      const barLeft=Math.max(0,pct(t.start)),barW=Math.max(2,pct(t.end)-pct(t.start)+(100/total));
+      let grid='';for(let i=0;i<weeks;i++)grid+='<span></span>';
+      html+='<div class="grow'+(t.status==="done"?" done":"")+'">'+
+        '<div class="gl'+(isParent?" parent":"")+'" style="padding-left:'+(16+depth*18)+'px">'+
+          '<span class="tw">'+(isParent?'<button class="caret" data-toggle="'+t.id+'">'+(t.open?'▾':'▸')+'</button>':'<span class="sdot" style="background:'+STATUS[t.status].color+'"></span>')+'</span>'+
+          '<span class="nm" data-edit="'+t.id+'">'+esc(t.title)+'</span>'+
+          (t.parent===null&&(t.visibility||"public")==="team"?'<span class="visbadge" title="우리 팀만 볼 수 있는 트리">🔒 우리 팀</span>':'')+
+          '<div class="rowmeta">'+
+            '<div class="mini-av" style="background:'+p.bg+';color:'+p.fg+'" title="'+esc(p.name)+'">'+p.initials+'</div>'+
+            (dd?'<span class="dd" style="background:'+dd.bg+';color:'+dd.fg+'">'+dd.txt+'</span>':'<span class="dd" style="background:var(--ok-bg);color:var(--ok-fg)">완료</span>')+
+            (can("createSub",t)?'<button class="rowadd" data-add="'+t.id+'" title="하위 업무 추가">＋</button>':'<span style="width:20px"></span>')+
+          '</div>'+
+        '</div>'+
+        '<div class="gr" data-edit="'+t.id+'"><div class="grid" style="grid-template-columns:repeat('+weeks+',1fr)">'+grid+'</div>'+
+          (todayPct>=0&&todayPct<=100?'<div class="todayline" style="left:'+todayPct+'%">'+(todayLabeled?'':'<b>오늘</b>')+'</div>':'')+
+          '<div class="gbar" style="left:'+barLeft+'%;width:'+barW+'%;background:'+BAR[t.status]+'">'+
+            (t.status!=="done"&&t.status!=="todo"?'<div class="fill" style="width:'+t.prog+'%"></div>':'')+
+            '<span class="lab">'+(isParent?t.prog+'%':p.initials)+'</span>'+
+          '</div></div></div>';
+      if(todayPct>=0&&todayPct<=100)todayLabeled=true;
+      if(isParent&&t.open)walk(kids,depth+1);
+    });
+  }
+  walk(tasks.filter(t=>!t.parent),0);
+  rows.innerHTML=html||'<div class="empty" style="padding:20px">조건에 맞는 업무가 없습니다.</div>';
+}
+
+/* ---------- board ---------- */
+function renderBoard(){
+  const board=document.getElementById("board"),cols=["todo","doing","review","done"];
+  let html="";
+  cols.forEach(s=>{
+    const items=state.tasks.filter(t=>t.status===s&&matches(t)&&visibleToMe(t));
+    html+='<div class="bcol" data-col="'+s+'"><div class="bcolh"><span>'+STATUS[s].label+'</span><span class="cnt">'+items.length+'</span></div><div class="bcards" data-drop="'+s+'">';
+    items.forEach(t=>{
+      const p=person(t.user),dd=fmtDD(t.end,t.status),pr=PRIO[t.prio],drag=can("status",t);
+      const priv=(rootTask(t).visibility||"public")==="team";
+      html+='<div class="bcard'+(dd&&daysBetween(today(),parse(t.end))<=2&&t.status!=="done"?" due":"")+'"'+(drag?' draggable="true"':'')+' data-id="'+t.id+'" data-edit="'+t.id+'">'+
+        '<div class="bt">'+esc(t.title)+'</div><div class="bpath">'+(priv?'🔒 ':'')+esc(pathOf(t))+'</div>'+
+        '<div class="bf"><span class="pill" style="background:'+pr.bg+';color:'+pr.fg+'">'+(dd&&t.status!=="done"?dd.txt:pr.label)+'</span>'+
+        '<div class="mini-av" style="background:'+p.bg+';color:'+p.fg+'" title="'+esc(p.name)+'">'+p.initials+'</div></div></div>';
+    });
+    html+='</div></div>';
+  });
+  board.innerHTML=html;bindDrag();
+}
+function bindDrag(){
+  let dragId=null;
+  document.querySelectorAll(".bcard[draggable=true]").forEach(c=>{
+    c.addEventListener("dragstart",e=>{dragId=c.dataset.id;c.classList.add("dragging");e.dataTransfer.effectAllowed="move";});
+    c.addEventListener("dragend",()=>{dragId=null;c.classList.remove("dragging");document.querySelectorAll(".bcol").forEach(x=>x.classList.remove("dragover"));});
+  });
+  document.querySelectorAll(".bcards").forEach(drop=>{
+    const col=drop.closest(".bcol");
+    drop.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("dragover");});
+    drop.addEventListener("dragleave",()=>col.classList.remove("dragover"));
+    drop.addEventListener("drop",async e=>{
+      e.preventDefault();col.classList.remove("dragover");
+      if(!dragId)return;const t=getTask(dragId),ns=drop.dataset.drop;
+      if(!t||!can("status",t))return;
+      if(t.status!==ns){
+        const np=(ns==="done")?100:(t.prog===100?90:t.prog);
+        if(dbMode&&sb){await dbUpdateTask(t.id,{status:ns,progress:np});await loadTasks(state.orgId);renderAll();}
+        else{t.status=ns;t.prog=np;save();renderAll();}
+      }
+    });
+  });
+}
+
+/* ---------- my work ---------- */
+function renderMine(){
+  const uid=state.currentUser,list=document.getElementById("mineList");
+  const mine=state.tasks.filter(t=>t.user===uid&&children(t.id).length===0&&visibleToMe(t));
+  const groups={overdue:[],today:[],week:[],later:[],done:[]};
+  mine.forEach(t=>{
+    if(t.status==="done"){groups.done.push(t);return;}
+    const diff=daysBetween(today(),parse(t.end));
+    if(diff<0)groups.overdue.push(t);else if(diff===0)groups.today.push(t);
+    else if(diff<=7)groups.week.push(t);else groups.later.push(t);
+  });
+  const order=[["overdue","지연"],["today","오늘"],["week","이번 주"],["later","이후"],["done","완료"]];
+  let html="";
+  order.forEach(([k,label])=>{
+    const arr=groups[k].sort((a,b)=>parse(a.end)-parse(b.end));if(!arr.length)return;
+    html+='<div class="grp-h"><span class="t">'+label+'</span><span class="c">· '+arr.length+'건</span></div>';
+    arr.forEach(t=>{
+      const dd=fmtDD(t.end,t.status),checked=t.status==="done",lock=!can("status",t);
+      html+='<div class="mrow'+(checked?" done":"")+'">'+
+        '<div class="cbx'+(checked?" checked":"")+(lock?" locked":"")+'"'+(lock?"":' data-check="'+t.id+'"')+'>'+(checked?"✓":"")+'</div>'+
+        '<div class="mt" data-edit="'+t.id+'"><div class="ttl">'+esc(t.title)+'</div><div class="path">'+esc(pathOf(t))+'</div></div>'+
+        (dd?'<span class="dd" style="background:'+dd.bg+';color:'+dd.fg+'">'+dd.txt+'</span>':'')+'</div>';
+    });
+  });
+  list.innerHTML=html||'<div class="empty">담당한 업무가 없습니다.</div>';
+  const active=mine.filter(t=>t.status!=="done"&&daysBetween(today(),parse(t.end))<=7&&daysBetween(today(),parse(t.end))>=-30);
+  const pctLoad=Math.min(100,Math.round(active.length/6*100));
+  let lc="var(--done)",lt="양호";
+  if(pctLoad>=85){lc="var(--danger)";lt="과부하";}else if(pctLoad>=60){lc="var(--review)";lt="주의";}
+  document.getElementById("loadTxt").textContent=lt+" · "+pctLoad+"% ("+active.length+"건)";
+  const lb=document.getElementById("loadBar");lb.style.width=pctLoad+"%";lb.style.background=lc;
+}
+
+/* ---------- presence + chrome ---------- */
+function renderPresence(){
+  const on=people.filter(p=>isOnline(p.id));
+  const el=document.getElementById("presence");
+  el.innerHTML='<span class="plabel"><span class="pdotg"></span>접속 중 '+on.length+'</span>'+
+    on.map(p=>'<div class="pav" style="background:'+p.bg+';color:'+p.fg+'" title="'+esc(p.name)+' · 접속 중">'+p.initials+'</div>').join('')+
+    (on.length===0?'<span style="font-size:11px;color:var(--text-3)">없음</span>':'');
+}
+function renderChrome(){
+  const u=me();if(!u)return;
+  renderPresence();
+  const rb=ROLES[u.role];
+  document.getElementById("userchip").innerHTML='<div class="mini-av" style="background:'+u.bg+';color:'+u.fg+'">'+u.initials+'</div><span class="nm">'+esc(u.name)+'</span><span class="rbadge" style="background:'+rb.bg+';color:'+rb.fg+'">'+rb.label+'</span>';
+  document.getElementById("newBtn").hidden=!can("createTop");
+  document.getElementById("usersBtn").hidden=!can("manageUsers");
+  document.getElementById("orgBtn").hidden=!can("manageUsers");
+  document.getElementById("resetBtn").hidden=u.role!=="admin";
+  const fa=document.getElementById("fAssignee");
+  if(fa.options.length===0)fa.innerHTML='<option value="all">담당자 전체</option>'+people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+  const us=document.getElementById("userSel");
+  if(us.options.length===0)us.innerHTML=people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+  us.value=state.currentUser;
+  const done=state.tasks.filter(t=>t.status==="done").length;
+  document.getElementById("tzInfo").textContent="3개 타임존 · 오늘 "+(today().getMonth()+1)+"월 "+today().getDate()+"일 · 완료 "+done+"/"+state.tasks.length;
+}
+function renderAll(){renderChrome();renderGantt();renderBoard();renderMine();}
+
+function switchView(v){
+  state.view=v;save();
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.v===v));
+  document.querySelectorAll(".view").forEach(el=>el.classList.toggle("on",el.id==="view-"+v));
+}
+
+/* ---------- org chart rendering ---------- */
+function nodeHtml(id,clickable){
+  const p=person(id),rb=ROLES[roleOf(id)],t=state.titles[id]||"",on=isOnline(id);
+  return '<div class="node'+(clickable?" clk":"")+'"'+(clickable?' data-login="'+id+'"':'')+'>'+
+    '<div class="npic" style="background:'+p.bg+';color:'+p.fg+'">'+p.initials+(on?'<span class="dot" title="접속 중"></span>':'')+'</div>'+
+    '<div class="nn">'+esc(p.name)+'</div>'+
+    (t?'<div class="nt">'+esc(t)+'</div>':'')+
+    '<span class="rbadge" style="background:'+rb.bg+';color:'+rb.fg+'">'+rb.label+'</span>'+
+  '</div>';
+}
+function buildTree(ids,clickable){
+  if(!ids.length)return "";
+  return '<ul>'+ids.map(id=>'<li>'+nodeHtml(id,clickable)+buildTree(reports(id),clickable)+'</li>').join('')+'</ul>';
+}
+function renderLoginChart(){document.getElementById("loginChart").innerHTML=buildTree(orgRoots(),true);}
+
+/* ---------- login / logout ---------- */
+let pendingLogin=null;
+function openLogin(id){
+  pendingLogin=id;const p=person(id),rb=ROLES[roleOf(id)];
+  document.getElementById("pwWho").innerHTML='<div class="npic" style="width:52px;height:52px;font-size:17px;background:'+p.bg+';color:'+p.fg+';margin:0 auto 8px"></div>'.replace("></div>",'>'+p.initials+'</div>')+
+    '<div style="font-weight:600;font-size:15px">'+esc(p.name)+'</div><span class="rbadge" style="background:'+rb.bg+';color:'+rb.fg+'">'+rb.label+'</span>';
+  document.getElementById("pwInput").value="";
+  document.getElementById("pwErr").hidden=true;
+  document.getElementById("pwOverlay").classList.add("on");
+  setTimeout(()=>document.getElementById("pwInput").focus(),30);
+}
+async function submitLogin(){
+  if(!pendingLogin)return;
+  const id=pendingLogin, val=document.getElementById("pwInput").value;
+  const btn=document.getElementById("pwSubmit"); btn.disabled=true; btn.textContent="로그인 중…";
+  let ok=false, viaServer=false;
+  if(sb){
+    try{
+      const email=(person(id).email)||(id+"@"+LOGIN_DOMAIN);
+      const {data,error}=await sb.auth.signInWithPassword({email,password:val});
+      viaServer=true; ok=!error && !!(data&&data.user);
+    }catch(e){viaServer=false;}
+  }
+  if(!viaServer) ok=verifyPw(id,val);   // 오프라인/미연결 폴백
+  btn.disabled=false; btn.textContent="로그인";
+  if(!ok){document.getElementById("pwErr").hidden=false;document.getElementById("pwInput").select();return;}
+  pendingLogin=null;
+  document.getElementById("pwOverlay").classList.remove("on");
+  await doLogin(id);
+}
+async function doLogin(id){
+  state.session=id;state.currentUser=id;
+  if(dbMode)state.online=[id];else if(!isOnline(id))state.online.push(id);
+  save();
+  if(dbMode&&sb&&state.orgId)await loadTasks(state.orgId);
+  document.getElementById("login").classList.remove("on");
+  document.getElementById("app").hidden=false;
+  switchView(state.view||"gantt");renderAll();
+}
+function doLogout(){
+  if(sb){try{sb.auth.signOut();}catch(e){}}
+  state.online=state.online.filter(x=>x!==state.session);
+  state.session=null;save();
+  document.getElementById("app").hidden=true;
+  renderLoginChart();
+  document.getElementById("login").classList.add("on");
+}
+
+/* ---------- company gate ---------- */
+async function enterCompany(){
+  const code=document.getElementById("coCode").value.trim();
+  const pw=document.getElementById("coPw").value;
+  const err=document.getElementById("coErr"), btn=document.getElementById("coEnter");
+  btn.disabled=true;btn.textContent="확인 중…";
+  let ok=false, viaServer=false;
+  if(sb){
+    try{
+      const {data,error}=await sb.rpc("verify_company_gate",{p_code:code,p_password:pw});
+      if(!error){viaServer=true; ok=Array.isArray(data)&&data.length>0; if(ok&&data[0].org_id)state.orgId=data[0].org_id;}
+    }catch(e){/* 네트워크 실패 → 아래 오프라인 폴백 */}
+  }
+  if(!viaServer){ // 오프라인/미연결 시 로컬 검증
+    ok=code.toUpperCase()===state.company.code.toUpperCase()&&state.company.pw===hash(pw);
+  }
+  btn.disabled=false;btn.textContent="입장";
+  if(!ok){err.hidden=false;return;}
+  err.hidden=true;
+  state.companyUnlocked=true;save();
+  if(sb&&state.orgId)await loadOrgMembers(state.orgId);
+  document.getElementById("company").classList.remove("on");
+  renderLoginChart();
+  document.getElementById("login").classList.add("on");
+}
+function switchCompany(){
+  if(sb){try{sb.auth.signOut();}catch(e){}}
+  state.companyUnlocked=false;state.session=null;save();
+  document.getElementById("login").classList.remove("on");
+  document.getElementById("app").hidden=true;
+  document.getElementById("coCode").value="";document.getElementById("coPw").value="";
+  document.getElementById("coErr").hidden=true;
+  document.getElementById("company").classList.add("on");
+  setTimeout(()=>document.getElementById("coCode").focus(),30);
+}
+
+/* ---------- 회원가입 / 비번찾기 요청 ---------- */
+function openOv(id){document.getElementById(id).classList.add("on");}
+function closeOv(id){document.getElementById(id).classList.remove("on");}
+async function sendSignup(){
+  const err=document.getElementById("suErr"), okb=document.getElementById("suOk");
+  err.hidden=true;
+  const company=document.getElementById("suCompany").value.trim();
+  const contact=document.getElementById("suContact").value.trim();
+  if(!company||!contact){err.textContent="회사명과 연락처는 필수입니다.";err.hidden=false;return;}
+  if(!sb){err.textContent="서버 연결이 필요합니다(온라인에서 요청하세요).";err.hidden=false;return;}
+  const {error}=await sb.rpc("submit_company_request",{
+    p_type:"signup",p_company_name:company,p_contact_name:document.getElementById("suName").value.trim(),
+    p_contact:contact,p_desired_code:document.getElementById("suCode").value.trim(),p_message:document.getElementById("suMsg").value.trim()});
+  if(error){err.textContent="요청 실패: "+error.message;err.hidden=false;return;}
+  okb.hidden=false;
+  ["suCompany","suName","suContact","suCode","suMsg"].forEach(i=>document.getElementById(i).value="");
+}
+async function sendReset(){
+  const err=document.getElementById("rsErr"), okb=document.getElementById("rsOk");
+  err.hidden=true;
+  const code=document.getElementById("rsCode").value.trim();
+  const contact=document.getElementById("rsContact").value.trim();
+  if(!code||!contact){err.textContent="회사 코드와 연락처는 필수입니다.";err.hidden=false;return;}
+  if(!sb){err.textContent="서버 연결이 필요합니다(온라인에서 요청하세요).";err.hidden=false;return;}
+  const {error}=await sb.rpc("submit_company_request",{
+    p_type:"reset",p_company_name:null,p_contact_name:document.getElementById("rsName").value.trim(),
+    p_contact:contact,p_desired_code:code,p_message:document.getElementById("rsMsg").value.trim()});
+  if(error){err.textContent="요청 실패: "+error.message;err.hidden=false;return;}
+  okb.hidden=false;
+  ["rsCode","rsName","rsContact","rsMsg"].forEach(i=>document.getElementById(i).value="");
+}
+
+/* ---------- 플랫폼 관리자 콘솔 ---------- */
+let acOrgs=[], acReqs=[];
+async function submitAdminLogin(){
+  const err=document.getElementById("alErr");err.hidden=true;
+  const email=document.getElementById("alEmail").value.trim(), pw=document.getElementById("alPw").value;
+  if(!sb){err.textContent="서버 연결이 필요합니다.";err.hidden=false;return;}
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
+  if(error||!data.user){err.textContent="로그인 실패: 이메일 또는 비밀번호를 확인하세요.";err.hidden=false;return;}
+  const chk=await sb.rpc("is_platform_admin");
+  if(chk.error||!chk.data){err.textContent="플랫폼 관리자 권한이 없는 계정입니다.";err.hidden=false;try{await sb.auth.signOut();}catch(e){}return;}
+  closeOv("adminLoginOverlay");
+  document.getElementById("company").classList.remove("on");
+  document.getElementById("adminConsole").classList.add("on");
+  renderAdminConsole();
+}
+async function acLogout(){if(sb){try{await sb.auth.signOut();}catch(e){}}
+  document.getElementById("adminConsole").classList.remove("on");
+  document.getElementById("company").classList.add("on");}
+async function renderAdminConsole(){
+  const rl=document.getElementById("acReqList"), ol=document.getElementById("acOrgList");
+  rl.innerHTML='<div class="ac-empty">불러오는 중…</div>';ol.innerHTML="";
+  const [reqRes,orgRes]=await Promise.all([sb.rpc("admin_list_requests"),sb.rpc("admin_list_orgs")]);
+  acOrgs=orgRes.data||[];
+  // 요청
+  acReqs=(reqRes.data||[]); const reqs=acReqs;
+  const pending=reqs.filter(r=>r.status==="pending");
+  document.getElementById("acReqCnt").textContent=pending.length;
+  if(!reqs.length){rl.innerHTML='<div class="ac-empty">아직 요청이 없습니다.</div>';}
+  else{
+    rl.innerHTML=reqs.map(r=>{
+      const isSignup=r.type==="signup";
+      const badge=isSignup?'<span class="rtype" style="background:var(--ok-bg);color:var(--ok-fg)">가입</span>':'<span class="rtype" style="background:var(--warn-bg);color:var(--warn-fg)">비번재설정</span>';
+      const st=r.status==="pending"?'':(r.status==="done"?' <span class="rtype" style="background:var(--surface-1);color:var(--text-2)">처리됨</span>':' <span class="rtype" style="background:var(--surface-1);color:var(--text-3)">거절됨</span>');
+      const meta=[r.company_name?("회사: "+esc(r.company_name)):"",r.desired_code?("코드: "+esc(r.desired_code)):"",r.contact_name?("담당: "+esc(r.contact_name)):"",r.contact?("연락처: "+esc(r.contact)):"",r.message?("메모: "+esc(r.message)):""].filter(Boolean).join("<br>");
+      const acts=r.status!=="pending"?"":(isSignup
+        ?'<button class="btn primary sm" data-reg="'+r.id+'">회사 등록</button><button class="btn sm" data-rej="'+r.id+'">거절</button>'
+        :'<button class="btn primary sm" data-setpw="'+r.id+'">비번 재설정</button><button class="btn sm" data-rej="'+r.id+'">거절</button>');
+      return '<div class="ac-card ac-req"><div class="info"><div class="rt">'+badge+(isSignup?esc(r.company_name||"(회사명 없음)"):esc(r.desired_code||"(코드 없음)"))+st+'</div><div class="rmeta">'+meta+'</div></div><div class="acts">'+acts+'</div></div>';
+    }).join("");
+  }
+  // 회사
+  if(!acOrgs.length){ol.innerHTML='<div class="ac-empty">등록된 회사가 없습니다.</div>';}
+  else{
+    ol.innerHTML=acOrgs.map(o=>'<div class="ac-orow"><span class="ocode">'+esc(o.code)+'</span><span class="oname">'+esc(o.name||"")+'</span><span class="ometa">구성원 '+o.member_count+'명</span><button class="btn sm" data-opw="'+o.id+'">비번 재설정</button><button class="btn sm danger" data-odel="'+o.id+'">삭제</button></div>').join("");
+  }
+}
+/* 회사 등록 / 비번 재설정 모달 */
+let procMode="register", procCtx={};
+function openProc(mode,ctx){
+  procMode=mode;procCtx=ctx||{};
+  document.getElementById("pcErr").hidden=true;
+  document.getElementById("procTitle").textContent=mode==="register"?"회사 등록":"회사 비밀번호 재설정";
+  const code=document.getElementById("pcCode"), name=document.getElementById("pcName"), pw=document.getElementById("pcPw");
+  code.value=procCtx.code||"";name.value=procCtx.name||"";pw.value="";
+  const lock=mode==="setpw";
+  code.disabled=lock;name.disabled=lock;
+  code.parentElement.style.display=lock?"none":"";
+  name.parentElement.style.display=lock?"none":"";
+  openOv("procOverlay");
+}
+async function saveProc(){
+  const err=document.getElementById("pcErr");err.hidden=true;
+  const pw=document.getElementById("pcPw").value.trim();
+  if(!pw){err.textContent="비밀번호를 입력하세요.";err.hidden=false;return;}
+  let res;
+  if(procMode==="register"){
+    const code=document.getElementById("pcCode").value.trim();
+    if(!code){err.textContent="회사 코드를 입력하세요.";err.hidden=false;return;}
+    res=await sb.rpc("admin_register_company",{p_request_id:procCtx.requestId||null,p_code:code,p_password:pw,p_name:document.getElementById("pcName").value.trim()});
+  }else{
+    res=await sb.rpc("admin_set_company_password",{p_org_id:procCtx.orgId,p_password:pw,p_request_id:procCtx.requestId||null});
+  }
+  if(res.error){err.textContent=res.error.message;err.hidden=false;return;}
+  closeOv("procOverlay");renderAdminConsole();
+}
+
+/* ---------- set password ---------- */
+let setTarget=null,setRequireCur=false;
+function openSetPw(targetId,requireCurrent){
+  const u=me();if(!u||(u.role!=="admin"&&u.id!==targetId))return;
+  setTarget=targetId;setRequireCur=requireCurrent;
+  const self=u.id===targetId;
+  document.getElementById("setTitle").textContent=self?"내 비밀번호 변경":(person(targetId).name+" 비밀번호 재설정");
+  document.getElementById("curWrap").hidden=!requireCurrent;
+  document.getElementById("setCur").value="";document.getElementById("setNew").value="";document.getElementById("setNew2").value="";
+  document.getElementById("setErr").hidden=true;
+  document.getElementById("setOverlay").classList.add("on");
+  setTimeout(()=>document.getElementById(requireCurrent?"setCur":"setNew").focus(),30);
+}
+function saveSetPw(){
+  if(!setTarget)return;const u=me();if(!u||(u.role!=="admin"&&u.id!==setTarget))return;
+  const err=document.getElementById("setErr");
+  const cur=document.getElementById("setCur").value, nw=document.getElementById("setNew").value, nw2=document.getElementById("setNew2").value;
+  if(setRequireCur&&!verifyPw(setTarget,cur)){err.textContent="현재 비밀번호가 올바르지 않습니다.";err.hidden=false;return;}
+  if(!nw){err.textContent="새 비밀번호를 입력하세요.";err.hidden=false;return;}
+  if(nw!==nw2){err.textContent="새 비밀번호 확인이 일치하지 않습니다.";err.hidden=false;return;}
+  state.passwords[setTarget]=hash(nw);save();
+  document.getElementById("setOverlay").classList.remove("on");setTarget=null;
+  if(document.getElementById("uOverlay").classList.contains("on"))renderUsers();
+}
+
+/* ---------- user mgmt ---------- */
+function renderUsers(){
+  document.getElementById("uList").innerHTML=people.map(p=>{
+    const opts=Object.keys(ROLES).map(r=>'<option value="'+r+'"'+(roleOf(p.id)===r?" selected":"")+'>'+ROLES[r].label+'</option>').join("");
+    const on=isOnline(p.id);
+    return '<div class="urow"><div class="mini-av" style="background:'+p.bg+';color:'+p.fg+'">'+p.initials+'</div>'+
+      '<span class="un">'+esc(p.name)+(p.id===state.session?' (나)':'')+'</span>'+
+      '<span class="ostat" style="background:'+(on?"var(--ok-bg)":"var(--surface-1)")+';color:'+(on?"var(--ok-fg)":"var(--text-3)")+'">'+(on?"접속중":"오프라인")+'</span>'+
+      '<select data-role="'+p.id+'">'+opts+'</select>'+
+      '<button class="ubtn" data-pw="'+p.id+'">비번 재설정</button></div>';
+  }).join("");
+}
+function openUsers(){if(!can("manageUsers"))return;renderUsers();document.getElementById("uOverlay").classList.add("on");}
+
+/* ---------- org editor ---------- */
+function renderOrgEditor(){
+  document.getElementById("orgPreview").innerHTML=buildTree(orgRoots(),false);
+  document.getElementById("orgRows").innerHTML=people.map(p=>{
+    const invalid=people.filter(x=>x.id!==p.id&&wouldCycle(p.id,x.id)).map(x=>x.id);
+    const opts='<option value="">— 최상위 (상사 없음)</option>'+people.filter(x=>x.id!==p.id&&invalid.indexOf(x.id)<0).map(x=>'<option value="'+x.id+'"'+(state.managers[p.id]===x.id?" selected":"")+'>'+esc(x.name)+'</option>').join("");
+    return '<div class="urow"><div class="mini-av" style="background:'+p.bg+';color:'+p.fg+'">'+p.initials+'</div>'+
+      '<span class="un">'+esc(p.name)+'</span>'+
+      '<input class="tinp" data-title="'+p.id+'" value="'+esc(state.titles[p.id]||"")+'" placeholder="직함">'+
+      '<span style="font-size:11px;color:var(--text-3)">상사</span><select data-mgr="'+p.id+'">'+opts+'</select></div>';
+  }).join("");
+}
+function openOrg(){if(!can("manageUsers"))return;renderOrgEditor();document.getElementById("orgOverlay").classList.add("on");}
+
+/* ---------- task modal ---------- */
+let editing=null,mParentCtx=null,mPrio="mid",mStatus="todo",mVis="public";
+function setSeg(container,val,attr){container.querySelectorAll("button").forEach(b=>{const on=b.dataset[attr]===val;b.classList.toggle("on",on);b.style.background=on?(attr==="p"?PRIO[val].fg:STATUS[val].color):"";});}
+function paintVis(){document.getElementById("segVis").querySelectorAll("button").forEach(b=>{const on=b.dataset.vis===mVis;b.classList.toggle("on",on);b.style.background=on?"var(--accent)":"";});document.getElementById("visHelp").textContent=mVis==="team"?"우리 팀(소유자+팀원)과 관리자만 이 트리를 볼 수 있습니다.":"모든 구성원이 이 트리를 볼 수 있습니다.";}
+function modalPerm(t,parentId){
+  const u=me(),r=u.role;
+  const isTop=t?(t.parent===null):!parentId;
+  const all={title:1,parent:1,user:1,prio:1,dates:1,status:1,prog:1};
+  if(t){
+    if(!can("edit",t))return{ro:true,save:false,del:can("delete",t),f:{title:0,parent:0,user:0,prio:0,dates:0,status:0,prog:0},vis:isTop,visEdit:false,hint:"읽기 전용 — 이 업무를 수정할 권한이 없습니다."};
+    if(r==="member")return{ro:false,save:true,del:can("delete",t),f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:"팀원 권한 — 담당자·상위 변경은 잠겨 있습니다."};
+    if(r==="lead"&&isTop)return{ro:false,save:true,del:can("delete",t),f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:true,visEdit:true,hint:"우리 팀 업무 트리 — 소유 팀은 바꿀 수 없고, 공개 범위를 설정할 수 있습니다."};
+    return{ro:false,save:true,del:can("delete",t),f:all,vis:isTop,visEdit:isTop,hint:null};
+  }
+  if(parentId){
+    if(r==="member")return{ro:false,save:true,del:false,f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:"본인 업무 아래 하위 업무 — 담당자는 본인으로 지정됩니다."};
+    return{ro:false,save:true,del:false,f:{title:1,parent:0,user:1,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:null};
+  }
+  if(r==="lead")return{ro:false,save:true,del:false,f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:true,visEdit:true,hint:"우리 팀 업무 트리 — 소유자는 본인, 공개 범위를 선택하세요."};
+  return{ro:false,save:true,del:false,f:all,vis:true,visEdit:true,hint:null};
+}
+function applyFieldPerm(f){
+  document.getElementById("fTitleInput").disabled=!f.title;
+  document.getElementById("fParent").disabled=!f.parent;
+  document.getElementById("fUser").disabled=!f.user;
+  document.getElementById("fStart").disabled=!f.dates;
+  document.getElementById("fEnd").disabled=!f.dates;
+  document.getElementById("fProg").disabled=!f.prog;
+  document.getElementById("segPrio").classList.toggle("locked",!f.prio);
+  document.getElementById("segStatus").classList.toggle("locked",!f.status);
+}
+function openModal(taskId,parentId){
+  editing=taskId||null;mParentCtx=parentId||null;
+  const t=taskId?getTask(taskId):null,u=me();
+  const perm=modalPerm(t,parentId);
+  document.getElementById("mTitle").textContent=t?(perm.ro?"업무 보기":"업무 편집"):"새 업무";
+  const rh=document.getElementById("roHint");rh.hidden=!perm.hint;if(perm.hint)document.getElementById("roHintText").textContent=perm.hint;
+  document.getElementById("mDelete").style.display=perm.del?"inline-flex":"none";
+  document.getElementById("mSave").style.display=perm.save?"inline-flex":"none";
+  document.getElementById("mCancel").textContent=perm.save?"취소":"닫기";
+  document.getElementById("fTitleInput").value=t?t.title:"";
+  const fp=document.getElementById("fParent");
+  const opts=['<option value="">— 없음 (최상위)</option>'];
+  state.tasks.filter(x=>x.id!==taskId&&x.parent===null).forEach(x=>opts.push('<option value="'+x.id+'">'+esc(x.title)+'</option>'));
+  fp.innerHTML=opts.join("");
+  fp.value=t?(t.parent||""):(parentId||"");
+  const fu=document.getElementById("fUser");
+  fu.innerHTML=people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+  fu.value=t?t.user:(perm.f.user?state.currentUser:u.id);
+  document.getElementById("visFld").hidden=!perm.vis;
+  mVis=t?(t.visibility||"public"):(u.role==="lead"?"team":"public");
+  paintVis();
+  document.getElementById("segVis").classList.toggle("locked",!perm.visEdit);
+  document.getElementById("fStart").value=t?t.start:iso(today());
+  document.getElementById("fEnd").value=t?t.end:iso(addDays(today(),3));
+  mPrio=t?t.prio:"mid";mStatus=t?t.status:"todo";
+  setSeg(document.getElementById("segPrio"),mPrio,"p");
+  setSeg(document.getElementById("segStatus"),mStatus,"s");
+  document.getElementById("fProg").value=t?t.prog:0;
+  document.getElementById("progVal").textContent=(t?t.prog:0)+"%";
+  applyFieldPerm(perm.f);
+  document.getElementById("overlay").classList.add("on");
+  if(perm.f.title)document.getElementById("fTitleInput").focus();
+}
+function closeModal(){document.getElementById("overlay").classList.remove("on");editing=null;mParentCtx=null;}
+async function saveModal(){
+  const t=editing?getTask(editing):null,u=me();
+  const perm=modalPerm(t,mParentCtx);if(!perm.save)return;
+  const title=document.getElementById("fTitleInput").value.trim();
+  if(!title){document.getElementById("fTitleInput").focus();return;}
+  let start=document.getElementById("fStart").value||iso(today());
+  let end=document.getElementById("fEnd").value||start;if(parse(end)<parse(start))end=start;
+  let parentVal=perm.f.parent?(document.getElementById("fParent").value||null):(t?t.parent:(mParentCtx||null));
+  let userVal=perm.f.user?document.getElementById("fUser").value:(t?t.user:(u.role==="member"?u.id:state.currentUser));
+  const data={title,parent:parentVal,user:userVal,prio:mPrio,status:mStatus,start,end,prog:mStatus==="done"?100:parseInt(document.getElementById("fProg").value,10)};
+  if(parentVal===null)data.visibility=perm.vis?mVis:((t&&t.visibility)||"public");
+  if(dbMode&&sb){
+    const btn=document.getElementById("mSave");btn.disabled=true;btn.textContent="저장 중…";
+    const res=await dbSaveTask(editing,data);
+    btn.disabled=false;btn.textContent="저장";
+    if(res&&res.error){alert("저장 실패: "+res.error.message);return;}
+    await loadTasks(state.orgId);renderAll();closeModal();return;
+  }
+  if(editing){Object.assign(getTask(editing),data);}
+  else{data.id="t"+Date.now();data.open=true;state.tasks.push(data);}
+  save();renderAll();closeModal();
+}
+async function deleteTask(){
+  if(!editing)return;const t=getTask(editing);if(!can("delete",t))return;
+  const kids=children(editing);
+  if(kids.length&&!confirm("하위 업무 "+kids.length+"개도 함께 삭제됩니다. 계속할까요?"))return;
+  if(dbMode&&sb){
+    const res=await sb.from("tasks").delete().eq("id",editing);  // 하위는 DB에서 cascade 삭제
+    if(res.error){alert("삭제 실패: "+res.error.message);return;}
+    await loadTasks(state.orgId);renderAll();closeModal();return;
+  }
+  const toDel=new Set([editing]);let ch=true;
+  while(ch){ch=false;state.tasks.forEach(x=>{if(x.parent&&toDel.has(x.parent)&&!toDel.has(x.id)){toDel.add(x.id);ch=true;}});}
+  state.tasks=state.tasks.filter(x=>!toDel.has(x.id));save();renderAll();closeModal();
+}
+
+/* ---------- events ---------- */
+function bind(){
+  document.getElementById("coEnter").addEventListener("click",enterCompany);
+  document.getElementById("coPw").addEventListener("keydown",e=>{if(e.key==="Enter")enterCompany();});
+  document.getElementById("coCode").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("coPw").focus();});
+  document.getElementById("switchCo").addEventListener("click",switchCompany);
+
+  // 회원가입/비번찾기/관리자 로그인
+  document.getElementById("lnkSignup").addEventListener("click",()=>{document.getElementById("suErr").hidden=true;document.getElementById("suOk").hidden=true;openOv("signupOverlay");});
+  document.getElementById("lnkReset").addEventListener("click",()=>{document.getElementById("rsErr").hidden=true;document.getElementById("rsOk").hidden=true;openOv("resetOverlay");});
+  document.getElementById("lnkAdmin").addEventListener("click",()=>{document.getElementById("alErr").hidden=true;openOv("adminLoginOverlay");setTimeout(()=>document.getElementById("alEmail").focus(),30);});
+  document.getElementById("suClose").addEventListener("click",()=>closeOv("signupOverlay"));
+  document.getElementById("suCancel").addEventListener("click",()=>closeOv("signupOverlay"));
+  document.getElementById("suSend").addEventListener("click",sendSignup);
+  document.getElementById("rsClose").addEventListener("click",()=>closeOv("resetOverlay"));
+  document.getElementById("rsCancel").addEventListener("click",()=>closeOv("resetOverlay"));
+  document.getElementById("rsSend").addEventListener("click",sendReset);
+  document.getElementById("alClose").addEventListener("click",()=>closeOv("adminLoginOverlay"));
+  document.getElementById("alCancel").addEventListener("click",()=>closeOv("adminLoginOverlay"));
+  document.getElementById("alSubmit").addEventListener("click",submitAdminLogin);
+  document.getElementById("alPw").addEventListener("keydown",e=>{if(e.key==="Enter")submitAdminLogin();});
+  [["signupOverlay"],["resetOverlay"],["adminLoginOverlay"],["procOverlay"]].forEach(([id])=>document.getElementById(id).addEventListener("click",e=>{if(e.target.id===id)closeOv(id);}));
+
+  // 관리자 콘솔
+  document.getElementById("acLogout").addEventListener("click",acLogout);
+  document.getElementById("acNewCo").addEventListener("click",()=>openProc("register",{}));
+  document.getElementById("pcClose").addEventListener("click",()=>closeOv("procOverlay"));
+  document.getElementById("pcCancel").addEventListener("click",()=>closeOv("procOverlay"));
+  document.getElementById("pcSave").addEventListener("click",saveProc);
+  document.getElementById("acReqList").addEventListener("click",async e=>{
+    const reg=e.target.closest("[data-reg]"); if(reg){const r=acReqs.find(x=>x.id===reg.dataset.reg);openProc("register",{requestId:r.id,code:r.desired_code||"",name:r.company_name||""});return;}
+    const sp=e.target.closest("[data-setpw]"); if(sp){const r=acReqs.find(x=>x.id===sp.dataset.setpw);const org=acOrgs.find(o=>(o.code||"").toUpperCase()===(r.desired_code||"").toUpperCase());if(!org){alert("요청의 회사 코드('"+(r.desired_code||"")+"')와 일치하는 회사가 없습니다. 회사 목록에서 직접 재설정하세요.");return;}openProc("setpw",{requestId:r.id,orgId:org.id,code:org.code,name:org.name});return;}
+    const rej=e.target.closest("[data-rej]"); if(rej){if(!confirm("이 요청을 거절할까요?"))return;const res=await sb.rpc("admin_reject_request",{p_request_id:rej.dataset.rej});if(res.error){alert(res.error.message);return;}renderAdminConsole();return;}
+  });
+  document.getElementById("acOrgList").addEventListener("click",async e=>{
+    const opw=e.target.closest("[data-opw]"); if(opw){const o=acOrgs.find(x=>x.id===opw.dataset.opw);openProc("setpw",{orgId:o.id,code:o.code,name:o.name});return;}
+    const del=e.target.closest("[data-odel]"); if(del){const o=acOrgs.find(x=>x.id===del.dataset.odel);if(!confirm("회사 '"+(o.code)+"'를 삭제할까요? 이 회사의 모든 데이터가 사라집니다."))return;const res=await sb.rpc("admin_delete_company",{p_org_id:o.id});if(res.error){alert(res.error.message);return;}renderAdminConsole();return;}
+  });
+  document.getElementById("login").addEventListener("click",e=>{const b=e.target.closest("[data-login]");if(b)openLogin(b.dataset.login);});
+  document.getElementById("pwClose").addEventListener("click",()=>{document.getElementById("pwOverlay").classList.remove("on");pendingLogin=null;});
+  document.getElementById("pwCancel").addEventListener("click",()=>{document.getElementById("pwOverlay").classList.remove("on");pendingLogin=null;});
+  document.getElementById("pwSubmit").addEventListener("click",submitLogin);
+  document.getElementById("pwInput").addEventListener("keydown",e=>{if(e.key==="Enter")submitLogin();});
+  document.getElementById("logoutBtn").addEventListener("click",doLogout);
+  document.getElementById("userchip").addEventListener("click",()=>{const u=me();if(u)openSetPw(u.id,true);});
+
+  document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(b)switchView(b.dataset.v);});
+  document.getElementById("newBtn").addEventListener("click",()=>{if(can("createTop"))openModal(null,null);});
+  document.getElementById("usersBtn").addEventListener("click",openUsers);
+  document.getElementById("orgBtn").addEventListener("click",openOrg);
+  document.getElementById("resetBtn").addEventListener("click",()=>{if(me().role==="admin"&&confirm("샘플 데이터로 초기화할까요? 현재 데이터는 사라집니다.")){const sess=state.session;state=seed();state.session=sess;if(sess&&!state.online.includes(sess))state.online.push(sess);save();switchView(state.view);renderAll();}});
+  document.getElementById("search").addEventListener("input",e=>{filter.q=e.target.value;renderAll();});
+  document.getElementById("fAssignee").addEventListener("change",e=>{filter.assignee=e.target.value;renderAll();});
+  document.getElementById("fPriority").addEventListener("change",e=>{filter.prio=e.target.value;renderAll();});
+  document.getElementById("fDue").addEventListener("click",e=>{filter.due=!filter.due;e.currentTarget.classList.toggle("on",filter.due);renderAll();});
+  document.getElementById("userSel").addEventListener("change",e=>{state.currentUser=e.target.value;save();renderMine();});
+
+  document.getElementById("main").addEventListener("click",async e=>{
+    const tog=e.target.closest("[data-toggle]");if(tog){const t=getTask(tog.dataset.toggle);t.open=!t.open;if(!dbMode)save();renderGantt();return;}
+    const add=e.target.closest("[data-add]");if(add){openModal(null,add.dataset.add);return;}
+    const chk=e.target.closest("[data-check]");if(chk){const t=getTask(chk.dataset.check);if(!can("status",t))return;const ns=t.status==="done"?"doing":"done";const np=ns==="done"?100:90;if(dbMode&&sb){await dbUpdateTask(t.id,{status:ns,progress:np});await loadTasks(state.orgId);renderAll();}else{t.status=ns;t.prog=np;save();renderAll();}return;}
+    const ed=e.target.closest("[data-edit]");if(ed){openModal(ed.dataset.edit,null);return;}
+  });
+
+  document.getElementById("mClose").addEventListener("click",closeModal);
+  document.getElementById("mCancel").addEventListener("click",closeModal);
+  document.getElementById("mSave").addEventListener("click",saveModal);
+  document.getElementById("mDelete").addEventListener("click",deleteTask);
+  document.getElementById("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal();});
+  document.getElementById("segPrio").addEventListener("click",e=>{const b=e.target.closest("button");if(b){mPrio=b.dataset.p;setSeg(e.currentTarget,mPrio,"p");}});
+  document.getElementById("segStatus").addEventListener("click",e=>{const b=e.target.closest("button");if(b){mStatus=b.dataset.s;setSeg(e.currentTarget,mStatus,"s");if(mStatus==="done"){document.getElementById("fProg").value=100;document.getElementById("progVal").textContent="100%";}}});
+  document.getElementById("segVis").addEventListener("click",e=>{const b=e.target.closest("button");if(b){mVis=b.dataset.vis;paintVis();}});
+  document.getElementById("fProg").addEventListener("input",e=>{document.getElementById("progVal").textContent=e.target.value+"%";});
+
+  // user mgmt
+  document.getElementById("uClose").addEventListener("click",()=>document.getElementById("uOverlay").classList.remove("on"));
+  document.getElementById("uDone").addEventListener("click",()=>document.getElementById("uOverlay").classList.remove("on"));
+  document.getElementById("uOverlay").addEventListener("click",e=>{if(e.target.id==="uOverlay")document.getElementById("uOverlay").classList.remove("on");});
+  document.getElementById("uList").addEventListener("change",async e=>{const s=e.target.closest("[data-role]");if(s){state.roles[s.dataset.role]=s.value;if(dbMode&&sb){await sb.from("members").update({role:s.value}).eq("id",s.dataset.role);}else{save();}renderAll();renderUsers();}});
+  document.getElementById("uList").addEventListener("click",e=>{const b=e.target.closest("[data-pw]");if(b)openSetPw(b.dataset.pw,false);});
+
+  // set pw
+  document.getElementById("setClose").addEventListener("click",()=>{document.getElementById("setOverlay").classList.remove("on");setTarget=null;});
+  document.getElementById("setCancel").addEventListener("click",()=>{document.getElementById("setOverlay").classList.remove("on");setTarget=null;});
+  document.getElementById("setSave").addEventListener("click",saveSetPw);
+  document.getElementById("setNew2").addEventListener("keydown",e=>{if(e.key==="Enter")saveSetPw();});
+
+  // org editor
+  document.getElementById("orgClose").addEventListener("click",()=>document.getElementById("orgOverlay").classList.remove("on"));
+  document.getElementById("orgDone").addEventListener("click",()=>document.getElementById("orgOverlay").classList.remove("on"));
+  document.getElementById("orgOverlay").addEventListener("click",e=>{if(e.target.id==="orgOverlay")document.getElementById("orgOverlay").classList.remove("on");});
+  document.getElementById("orgRows").addEventListener("change",async e=>{
+    const m=e.target.closest("[data-mgr]");if(m){const pid=m.dataset.mgr,val=m.value||null;if(val&&wouldCycle(pid,val)){renderOrgEditor();return;}state.managers[pid]=val;if(dbMode&&sb){await sb.from("members").update({manager_id:val}).eq("id",pid);}else{save();}renderOrgEditor();renderPresence();return;}
+    const ti=e.target.closest("[data-title]");if(ti){const v=ti.value.trim();state.titles[ti.dataset.title]=v;if(dbMode&&sb){await sb.from("members").update({title:v}).eq("id",ti.dataset.title);}else{save();}renderOrgEditor();}
+  });
+
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();["uOverlay","orgOverlay","setOverlay","pwOverlay"].forEach(id=>document.getElementById(id).classList.remove("on"));}});
+}
+
+(async function init(){
+  load();bind();initI18n();renderLoginChart();
+  if(!state.companyUnlocked){document.getElementById("company").classList.add("on");document.getElementById("login").classList.remove("on");document.getElementById("app").hidden=true;return;}
+  if(sb&&state.orgId)await loadOrgMembers(state.orgId);
+  renderLoginChart();
+  let authed=false,authId=null;
+  if(sb){try{const {data}=await sb.auth.getSession();if(data&&data.session){authed=true;authId=data.session.user.id;}}catch(e){}}
+  if(dbMode){
+    if(authed&&person(authId)&&person(authId).id===authId){
+      state.session=authId;state.currentUser=authId;state.online=[authId];
+      await loadTasks(state.orgId);
+      document.getElementById("login").classList.remove("on");document.getElementById("app").hidden=false;
+      switchView(state.view||"gantt");renderAll();
+    }else{
+      if(sb&&authed){try{await sb.auth.signOut();}catch(e){}}
+      state.session=null;document.getElementById("login").classList.add("on");document.getElementById("app").hidden=true;
+    }
+  }else{
+    if(state.session){document.getElementById("login").classList.remove("on");document.getElementById("app").hidden=false;switchView(state.view||"gantt");renderAll();}
+    else{document.getElementById("login").classList.add("on");document.getElementById("app").hidden=true;}
+  }
+})();
+</script>
+</body>
+</html>
