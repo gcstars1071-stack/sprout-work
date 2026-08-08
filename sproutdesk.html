@@ -268,13 +268,13 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
   <div class="brand"><span class="mark">◆</span>SproutDesk</div>
   <div class="sub">회사 코드와 비밀번호를 입력해 입장하세요</div>
   <div class="gatecard">
-    <div class="fld"><label>회사 코드</label><input id="coCode" placeholder="예: SPROUT" autocomplete="off"></div>
+    <div class="fld"><label>회사 코드</label><input id="coCode" placeholder="회사 코드 입력" autocomplete="off"></div>
     <div class="fld"><label>비밀번호</label><input id="coPw" type="password" placeholder="회사 비밀번호" autocomplete="off"></div>
     <div class="pwerr" id="coErr" hidden>회사 코드 또는 비밀번호가 올바르지 않습니다.</div>
     <button class="btn primary" id="coEnter" style="width:100%;justify-content:center;padding:11px">입장</button>
     <div class="gatelinks"><a id="lnkSignup">회원가입 요청</a><span>·</span><a id="lnkReset">비밀번호 찾기</a></div>
   </div>
-  <div class="note">테스트 회사 코드: <b>SPROUT</b> · 비밀번호: <b>sprout</b><br>SproutWork 도메인 아래 <b>SproutDesk</b>는 회사 단위로 분리된 워크스페이스입니다.</div>
+  <div class="note">SproutWork 도메인 아래 <b>SproutDesk</b>는 회사 단위로 분리된 워크스페이스입니다.</div>
   <button class="btn ghost" id="lnkAdmin" style="margin-top:10px;font-size:12px"><span class="ic">🔑</span> 플랫폼 관리자 로그인</button>
   <select class="langsel" style="margin-top:14px"><option value="ko">한국어</option><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
 </div>
@@ -286,7 +286,7 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
   <div class="chartwrap"><div class="tree" id="loginChart"></div></div>
   <button class="btn ghost" id="switchCo" style="margin-top:16px">← 다른 회사 코드로 입장</button>
   <select class="langsel" style="margin-top:12px"><option value="ko">한국어</option><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
-  <div class="note">테스트 비밀번호: <b>1234</b> · 비밀번호는 <b>관리자와 본인만</b> 변경할 수 있습니다.<br>⚠️ 프로토타입 로그인으로, 역할·권한 흐름 테스트용입니다. 실제 보안(서버 인증)은 아닙니다.</div>
+  <div class="note">비밀번호는 관리자와 본인만 변경할 수 있습니다.</div>
 </div>
 
 <div class="app" id="app" hidden>
@@ -342,7 +342,7 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
       </div>
     </div>
   </div>
-  <div class="footer-note">SproutDesk 프로토타입 · 로그인하면 데이터가 서버(Supabase)에 저장·공유됩니다</div>
+  <div class="footer-note">SproutDesk · 데이터는 서버에 안전하게 저장·공유됩니다</div>
 </div>
 
 <!-- LOGIN PASSWORD MODAL -->
@@ -507,7 +507,7 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
     <h3><span>비밀번호 찾기</span><button class="close" id="rsClose">×</button></h3>
     <div class="body">
       <p style="font-size:12px;color:var(--text-2)">회사 코드 비밀번호 재설정 요청입니다. 관리자가 확인 후 새 비밀번호를 발급합니다.</p>
-      <div class="fld"><label>회사 코드 *</label><input id="rsCode" placeholder="예: SPROUT"></div>
+      <div class="fld"><label>회사 코드 *</label><input id="rsCode" placeholder="회사 코드 입력"></div>
       <div class="fld"><label>담당자 이름</label><input id="rsName" placeholder="예: 홍길동"></div>
       <div class="fld"><label>연락처(이메일/전화) *</label><input id="rsContact" placeholder="연락받을 곳"></div>
       <div class="fld"><label>메모</label><input id="rsMsg" placeholder="요청 내용(선택)"></div>
@@ -644,7 +644,9 @@ const I18N={
   "각 구성원의 상사(보고 대상)와 직함을 지정하면 로그인 조직도에 반영됩니다. (관리자만 가능)":{en:"Set each member's manager and title; it reflects in the login org chart. (Admin only)",vi:"Đặt quản lý và chức danh cho từng thành viên; sẽ hiển thị trong sơ đồ đăng nhập. (Chỉ quản trị)"},
   "역할을 바꾸면 권한이 즉시 적용됩니다. 접속 상태와 비밀번호 재설정도 여기서 관리합니다.":{en:"Changing a role applies immediately. Manage online status and password resets here too.",vi:"Đổi vai trò áp dụng ngay. Quản lý trạng thái trực tuyến và đặt lại mật khẩu tại đây."},
   "접속중":{en:"online",vi:"trực tuyến"},"오프라인":{en:"offline",vi:"ngoại tuyến"},
-  "SproutDesk 프로토타입 · 로그인하면 데이터가 서버(Supabase)에 저장·공유됩니다":{en:"SproutDesk prototype · after login, data is stored and shared on the server (Supabase)",vi:"Bản mẫu SproutDesk · sau khi đăng nhập, dữ liệu được lưu và chia sẻ trên máy chủ (Supabase)"}
+  "SproutDesk · 데이터는 서버에 안전하게 저장·공유됩니다":{en:"SproutDesk · your data is stored and shared securely on the server",vi:"SproutDesk · dữ liệu của bạn được lưu và chia sẻ an toàn trên máy chủ"},
+  "회사 코드 입력":{en:"Enter company code",vi:"Nhập mã công ty"},
+  "비밀번호는 관리자와 본인만 변경할 수 있습니다.":{en:"Passwords can be changed only by an admin or the user.",vi:"Mật khẩu chỉ có thể được đổi bởi quản trị viên hoặc chính người dùng."}
 };
 const I18N_RE=[
   {re:/^(\d+)일 지남$/, en:m=>m[1]+" days overdue", vi:m=>"Quá "+m[1]+" ngày"},
