@@ -539,6 +539,12 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
       <div class="fld"><label>회사 코드(ID) *</label><input id="pcCode" placeholder="예: SAESAK"></div>
       <div class="fld"><label>회사명</label><input id="pcName" placeholder="회사 이름"></div>
       <div class="fld"><label>회사 비밀번호 *</label><input id="pcPw" placeholder="입장 비밀번호"></div>
+      <div id="pcAdminBlock">
+        <div style="border-top:1px solid var(--border);margin:6px 0;padding-top:10px;font-size:12px;color:var(--text-2)">이 회사의 첫 관리자 계정 (로그인용)</div>
+        <div class="fld"><label>관리자 이름 *</label><input id="pcAdminName" placeholder="예: 홍길동"></div>
+        <div class="fld"><label>관리자 이메일(로그인 ID) *</label><input id="pcAdminEmail" placeholder="예: admin@company.com" autocomplete="off"></div>
+        <div class="fld"><label>관리자 초기 비밀번호 *</label><input id="pcAdminPw" placeholder="관리자가 나중에 변경 가능"></div>
+      </div>
       <div class="pwerr" id="pcErr" hidden></div>
     </div>
     <div class="foot"><button class="btn" id="pcCancel">취소</button><button class="btn primary" id="pcSave">등록</button></div>
@@ -641,6 +647,9 @@ const I18N={
   "예: 새싹 주식회사":{en:"e.g. Saesak Inc.",vi:"vd: Công ty Saesak"},"예: 홍길동":{en:"e.g. John Doe",vi:"vd: Nguyễn Văn A"},"예: hong@company.com":{en:"e.g. hong@company.com",vi:"vd: hong@company.com"},
   "예: SAESAK":{en:"e.g. SAESAK",vi:"vd: SAESAK"},"연락받을 곳":{en:"Where to reach you",vi:"Nơi liên hệ"},"요청 내용(선택)":{en:"Message (optional)",vi:"Nội dung (tùy chọn)"},
   "회사 이름":{en:"Company name",vi:"Tên công ty"},"입장 비밀번호":{en:"Entry password",vi:"Mật khẩu vào"},
+  "이 회사의 첫 관리자 계정 (로그인용)":{en:"First admin account for this company (for login)",vi:"Tài khoản quản trị đầu tiên của công ty này (để đăng nhập)"},
+  "관리자 이름 *":{en:"Admin name *",vi:"Tên quản trị *"},"관리자 이메일(로그인 ID) *":{en:"Admin email (login ID) *",vi:"Email quản trị (ID đăng nhập) *"},"관리자 초기 비밀번호 *":{en:"Admin initial password *",vi:"Mật khẩu ban đầu của quản trị *"},
+  "예: admin@company.com":{en:"e.g. admin@company.com",vi:"vd: admin@company.com"},"관리자가 나중에 변경 가능":{en:"Admin can change it later",vi:"Quản trị có thể đổi sau"},
   "각 구성원의 상사(보고 대상)와 직함을 지정하면 로그인 조직도에 반영됩니다. (관리자만 가능)":{en:"Set each member's manager and title; it reflects in the login org chart. (Admin only)",vi:"Đặt quản lý và chức danh cho từng thành viên; sẽ hiển thị trong sơ đồ đăng nhập. (Chỉ quản trị)"},
   "역할을 바꾸면 권한이 즉시 적용됩니다. 접속 상태와 비밀번호 재설정도 여기서 관리합니다.":{en:"Changing a role applies immediately. Manage online status and password resets here too.",vi:"Đổi vai trò áp dụng ngay. Quản lý trạng thái trực tuyến và đặt lại mật khẩu tại đây."},
   "접속중":{en:"online",vi:"trực tuyến"},"오프라인":{en:"offline",vi:"ngoại tuyến"},
@@ -744,14 +753,14 @@ function save(){try{localStorage.setItem(STORAGE,JSON.stringify(state));}catch(e
 let dbMode=false;
 async function loadOrgMembers(orgId){
   if(!sb||!orgId)return false;
-  let data=null;
+  let data=null, gotServer=false;
   // 1) RLS 안전 RPC(로그인 전 화면에서도 조직도 멤버 조회)
-  try{const r=await sb.rpc("org_members_for_gate",{p_org_id:orgId});if(!r.error&&Array.isArray(r.data)&&r.data.length)data=r.data;}catch(e){}
+  try{const r=await sb.rpc("org_members_for_gate",{p_org_id:orgId});if(!r.error&&Array.isArray(r.data)){data=r.data;gotServer=true;}}catch(e){}
   // 2) 직접 조회 폴백(RLS off이거나 RPC 미배포 시)
-  if(!data){let res=await sb.from("members").select("id,name,initials,role,manager_id,title,email").eq("org_id",orgId);
+  if(!gotServer){let res=await sb.from("members").select("id,name,initials,role,manager_id,title,email").eq("org_id",orgId);
     if(res.error){res=await sb.from("members").select("id,name,initials,role,manager_id,title").eq("org_id",orgId);}
-    if(!res.error&&res.data&&res.data.length)data=res.data;}
-  if(!data)return false;
+    if(!res.error&&Array.isArray(res.data)){data=res.data;gotServer=true;}}
+  if(!gotServer)return false;   // 서버 응답 자체가 실패(오프라인)일 때만 데모 폴백 유지
   people=data.map((m,i)=>({id:m.id,name:m.name,initials:m.initials||initialsOf(m.name),email:m.email||((m.initials||initialsOf(m.name)).toLowerCase()+"@"+LOGIN_DOMAIN),...pColor(i)}));
   state.roles={};state.managers={};state.titles={};
   data.forEach(m=>{state.roles[m.id]=m.role;state.managers[m.id]=m.manager_id||null;state.titles[m.id]=m.title||"";});
@@ -1214,6 +1223,11 @@ function openProc(mode,ctx){
   code.disabled=lock;name.disabled=lock;
   code.parentElement.style.display=lock?"none":"";
   name.parentElement.style.display=lock?"none":"";
+  // 첫 관리자 계정: 회사 등록 때만 표시(요청 연락처를 프리필)
+  document.getElementById("pcAdminBlock").hidden=lock;
+  document.getElementById("pcAdminName").value=procCtx.contactName||"";
+  document.getElementById("pcAdminEmail").value=procCtx.contact||"";
+  document.getElementById("pcAdminPw").value="";
   openOv("procOverlay");
 }
 async function saveProc(){
@@ -1224,7 +1238,11 @@ async function saveProc(){
   if(procMode==="register"){
     const code=document.getElementById("pcCode").value.trim();
     if(!code){err.textContent="회사 코드를 입력하세요.";err.hidden=false;return;}
-    res=await sb.rpc("admin_register_company",{p_request_id:procCtx.requestId||null,p_code:code,p_password:pw,p_name:document.getElementById("pcName").value.trim()});
+    const aName=document.getElementById("pcAdminName").value.trim();
+    const aEmail=document.getElementById("pcAdminEmail").value.trim();
+    const aPw=document.getElementById("pcAdminPw").value.trim();
+    if(!aName||!aEmail||!aPw){err.textContent="첫 관리자 이름·이메일·비밀번호는 필수입니다.";err.hidden=false;return;}
+    res=await sb.rpc("admin_register_company",{p_request_id:procCtx.requestId||null,p_code:code,p_password:pw,p_name:document.getElementById("pcName").value.trim(),p_admin_name:aName,p_admin_email:aEmail,p_admin_password:aPw});
   }else{
     res=await sb.rpc("admin_set_company_password",{p_org_id:procCtx.orgId,p_password:pw,p_request_id:procCtx.requestId||null});
   }
@@ -1337,7 +1355,7 @@ function renderOrgEditor(){
     const opts='<option value="">— 최상위 (상사 없음)</option>'+people.filter(x=>x.id!==p.id&&invalid.indexOf(x.id)<0).map(x=>'<option value="'+x.id+'"'+(state.managers[p.id]===x.id?" selected":"")+'>'+esc(x.name)+'</option>').join("");
     const roleOpts=Object.keys(ROLES).map(r=>'<option value="'+r+'"'+(roleOf(p.id)===r?" selected":"")+'>'+ROLES[r].label+'</option>').join("");
     return '<div class="urow"><div class="mini-av" style="background:'+p.bg+';color:'+p.fg+'">'+p.initials+'</div>'+
-      '<span class="un">'+esc(p.name)+(p.id===state.session?' (나)':'')+'</span>'+
+      '<input class="tinp" data-name="'+p.id+'" value="'+esc(p.name)+'" title="이름" style="min-width:72px;font-weight:500"'+(p.id===state.session?' ':'')+'>'+
       '<select data-orole="'+p.id+'" title="역할">'+roleOpts+'</select>'+
       '<input class="tinp" data-title="'+p.id+'" value="'+esc(state.titles[p.id]||"")+'" placeholder="직함">'+
       '<span style="font-size:11px;color:var(--text-3)">상사</span><select data-mgr="'+p.id+'">'+opts+'</select>'+
@@ -1477,7 +1495,7 @@ function bind(){
   document.getElementById("pcCancel").addEventListener("click",()=>closeOv("procOverlay"));
   document.getElementById("pcSave").addEventListener("click",saveProc);
   document.getElementById("acReqList").addEventListener("click",async e=>{
-    const reg=e.target.closest("[data-reg]"); if(reg){const r=acReqs.find(x=>x.id===reg.dataset.reg);openProc("register",{requestId:r.id,code:r.desired_code||"",name:r.company_name||""});return;}
+    const reg=e.target.closest("[data-reg]"); if(reg){const r=acReqs.find(x=>x.id===reg.dataset.reg);openProc("register",{requestId:r.id,code:r.desired_code||"",name:r.company_name||"",contactName:r.contact_name||"",contact:r.contact||""});return;}
     const sp=e.target.closest("[data-setpw]"); if(sp){const r=acReqs.find(x=>x.id===sp.dataset.setpw);const org=acOrgs.find(o=>(o.code||"").toUpperCase()===(r.desired_code||"").toUpperCase());if(!org){alert("요청의 회사 코드('"+(r.desired_code||"")+"')와 일치하는 회사가 없습니다. 회사 목록에서 직접 재설정하세요.");return;}openProc("setpw",{requestId:r.id,orgId:org.id,code:org.code,name:org.name});return;}
     const rej=e.target.closest("[data-rej]"); if(rej){if(!confirm("이 요청을 거절할까요?"))return;const res=await sb.rpc("admin_reject_request",{p_request_id:rej.dataset.rej});if(res.error){alert(res.error.message);return;}renderAdminConsole();return;}
   });
@@ -1548,6 +1566,7 @@ function bind(){
   document.getElementById("orgAdd").addEventListener("click",openAddMember);
   document.getElementById("orgRows").addEventListener("change",async e=>{
     const m=e.target.closest("[data-mgr]");if(m){const pid=m.dataset.mgr,val=m.value||null;if(val&&wouldCycle(pid,val)){renderOrgEditor();return;}state.managers[pid]=val;if(dbMode&&sb){await sb.from("members").update({manager_id:val}).eq("id",pid);}else{save();}renderOrgEditor();renderLoginChart();renderPresence();return;}
+    const nm=e.target.closest("[data-name]");if(nm){const v=nm.value.trim();if(!v){renderOrgEditor();return;}const pp=people.find(x=>x.id===nm.dataset.name);if(pp){pp.name=v;pp.initials=initialsOf(v);}if(dbMode&&sb){await sb.from("members").update({name:v,initials:initialsOf(v)}).eq("id",nm.dataset.name);}else{save();}renderAll();renderLoginChart();renderOrgEditor();return;}
     const ro=e.target.closest("[data-orole]");if(ro){state.roles[ro.dataset.orole]=ro.value;if(dbMode&&sb){await sb.from("members").update({role:ro.value}).eq("id",ro.dataset.orole);}else{save();}renderAll();renderOrgEditor();return;}
     const ti=e.target.closest("[data-title]");if(ti){const v=ti.value.trim();state.titles[ti.dataset.title]=v;if(dbMode&&sb){await sb.from("members").update({title:v}).eq("id",ti.dataset.title);}else{save();}renderOrgEditor();renderLoginChart();}
   });
