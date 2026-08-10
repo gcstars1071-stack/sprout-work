@@ -397,7 +397,6 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
       <button class="btn" id="orgBtn" hidden><span class="ic">🗂</span>조직도</button>
       <button class="btn" id="usersBtn" hidden><span class="ic">🔑</span>권한</button>
       <button class="btn primary" id="newBtn" hidden><span class="ic">＋</span>새 업무</button>
-      <button class="btn ghost" id="resetBtn" title="샘플 데이터로 초기화" hidden>↺</button>
       <div class="userchip" id="userchip" title="내 계정 · 비밀번호 변경"></div>
       <button class="btn ghost" id="logoutBtn" title="로그아웃"><span class="ic">⎋</span></button>
     </div>
@@ -1107,7 +1106,6 @@ function renderChrome(){
   document.getElementById("newBtn").hidden=!can("createTop");
   document.getElementById("usersBtn").hidden=!can("manageUsers");
   document.getElementById("orgBtn").hidden=!can("manageUsers");
-  document.getElementById("resetBtn").hidden=u.role!=="admin";
   const fa=document.getElementById("fAssignee");
   if(fa.options.length===0)fa.innerHTML='<option value="all">담당자 전체</option>'+people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
   // 기간 선택기(업무 날짜에서 자동 구성)
@@ -1759,7 +1757,6 @@ function bind(){
   document.getElementById("newBtn").addEventListener("click",()=>{if(can("createTop"))openModal(null,null);});
   document.getElementById("usersBtn").addEventListener("click",openUsers);
   document.getElementById("orgBtn").addEventListener("click",openOrg);
-  document.getElementById("resetBtn").addEventListener("click",()=>{if(me().role==="admin"&&confirm("샘플 데이터로 초기화할까요? 현재 데이터는 사라집니다.")){const sess=state.session;state=seed();state.session=sess;if(sess&&!state.online.includes(sess))state.online.push(sess);save();switchView(state.view);renderAll();}});
   document.getElementById("search").addEventListener("input",e=>{filter.q=e.target.value;renderAll();});
   document.getElementById("fAssignee").addEventListener("change",e=>{filter.assignee=e.target.value;renderAll();});
   document.getElementById("fPriority").addEventListener("change",e=>{filter.prio=e.target.value;renderAll();});
