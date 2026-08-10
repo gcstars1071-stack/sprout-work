@@ -406,7 +406,6 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
     <div class="body">
       <p style="font-size:12px;color:var(--text-2)">계정이 즉시 생성됩니다. 초기 비밀번호를 알려주면 본인이 로그인 후 변경할 수 있습니다.</p>
       <div class="fld"><label>이름 *</label><input id="amName" placeholder="예: 김하나"></div>
-      <div class="fld"><label>이메일(로그인 ID) *</label><input id="amEmail" placeholder="예: hana@company.com" autocomplete="off"></div>
       <div class="fld"><label>초기 비밀번호 *</label><input id="amPw" placeholder="본인이 나중에 변경 가능"></div>
       <div class="row2">
         <div class="fld"><label>역할</label><select id="amRole"><option value="member">팀원</option><option value="lead">팀장</option><option value="viewer">뷰어</option><option value="admin">관리자</option></select></div>
@@ -539,12 +538,7 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
       <div class="fld"><label>회사 코드(ID) *</label><input id="pcCode" placeholder="예: SAESAK"></div>
       <div class="fld"><label>회사명</label><input id="pcName" placeholder="회사 이름"></div>
       <div class="fld"><label>회사 비밀번호 *</label><input id="pcPw" placeholder="입장 비밀번호"></div>
-      <div id="pcAdminBlock">
-        <div style="border-top:1px solid var(--border);margin:6px 0;padding-top:10px;font-size:12px;color:var(--text-2)">이 회사의 첫 관리자 계정 (로그인용)</div>
-        <div class="fld"><label>관리자 이름 *</label><input id="pcAdminName" placeholder="예: 홍길동"></div>
-        <div class="fld"><label>관리자 이메일(로그인 ID) *</label><input id="pcAdminEmail" placeholder="예: admin@company.com" autocomplete="off"></div>
-        <div class="fld"><label>관리자 초기 비밀번호 *</label><input id="pcAdminPw" placeholder="관리자가 나중에 변경 가능"></div>
-      </div>
+      <div id="pcAdminNote" style="font-size:12px;color:var(--text-2);background:var(--surface-1);border-radius:8px;padding:9px 11px">등록하면 이 회사에 <b>관리자 계정(이름·ID: admin)</b>이 하나 자동 생성됩니다. 비밀번호는 위 회사 비밀번호와 동일하며, 로그인 후 변경할 수 있습니다.</div>
       <div class="pwerr" id="pcErr" hidden></div>
     </div>
     <div class="foot"><button class="btn" id="pcCancel">취소</button><button class="btn primary" id="pcSave">등록</button></div>
@@ -580,6 +574,7 @@ const PRIO={high:{label:"높음",bg:"var(--danger-bg)",fg:"var(--danger-fg)"},mi
 const PALETTE=[["#CECBF6","#3C3489"],["#9FE1CB","#0F6E56"],["#F5C4B3","#993C1D"],["#B5D4F4","#0C447C"],["#F4C0D1","#993556"],["#FAC775","#663306"],["#C0DD97","#3B6D11"],["#F09595","#791F1F"],["#AFA9EC","#26215C"],["#9FE1CB","#04342C"]];
 function pColor(i){const c=PALETTE[i%PALETTE.length];return{bg:c[0],fg:c[1]};}
 function initialsOf(name){return (String(name||"").trim().slice(0,2)||"?").toUpperCase();}
+function genLoginId(name,code){var base=String(name||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,12)||"user";var dom=String(code||"co").toLowerCase().replace(/[^a-z0-9]/g,"")||"co";return base+"."+Date.now().toString(36).slice(-5)+"@"+dom+".local";}
 
 /* ===== i18n (한국어/English/Tiếng Việt) ===== */
 const I18N={
@@ -1115,7 +1110,7 @@ async function enterCompany(){
   btn.disabled=false;btn.textContent="입장";
   if(!ok){err.hidden=false;return;}
   err.hidden=true;
-  state.companyUnlocked=true;save();
+  state.companyUnlocked=true;state.companyCode=code;save();
   if(sb&&state.orgId)await loadOrgMembers(state.orgId);
   document.getElementById("company").classList.remove("on");
   renderLoginChart();
@@ -1223,11 +1218,8 @@ function openProc(mode,ctx){
   code.disabled=lock;name.disabled=lock;
   code.parentElement.style.display=lock?"none":"";
   name.parentElement.style.display=lock?"none":"";
-  // 첫 관리자 계정: 회사 등록 때만 표시(요청 연락처를 프리필)
-  document.getElementById("pcAdminBlock").hidden=lock;
-  document.getElementById("pcAdminName").value=procCtx.contactName||"";
-  document.getElementById("pcAdminEmail").value=procCtx.contact||"";
-  document.getElementById("pcAdminPw").value="";
+  // 회사 등록 때만 "관리자 자동 생성" 안내 표시
+  document.getElementById("pcAdminNote").hidden=lock;
   openOv("procOverlay");
 }
 async function saveProc(){
@@ -1238,11 +1230,7 @@ async function saveProc(){
   if(procMode==="register"){
     const code=document.getElementById("pcCode").value.trim();
     if(!code){err.textContent="회사 코드를 입력하세요.";err.hidden=false;return;}
-    const aName=document.getElementById("pcAdminName").value.trim();
-    const aEmail=document.getElementById("pcAdminEmail").value.trim();
-    const aPw=document.getElementById("pcAdminPw").value.trim();
-    if(!aName||!aEmail||!aPw){err.textContent="첫 관리자 이름·이메일·비밀번호는 필수입니다.";err.hidden=false;return;}
-    res=await sb.rpc("admin_register_company",{p_request_id:procCtx.requestId||null,p_code:code,p_password:pw,p_name:document.getElementById("pcName").value.trim(),p_admin_name:aName,p_admin_email:aEmail,p_admin_password:aPw});
+    res=await sb.rpc("admin_register_company",{p_request_id:procCtx.requestId||null,p_code:code,p_password:pw,p_name:document.getElementById("pcName").value.trim()});
   }else{
     res=await sb.rpc("admin_set_company_password",{p_org_id:procCtx.orgId,p_password:pw,p_request_id:procCtx.requestId||null});
   }
@@ -1313,7 +1301,7 @@ function renderUsers(){
 function openUsers(){if(!can("manageUsers"))return;renderUsers();document.getElementById("uOverlay").classList.add("on");}
 function openAddMember(){
   if(!can("manageUsers"))return;
-  ["amName","amEmail","amPw","amTitle"].forEach(i=>document.getElementById(i).value="");
+  ["amName","amPw","amTitle"].forEach(i=>document.getElementById(i).value="");
   document.getElementById("amRole").value="member";
   document.getElementById("amMgr").innerHTML='<option value="">— 없음(최상위)</option>'+people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
   document.getElementById("amErr").hidden=true;
@@ -1322,10 +1310,11 @@ function openAddMember(){
 }
 async function saveAddMember(){
   const err=document.getElementById("amErr");err.hidden=true;
-  const name=document.getElementById("amName").value.trim(), email=document.getElementById("amEmail").value.trim(), pw=document.getElementById("amPw").value;
-  if(!name||!email||!pw){err.textContent="이름·이메일·초기 비밀번호는 필수입니다.";err.hidden=false;return;}
+  const name=document.getElementById("amName").value.trim(), pw=document.getElementById("amPw").value;
+  if(!name||!pw){err.textContent="이름·초기 비밀번호는 필수입니다.";err.hidden=false;return;}
   if(!sb){err.textContent="서버 연결이 필요합니다.";err.hidden=false;return;}
   const btn=document.getElementById("amSave");btn.disabled=true;btn.textContent="추가 중…";
+  const email=genLoginId(name, state.companyCode);   // 이름으로 로그인 ID 자동 생성
   const {error}=await sb.rpc("admin_create_member",{p_name:name,p_email:email,p_password:pw,p_role:document.getElementById("amRole").value,p_manager_id:document.getElementById("amMgr").value||null,p_title:document.getElementById("amTitle").value.trim()});
   btn.disabled=false;btn.textContent="추가";
   if(error){err.textContent="추가 실패: "+error.message;err.hidden=false;return;}
