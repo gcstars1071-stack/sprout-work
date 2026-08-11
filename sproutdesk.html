@@ -207,6 +207,26 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
 .rohint{font-size:12px;color:var(--text-2);background:var(--surface-1);border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:7px}
 .visbadge{font-size:10px;padding:1px 7px;border-radius:20px;background:var(--surface-1);color:var(--text-2);font-weight:600;white-space:nowrap;flex:none;margin-right:2px}
 .vishelp{font-size:11px;color:var(--text-3);margin-top:2px}
+.fhint{font-size:10px;color:var(--text-3);font-weight:500;background:var(--surface-1);padding:1px 6px;border-radius:20px;margin-left:4px}
+.collabsel{position:relative}
+.collabsel-field{min-height:38px;border:1px solid var(--border);background:var(--surface-2);border-radius:8px;padding:5px 28px 5px 7px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;cursor:pointer}
+.collabsel-field:after{content:"▾";position:absolute;right:11px;top:11px;color:var(--text-3);font-size:11px;pointer-events:none}
+.collabsel-field.open{border-color:var(--accent);background:var(--surface)}
+.collabsel-ph{color:var(--text-3);font-size:13px}
+.collabtag{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2px 4px 2px 2px;font-size:12px}
+.collabtag .mini-av{width:18px;height:18px;font-size:9px}
+.collabtag .x{border:none;background:none;color:var(--text-3);font-size:14px;line-height:1;width:16px;height:16px;border-radius:50%;padding:0}
+.collabtag .x:hover{background:var(--danger-bg);color:var(--danger-fg)}
+.collabsel-menu{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);z-index:5;max-height:196px;overflow:auto;padding:4px}
+.collabopt{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;font-size:13px;cursor:pointer}
+.collabopt:hover{background:var(--surface-1)}
+.collabopt .mini-av{width:22px;height:22px;font-size:9px}
+.collabopt .ck{margin-left:auto;color:var(--accent);font-weight:700;opacity:0}
+.collabopt.on .ck{opacity:1}
+.collabopt.on{background:var(--surface-1)}
+.collabsel-empty{padding:8px;font-size:12px;color:var(--text-3)}
+.collab-avs{display:flex;flex-wrap:wrap;gap:5px}
+.collab-avs .dw-chip{padding-left:3px}
 .pwerr{font-size:12px;color:var(--danger-fg);background:var(--danger-bg);border-radius:8px;padding:8px 11px}
 /* ---- task detail drawer ---- */
 .drawer-scrim{position:fixed;inset:0;background:rgba(0,0,0,.34);z-index:70;opacity:0;pointer-events:none;transition:opacity .18s}
@@ -531,6 +551,12 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
           </div>
         </div>
       </div>
+      <div class="fld" id="collabFld" hidden><label>협업 <span class="fhint">다른 팀 팀장 제외</span></label>
+        <div class="collabsel" id="collabSel">
+          <div class="collabsel-field" id="collabField" tabindex="0"></div>
+          <div class="collabsel-menu" id="collabMenu" hidden></div>
+        </div>
+      </div>
       <div class="row2">
         <div class="fld"><label>시작일</label><input type="date" id="fStart"></div>
         <div class="fld"><label>마감일</label><input type="date" id="fEnd"></div>
@@ -692,6 +718,7 @@ const I18N={
   "첨부가 없습니다.":{en:"No attachments.",vi:"Không có đính kèm."},"댓글":{en:"Comments",vi:"Bình luận"},"불러오는 중…":{en:"Loading…",vi:"Đang tải…"},
   "아직 댓글이 없습니다.":{en:"No comments yet.",vi:"Chưa có bình luận."},"댓글을 불러오지 못했습니다.":{en:"Couldn't load comments.",vi:"Không tải được bình luận."},
   "댓글 남기기…":{en:"Leave a comment…",vi:"Viết bình luận…"},"등록":{en:"Post",vi:"Gửi"},
+  "협업":{en:"Collaborators",vi:"Cộng tác"},"다른 팀 팀장 제외":{en:"excl. other-team leads",vi:"trừ trưởng nhóm khác"},"지정된 협업자가 없습니다.":{en:"No collaborators set.",vi:"Chưa có cộng tác viên."},
   "조직도":{en:"Org chart",vi:"Sơ đồ tổ chức"},"권한":{en:"Roles",vi:"Phân quyền"},"새 업무":{en:"New task",vi:"Việc mới"},
   "업무 편집":{en:"Edit task",vi:"Sửa việc"},"업무 보기":{en:"View task",vi:"Xem việc"},
   "로그아웃":{en:"Log out",vi:"Đăng xuất"},"입장":{en:"Enter",vi:"Vào"},"확인 중…":{en:"Checking…",vi:"Đang kiểm tra…"},
@@ -879,7 +906,7 @@ async function loadOrgMembers(orgId){
   data.forEach(m=>{state.roles[m.id]=m.role;state.managers[m.id]=m.manager_id||null;state.titles[m.id]=m.title||"";});
   dbMode=true;return true;
 }
-function taskFromDb(t){return {id:t.id,parent:t.parent_id,title:t.title,user:t.assignee_id,status:t.status,prio:t.priority,start:t.start_date,end:t.end_date,prog:t.progress,visibility:t.visibility,desc:t.description||"",checklist:Array.isArray(t.checklist)?t.checklist:[],attachments:Array.isArray(t.attachments)?t.attachments:[],open:true};}
+function taskFromDb(t){return {id:t.id,parent:t.parent_id,title:t.title,user:t.assignee_id,status:t.status,prio:t.priority,start:t.start_date,end:t.end_date,prog:t.progress,visibility:t.visibility,desc:t.description||"",checklist:Array.isArray(t.checklist)?t.checklist:[],attachments:Array.isArray(t.attachments)?t.attachments:[],collab:Array.isArray(t.collaborators)?t.collaborators:[],open:true};}
 async function loadTasks(orgId){
   if(!sb||!orgId)return false;
   const {data,error}=await sb.from("tasks").select("*").eq("org_id",orgId);
@@ -888,7 +915,7 @@ async function loadTasks(orgId){
   state.tasks=data.map(t=>{const o=taskFromDb(t);if(openState[t.id]!==undefined)o.open=openState[t.id];return o;});
   dbMode=true;return true;
 }
-function taskToDb(data){const row={org_id:state.orgId,parent_id:data.parent||null,title:data.title,assignee_id:data.user||null,status:data.status,priority:data.prio,start_date:data.start,end_date:data.end,progress:data.prog};if(data.visibility!==undefined)row.visibility=data.visibility;return row;}
+function taskToDb(data){const row={org_id:state.orgId,parent_id:data.parent||null,title:data.title,assignee_id:data.user||null,status:data.status,priority:data.prio,start_date:data.start,end_date:data.end,progress:data.prog};if(data.visibility!==undefined)row.visibility=data.visibility;if(data.collab!==undefined)row.collaborators=data.collab;return row;}
 async function dbSaveTask(id,data){const row=taskToDb(data);if(id){return await sb.from("tasks").update(row).eq("id",id);}row.created_by=state.session;return await sb.from("tasks").insert(row);}
 async function dbUpdateTask(id,fields){return await sb.from("tasks").update(fields).eq("id",id);}
 
@@ -901,6 +928,17 @@ function rootOwner(t){let cur=t;while(cur&&cur.parent){cur=getTask(cur.parent);}
 function rootTask(t){let cur=t;while(cur&&cur.parent){cur=getTask(cur.parent);}return cur;}
 function isDescendantOf(userId,ancestorId){let cur=userId,g=0;while(cur&&g++<50){if(cur===ancestorId)return true;cur=state.managers[cur];}return false;}
 function treeAssignees(rootId){const set={};(function walk(id){const t=getTask(id);if(t)set[t.user]=1;children(id).forEach(c=>walk(c.id));})(rootId);return set;}
+function treeCollaborators(rootId){const set={};(function walk(id){const t=getTask(id);if(t)(t.collab||[]).forEach(c=>set[c]=1);children(id).forEach(cc=>walk(cc.id));})(rootId);return set;}
+// 소유 팀장 = 조직도에서 나(또는 상위)로 거슬러 처음 만나는 '팀장'(없으면 null=관리자 최상위)
+function teamLeadOf(id){let cur=id,g=0;while(cur&&g++<50){if(roleOf(cur)==="lead")return cur;cur=state.managers[cur];}return null;}
+// 담당자로 지정 가능한 사람: 관리자=전체, 팀장=본인+본인 팀(하위), 그 외=본인
+function assigneeCandidates(){const u=me();if(!u)return people.slice();
+  if(u.role==="admin")return people.slice();
+  if(u.role==="lead")return people.filter(p=>p.id===u.id||isDescendantOf(p.id,u.id));
+  return people.filter(p=>p.id===u.id);}
+// 협업자로 지정 가능한 사람: 다른 팀의 팀장을 제외한 모든 사람(기준 팀=업무 소유자의 팀)
+function collabCandidates(ownerId){const tl=teamLeadOf(ownerId);
+  return people.filter(p=>roleOf(p.id)!=="lead"||p.id===tl);}
 function visibleToMe(t){
   const root=rootTask(t);if(!root)return true;
   if((root.visibility||"public")==="public")return true;
@@ -908,6 +946,7 @@ function visibleToMe(t){
   if(u.role==="admin")return true;                 // 관리자는 모두 열람
   if(isDescendantOf(u.id,root.user))return true;    // 소유자의 팀(소유자+팀원)
   if(treeAssignees(root.id)[u.id])return true;      // 트리 안에 배정된 업무가 있으면
+  if(treeCollaborators(root.id)[u.id])return true;  // 트리 안에 협업자로 지정됐으면
   return false;
 }
 function isOnline(id){return state.online.indexOf(id)>=0;}
@@ -927,6 +966,8 @@ function can(action,t){
   if(action==="manageUsers")return false;
   if(action==="createTop")return r==="lead";       // 팀장도 팀 업무 트리 생성 가능
   if(!t)return false;
+  // 협업자(뷰어 제외)는 해당 업무를 수정·상태변경 가능
+  if((t.collab||[]).indexOf(u.id)>=0&&(action==="edit"||action==="status"))return true;
   const mine=t.user===u.id, inDomain=rootOwner(t)===u.id;
   if(r==="lead"){
     switch(action){
@@ -1500,7 +1541,26 @@ function renderOrgEditor(){
 function openOrg(){if(!can("manageUsers"))return;renderOrgEditor();document.getElementById("orgOverlay").classList.add("on");}
 
 /* ---------- task modal ---------- */
-let editing=null,mParentCtx=null,mPrio="mid",mStatus="todo",mVis="public";
+let editing=null,mParentCtx=null,mPrio="mid",mStatus="todo",mVis="public",mCollab=[],mCollabEditable=false,mCollabOpen=false;
+function renderCollabField(){
+  const field=document.getElementById("collabField");if(!field)return;
+  const ownerId=document.getElementById("fUser").value;
+  const sel=mCollab.filter(id=>people.some(p=>p.id===id)&&id!==ownerId);
+  if(!sel.length){field.innerHTML='<span class="collabsel-ph">'+(mCollabEditable?"협업자 선택…":"지정된 협업자가 없습니다.")+'</span>';return;}
+  field.innerHTML=sel.map(id=>{const p=person(id);
+    return '<span class="collabtag"><span class="mini-av" style="background:'+p.bg+';color:'+p.fg+'">'+esc(p.initials)+'</span>'+esc(p.name)+(mCollabEditable?'<button type="button" class="x" data-collabrm="'+id+'">×</button>':"")+'</span>';}).join("");
+}
+function renderCollabMenu(){
+  const menu=document.getElementById("collabMenu");if(!menu)return;
+  const ownerId=document.getElementById("fUser").value;
+  const cands=collabCandidates(ownerId).filter(p=>p.id!==ownerId);
+  if(!cands.length){menu.innerHTML='<div class="collabsel-empty">선택 가능한 사람이 없습니다.</div>';return;}
+  menu.innerHTML=cands.map(p=>{const on=mCollab.indexOf(p.id)>=0;
+    return '<div class="collabopt'+(on?" on":"")+'" data-collab="'+p.id+'"><span class="mini-av" style="background:'+p.bg+';color:'+p.fg+'">'+esc(p.initials)+'</span>'+esc(p.name)+'<span class="ck">✓</span></div>';}).join("");
+}
+function openCollabMenu(){if(!mCollabEditable)return;mCollabOpen=true;document.getElementById("collabField").classList.add("open");renderCollabMenu();document.getElementById("collabMenu").hidden=false;}
+function closeCollabMenu(){mCollabOpen=false;const f=document.getElementById("collabField");if(f)f.classList.remove("open");const m=document.getElementById("collabMenu");if(m)m.hidden=true;}
+function renderCollabPicker(){renderCollabField();if(mCollabOpen)renderCollabMenu();}
 function setSeg(container,val,attr){container.querySelectorAll("button").forEach(b=>{const on=b.dataset[attr]===val;b.classList.toggle("on",on);b.style.background=on?(attr==="p"?PRIO[val].fg:STATUS[val].color):"";});}
 function paintVis(){document.getElementById("segVis").querySelectorAll("button").forEach(b=>{const on=b.dataset.vis===mVis;b.classList.toggle("on",on);b.style.background=on?"var(--accent)":"";});document.getElementById("visHelp").textContent=mVis==="team"?"우리 팀(소유자+팀원)과 관리자만 이 트리를 볼 수 있습니다.":"모든 구성원이 이 트리를 볼 수 있습니다.";}
 function modalPerm(t,parentId){
@@ -1546,8 +1606,17 @@ function openModal(taskId,parentId){
   fp.innerHTML=opts.join("");
   fp.value=t?(t.parent||""):(parentId||"");
   const fu=document.getElementById("fUser");
-  fu.innerHTML=people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
-  fu.value=t?t.user:(perm.f.user?state.currentUser:u.id);
+  let cand=assigneeCandidates();
+  if(t&&t.user&&!cand.some(p=>p.id===t.user)){const cur=person(t.user);cand=[cur,...cand];} // 기존 담당자 유지
+  fu.innerHTML=cand.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
+  fu.value=t?t.user:(perm.f.user?(cand.some(p=>p.id===state.currentUser)?state.currentUser:u.id):u.id);
+  // 협업자
+  mCollab=t?((t.collab||[]).slice()):[];
+  mCollabEditable=!perm.ro&&(u.role==="admin"||u.role==="lead");
+  const showCollab=mCollabEditable||mCollab.length>0;
+  document.getElementById("collabFld").hidden=!showCollab;
+  closeCollabMenu();
+  if(showCollab)renderCollabField();
   document.getElementById("visFld").hidden=!perm.vis;
   mVis=t?(t.visibility||"public"):(u.role==="lead"?"team":"public");
   paintVis();
@@ -1563,7 +1632,7 @@ function openModal(taskId,parentId){
   document.getElementById("overlay").classList.add("on");
   if(perm.f.title)document.getElementById("fTitleInput").focus();
 }
-function closeModal(){document.getElementById("overlay").classList.remove("on");editing=null;mParentCtx=null;}
+function closeModal(){document.getElementById("overlay").classList.remove("on");editing=null;mParentCtx=null;closeCollabMenu();}
 async function saveModal(){
   const t=editing?getTask(editing):null,u=me();
   const perm=modalPerm(t,mParentCtx);if(!perm.save)return;
@@ -1575,6 +1644,8 @@ async function saveModal(){
   let userVal=perm.f.user?document.getElementById("fUser").value:(t?t.user:(u.role==="member"?u.id:state.currentUser));
   const data={title,parent:parentVal,user:userVal,prio:mPrio,status:mStatus,start,end,prog:mStatus==="done"?100:parseInt(document.getElementById("fProg").value,10)};
   if(parentVal===null)data.visibility=perm.vis?mVis:((t&&t.visibility)||"public");
+  if(mCollabEditable)data.collab=mCollab.filter(id=>id!==userVal&&people.some(p=>p.id===id));
+  else if(t)data.collab=(t.collab||[]);
   if(dbMode&&sb){
     const btn=document.getElementById("mSave");btn.disabled=true;btn.textContent="저장 중…";
     const res=await dbSaveTask(editing,data);
@@ -1632,6 +1703,13 @@ function renderDetail(){
   chips+='<span class="dw-chip">우선순위 '+pr.label+'</span>';
   if(canEdit)chips+='<span class="dw-chip edit" data-dt="edit">✏️ 편집</span>';
   chips+='</div>';
+  // 협업자
+  const collab=(t.collab||[]).filter(id=>people.some(pp=>pp.id===id));
+  let collabSec="";
+  if(collab.length){
+    collabSec='<div class="dw-sec"><h4>협업 <span class="c">'+collab.length+'</span></h4><div class="collab-avs">'+
+      collab.map(id=>{const cp=person(id);return '<span class="dw-chip"><span class="mini-av" style="width:18px;height:18px;font-size:9px;background:'+cp.bg+';color:'+cp.fg+'">'+esc(cp.initials)+'</span>'+esc(cp.name)+'</span>';}).join("")+'</div></div>';
+  }
   // 설명
   const descHtml=canEdit
     ? '<textarea class="dw-desc" id="dwDesc" placeholder="업무 설명을 입력하세요…">'+esc(t.desc||"")+'</textarea>'
@@ -1657,7 +1735,7 @@ function renderDetail(){
   atHtml+='</div>';
   // 댓글 (내용은 loadComments가 채움)
   const cm='<div class="dw-sec"><h4>댓글 <span class="c" id="dwCmCnt"></span></h4><div class="cmlist" id="dwComments"><div class="cm-empty">불러오는 중…</div></div></div>';
-  document.getElementById("dwBody").innerHTML=chips+desc+ckHtml+atHtml+cm;
+  document.getElementById("dwBody").innerHTML=chips+collabSec+desc+ckHtml+atHtml+cm;
   document.getElementById("dwCmAdd").hidden=false;
   if(state.lang&&state.lang!=="ko")translateDOM();
 }
@@ -1804,6 +1882,15 @@ function bind(){
   document.getElementById("segStatus").addEventListener("click",e=>{const b=e.target.closest("button");if(b){mStatus=b.dataset.s;setSeg(e.currentTarget,mStatus,"s");if(mStatus==="done"){document.getElementById("fProg").value=100;document.getElementById("progVal").textContent="100%";}}});
   document.getElementById("segVis").addEventListener("click",e=>{const b=e.target.closest("button");if(b){mVis=b.dataset.vis;paintVis();}});
   document.getElementById("fProg").addEventListener("input",e=>{document.getElementById("progVal").textContent=e.target.value+"%";});
+  document.getElementById("collabField").addEventListener("click",e=>{
+    const rm=e.target.closest("[data-collabrm]");
+    if(rm){e.stopPropagation();const id=rm.dataset.collabrm,i=mCollab.indexOf(id);if(i>=0)mCollab.splice(i,1);renderCollabPicker();return;}
+    if(!mCollabEditable)return;
+    if(mCollabOpen)closeCollabMenu();else openCollabMenu();
+  });
+  document.getElementById("collabMenu").addEventListener("click",e=>{const o=e.target.closest("[data-collab]");if(!o)return;const id=o.dataset.collab,i=mCollab.indexOf(id);if(i>=0)mCollab.splice(i,1);else mCollab.push(id);renderCollabField();renderCollabMenu();});
+  document.getElementById("fUser").addEventListener("change",()=>{if(!document.getElementById("collabFld").hidden)renderCollabPicker();});
+  document.addEventListener("click",e=>{if(mCollabOpen&&!e.target.closest("#collabSel"))closeCollabMenu();});
 
   // user mgmt
   document.getElementById("uClose").addEventListener("click",()=>document.getElementById("uOverlay").classList.remove("on"));
