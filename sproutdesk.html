@@ -1638,7 +1638,7 @@ function modalPerm(t,parentId){
   if(t){
     if(!can("edit",t))return{ro:true,save:false,del:can("delete",t),f:{title:0,parent:0,user:0,prio:0,dates:0,status:0,prog:0},vis:isTop,visEdit:false,hint:"읽기 전용 — 이 업무를 수정할 권한이 없습니다."};
     if(r==="member")return{ro:false,save:true,del:can("delete",t),f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:"팀원 권한 — 담당자·상위 변경은 잠겨 있습니다."};
-    if(r==="lead"&&isTop)return{ro:false,save:true,del:can("delete",t),f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:true,visEdit:true,hint:"우리 팀 업무 트리 — 소유 팀은 바꿀 수 없고, 공개 범위를 설정할 수 있습니다."};
+    if(r==="lead"&&isTop)return{ro:false,save:true,del:can("delete",t),f:{title:1,parent:0,user:1,prio:1,dates:1,status:1,prog:1},vis:true,visEdit:true,hint:"우리 팀 업무 트리 — 담당자는 우리 팀에서 지정하고, 공개 범위를 설정할 수 있습니다."};
     return{ro:false,save:true,del:can("delete",t),f:all,vis:isTop,visEdit:isTop,hint:null};
   }
   if(parentId){
@@ -1646,7 +1646,7 @@ function modalPerm(t,parentId){
     return{ro:false,save:true,del:false,f:{title:1,parent:0,user:1,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:null};
   }
   if(r==="member")return{ro:false,save:true,del:false,f:{title:1,parent:1,user:0,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:"본인 담당 업무 — 상위 트리를 선택하세요. 없으면 팀장에게 트리 생성을 요청합니다.",memberTop:true};
-  if(r==="lead")return{ro:false,save:true,del:false,f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:true,visEdit:true,hint:"우리 팀 업무 트리 — 소유자는 본인, 공개 범위를 선택하세요."};
+  if(r==="lead")return{ro:false,save:true,del:false,f:{title:1,parent:0,user:1,prio:1,dates:1,status:1,prog:1},vis:true,visEdit:true,hint:"우리 팀 업무 트리 — 담당자는 우리 팀(본인·팀원)에서 지정하고, 공개 범위를 선택하세요."};
   return{ro:false,save:true,del:false,f:all,vis:true,visEdit:true,hint:null};
 }
 function applyFieldPerm(f){
