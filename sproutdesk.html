@@ -60,6 +60,22 @@ button{font-family:inherit;cursor:pointer}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--text-2)}
 .btn.ghost:hover{background:var(--surface-1);color:var(--text)}
 .ic{font-style:normal;line-height:1}
+.bellwrap{position:relative}
+.bell{position:relative;font-size:16px;padding:7px 9px}
+.bell-cnt{position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:var(--danger,#e5484d);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
+.bellpanel{position:absolute;top:calc(100% + 6px);right:0;width:340px;max-width:88vw;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);z-index:40;max-height:70vh;overflow:auto;padding:8px}
+.bellpanel h5{font-size:11px;font-weight:700;color:var(--text-3);text-transform:none;padding:8px 8px 4px;letter-spacing:.02em}
+.reqcard{border:1px solid var(--border);border-radius:9px;padding:9px 10px;margin:4px 6px;display:flex;flex-direction:column;gap:7px;background:var(--surface-2)}
+.reqcard .rq-t{font-size:13px;font-weight:600;line-height:1.35;word-break:break-word}
+.reqcard .rq-m{font-size:11.5px;color:var(--text-2);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rq-kind{font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--surface-1);color:var(--text-2)}
+.rq-kind.coop{background:#e7f0ff;color:#2563c9}.rq-kind.tree{background:#eaf7ee;color:#1f9254}
+.rq-st{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:20px}
+.rq-st.pending{background:var(--warn-bg,#fff3d6);color:var(--warn-fg,#8a5a00)}
+.rq-st.accepted{background:#eaf7ee;color:#1f9254}.rq-st.rejected{background:var(--danger-bg);color:var(--danger-fg)}
+.reqcard .rq-b{display:flex;gap:7px}
+.reqcard .rq-b .btn{font-size:12px;padding:5px 12px;flex:1;justify-content:center}
+.bell-empty{font-size:12.5px;color:var(--text-3);padding:14px 10px;text-align:center}
 .userchip{display:flex;align-items:center;gap:7px;padding:4px 6px 4px 4px;border:1px solid var(--border);border-radius:20px;background:var(--surface-2);cursor:pointer}
 .userchip:hover{border-color:var(--border-strong)}
 .userchip .nm{font-size:12px;font-weight:500}
@@ -154,7 +170,11 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
 .hm-teamrow .cnt{font-size:12px;color:var(--text-2)}
 .hm-on{width:8px;height:8px;border-radius:50%;background:var(--done);flex:none}
 .hm-off{width:8px;height:8px;border-radius:50%;background:var(--border-strong);flex:none}
-@media(max-width:640px){.hm-grid{grid-template-columns:repeat(2,1fr)}.hm-cols{grid-template-columns:1fr}}
+.hm-req{margin-bottom:16px}
+.hm-reqlist{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hm-reqlist h5{grid-column:1/-1;font-size:11px;font-weight:700;color:var(--text-3);margin:2px 0 -2px}
+.hm-reqlist .reqcard{margin:0}
+@media(max-width:640px){.hm-grid{grid-template-columns:repeat(2,1fr)}.hm-cols{grid-template-columns:1fr}.hm-reqlist{grid-template-columns:1fr}}
 
 .mw{max-width:640px;margin:0 auto;padding:20px 18px}
 .who{display:flex;align-items:center;gap:10px;margin-bottom:6px}
@@ -237,6 +257,10 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
 .dw-h h3{font-size:16px;font-weight:650;line-height:1.35;flex:1;word-break:break-word}
 .dw-body{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:18px}
 .dw-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.dw-approve{background:var(--warn-bg,#fff3d6);border:1px solid var(--warn-fg,#e6b34d);border-radius:10px;padding:11px 13px;display:flex;flex-direction:column;gap:9px}
+.dw-approve-t{font-size:12.5px;color:var(--warn-fg,#8a5a00);line-height:1.45}
+.dw-approve-b{display:flex;gap:8px}
+.dw-approve-b .btn{font-size:12.5px;padding:6px 14px}
 .dw-chip{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--surface-1);color:var(--text-2);display:inline-flex;align-items:center;gap:5px}
 .dw-chip .dot{width:7px;height:7px;border-radius:50%}
 .dw-chip.edit{background:var(--accent-weak,var(--surface-1));color:var(--accent);cursor:pointer;border:1px solid transparent}
@@ -285,6 +309,7 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
 .dw-cmadd button{border:none;background:var(--accent);color:#fff;border-radius:8px;padding:9px 15px;font-size:13px;font-weight:600;white-space:nowrap}
 .dw-cmadd button:disabled{opacity:.5}
 .ck-badge{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--text-2);background:var(--surface-1);padding:1px 6px;border-radius:20px}
+.req-badge{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--warn-fg,#8a5a00);background:var(--warn-bg,#fff3d6);padding:1px 7px;border-radius:20px}
 @media(max-width:520px){.drawer{width:100%}}
 .footer-note{text-align:center;padding:14px;color:var(--text-3);font-size:11px}
 
@@ -416,7 +441,12 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
       <select class="langsel"><option value="ko">한국어</option><option value="en">English</option><option value="vi">Tiếng Việt</option></select>
       <button class="btn" id="orgBtn" hidden><span class="ic">🗂</span>조직도</button>
       <button class="btn" id="usersBtn" hidden><span class="ic">🔑</span>권한</button>
+      <button class="btn" id="coopBtn" hidden><span class="ic">🤝</span>협조 요청</button>
       <button class="btn primary" id="newBtn" hidden><span class="ic">＋</span>새 업무</button>
+      <div class="bellwrap">
+        <button class="btn ghost bell" id="bellBtn" title="요청 · 승인"><span class="ic">🔔</span><span class="bell-cnt" id="bellCnt" hidden>0</span></button>
+        <div class="bellpanel" id="bellPanel" hidden></div>
+      </div>
       <div class="userchip" id="userchip" title="내 계정 · 비밀번호 변경"></div>
       <button class="btn ghost" id="logoutBtn" title="로그아웃"><span class="ic">⎋</span></button>
     </div>
@@ -579,6 +609,27 @@ select.f{border:1px solid var(--border);background:var(--surface);border-radius:
   </div>
 </div>
 
+<!-- COOP REQUEST COMPOSE -->
+<div class="overlay" id="reqOverlay">
+  <div class="modal">
+    <h3><span>협조 요청 보내기</span><button class="close" id="rqClose">×</button></h3>
+    <div class="body">
+      <div class="rohint"><span class="ic">🤝</span>다른 팀장에게 업무 협조를 요청합니다. 상대 팀장이 수락하면 업무가 생성됩니다.</div>
+      <div class="fld"><label>대상 팀장</label><select id="rqTo"></select></div>
+      <div class="fld"><label>제목</label><input id="rqTitle" placeholder="예: 결제 연동 API 스펙 협의"></div>
+      <div class="row2">
+        <div class="fld"><label>희망 시작일</label><input type="date" id="rqStart"></div>
+        <div class="fld"><label>희망 마감일</label><input type="date" id="rqEnd"></div>
+      </div>
+      <div class="fld"><label>메모 <span class="fhint">선택</span></label><textarea class="dw-desc" id="rqNote" placeholder="협조가 필요한 내용을 간단히 적어주세요."></textarea></div>
+    </div>
+    <div class="foot">
+      <button class="btn" id="rqCancel">취소</button>
+      <button class="btn primary" id="rqSend">요청 보내기</button>
+    </div>
+  </div>
+</div>
+
 <!-- TASK DETAIL DRAWER -->
 <div class="drawer-scrim" id="dwScrim"></div>
 <aside class="drawer" id="taskDetail" aria-hidden="true">
@@ -719,6 +770,18 @@ const I18N={
   "아직 댓글이 없습니다.":{en:"No comments yet.",vi:"Chưa có bình luận."},"댓글을 불러오지 못했습니다.":{en:"Couldn't load comments.",vi:"Không tải được bình luận."},
   "댓글 남기기…":{en:"Leave a comment…",vi:"Viết bình luận…"},"등록":{en:"Post",vi:"Gửi"},
   "협업":{en:"Collaborators",vi:"Cộng tác"},"다른 팀 팀장 제외":{en:"excl. other-team leads",vi:"trừ trưởng nhóm khác"},"지정된 협업자가 없습니다.":{en:"No collaborators set.",vi:"Chưa có cộng tác viên."},
+  "협조 요청":{en:"Request help",vi:"Yêu cầu hỗ trợ"},"트리 생성 요청":{en:"Tree request",vi:"Yêu cầu cây"},"요청 · 승인":{en:"Requests · Approvals",vi:"Yêu cầu · Duyệt"},
+  "완료 승인 대기":{en:"Awaiting approval",vi:"Chờ duyệt"},"받은 요청":{en:"Received",vi:"Đã nhận"},"보낸 요청":{en:"Sent",vi:"Đã gửi"},"받은 요청이 없습니다.":{en:"No requests.",vi:"Không có yêu cầu."},
+  "수락":{en:"Accept",vi:"Chấp nhận"},"거절":{en:"Decline",vi:"Từ chối"},"승인":{en:"Approve",vi:"Duyệt"},"반려":{en:"Reject",vi:"Trả lại"},"완료 승인":{en:"Approve done",vi:"Duyệt hoàn tất"},
+  "대기":{en:"Pending",vi:"Chờ"},"수락됨":{en:"Accepted",vi:"Đã nhận"},"거절됨":{en:"Declined",vi:"Đã từ chối"},
+  "협조 요청 보내기":{en:"Send help request",vi:"Gửi yêu cầu hỗ trợ"},"대상 팀장":{en:"Target lead",vi:"Trưởng nhóm nhận"},"희망 시작일":{en:"Preferred start",vi:"Ngày bắt đầu"},"희망 마감일":{en:"Preferred due",vi:"Hạn mong muốn"},"메모":{en:"Note",vi:"Ghi chú"},"요청 보내기":{en:"Send request",vi:"Gửi yêu cầu"},"선택":{en:"optional",vi:"tùy chọn"},
+  "➕ 관련 트리 없음 — 팀장에게 트리 생성 요청":{en:"➕ No parent tree — request one from lead",vi:"➕ Không có cây — yêu cầu trưởng nhóm"},
+  "⏳ 완료 승인 대기":{en:"⏳ Awaiting approval",vi:"⏳ Chờ duyệt"},"⏳ 승인 대기":{en:"⏳ Awaiting",vi:"⏳ Chờ"},
+  "완료 승인 대기 — 팀장 승인 후 완료됩니다.":{en:"Awaiting approval — completes after lead approves.",vi:"Chờ duyệt — hoàn tất sau khi trưởng nhóm duyệt."},
+  "협조 수락 · 업무 생성":{en:"Accept help · New task",vi:"Nhận · Tạo việc"},"트리요청 수락 · 업무 생성":{en:"Accept tree · New task",vi:"Nhận cây · Tạo việc"},
+  "본인 담당 업무 — 상위 트리를 선택하세요. 없으면 팀장에게 트리 생성을 요청합니다.":{en:"Your task — pick a parent tree, or request one from your lead.",vi:"Việc của bạn — chọn cây cha, hoặc yêu cầu trưởng nhóm."},
+  "다른 팀장에게 업무 협조를 요청합니다. 상대 팀장이 수락하면 업무가 생성됩니다.":{en:"Request help from another lead. A task is created when they accept.",vi:"Yêu cầu hỗ trợ từ trưởng nhóm khác. Việc được tạo khi họ chấp nhận."},
+  "예: 결제 연동 API 스펙 협의":{en:"e.g. Align on payment API spec",vi:"vd: Thống nhất API thanh toán"},"협조가 필요한 내용을 간단히 적어주세요.":{en:"Briefly describe what you need help with.",vi:"Mô tả ngắn gọn nội dung cần hỗ trợ."},
   "조직도":{en:"Org chart",vi:"Sơ đồ tổ chức"},"권한":{en:"Roles",vi:"Phân quyền"},"새 업무":{en:"New task",vi:"Việc mới"},
   "업무 편집":{en:"Edit task",vi:"Sửa việc"},"업무 보기":{en:"View task",vi:"Xem việc"},
   "로그아웃":{en:"Log out",vi:"Đăng xuất"},"입장":{en:"Enter",vi:"Vào"},"확인 중…":{en:"Checking…",vi:"Đang kiểm tra…"},
@@ -906,7 +969,7 @@ async function loadOrgMembers(orgId){
   data.forEach(m=>{state.roles[m.id]=m.role;state.managers[m.id]=m.manager_id||null;state.titles[m.id]=m.title||"";});
   dbMode=true;return true;
 }
-function taskFromDb(t){return {id:t.id,parent:t.parent_id,title:t.title,user:t.assignee_id,status:t.status,prio:t.priority,start:t.start_date,end:t.end_date,prog:t.progress,visibility:t.visibility,desc:t.description||"",checklist:Array.isArray(t.checklist)?t.checklist:[],attachments:Array.isArray(t.attachments)?t.attachments:[],collab:Array.isArray(t.collaborators)?t.collaborators:[],open:true};}
+function taskFromDb(t){return {id:t.id,parent:t.parent_id,title:t.title,user:t.assignee_id,status:t.status,prio:t.priority,start:t.start_date,end:t.end_date,prog:t.progress,visibility:t.visibility,desc:t.description||"",checklist:Array.isArray(t.checklist)?t.checklist:[],attachments:Array.isArray(t.attachments)?t.attachments:[],collab:Array.isArray(t.collaborators)?t.collaborators:[],doneReq:!!t.done_requested,open:true};}
 async function loadTasks(orgId){
   if(!sb||!orgId)return false;
   const {data,error}=await sb.from("tasks").select("*").eq("org_id",orgId);
@@ -915,7 +978,7 @@ async function loadTasks(orgId){
   state.tasks=data.map(t=>{const o=taskFromDb(t);if(openState[t.id]!==undefined)o.open=openState[t.id];return o;});
   dbMode=true;return true;
 }
-function taskToDb(data){const row={org_id:state.orgId,parent_id:data.parent||null,title:data.title,assignee_id:data.user||null,status:data.status,priority:data.prio,start_date:data.start,end_date:data.end,progress:data.prog};if(data.visibility!==undefined)row.visibility=data.visibility;if(data.collab!==undefined)row.collaborators=data.collab;return row;}
+function taskToDb(data){const row={org_id:state.orgId,parent_id:data.parent||null,title:data.title,assignee_id:data.user||null,status:data.status,priority:data.prio,start_date:data.start,end_date:data.end,progress:data.prog};if(data.visibility!==undefined)row.visibility=data.visibility;if(data.collab!==undefined)row.collaborators=data.collab;if(data.doneReq!==undefined)row.done_requested=data.doneReq;if(data.id)row.id=data.id;return row;}
 async function dbSaveTask(id,data){const row=taskToDb(data);if(id){return await sb.from("tasks").update(row).eq("id",id);}row.created_by=state.session;return await sb.from("tasks").insert(row);}
 async function dbUpdateTask(id,fields){return await sb.from("tasks").update(fields).eq("id",id);}
 
@@ -944,7 +1007,8 @@ function visibleToMe(t){
   if((root.visibility||"public")==="public")return true;
   const u=me();if(!u)return false;
   if(u.role==="admin")return true;                 // 관리자는 모두 열람
-  if(isDescendantOf(u.id,root.user))return true;    // 소유자의 팀(소유자+팀원)
+  const myTeam=teamLeadOf(u.id);
+  if(myTeam&&myTeam===teamLeadOf(root.user))return true;  // 같은 팀(팀장+팀원 모두)
   if(treeAssignees(root.id)[u.id])return true;      // 트리 안에 배정된 업무가 있으면
   if(treeCollaborators(root.id)[u.id])return true;  // 트리 안에 협업자로 지정됐으면
   return false;
@@ -966,6 +1030,8 @@ function can(action,t){
   if(action==="manageUsers")return false;
   if(action==="createTop")return r==="lead";       // 팀장도 팀 업무 트리 생성 가능
   if(!t)return false;
+  // 완료 승인: 담당자의 팀장(관리자는 위에서 통과). 담당자가 팀장 본인이면 스스로 승인권자.
+  if(action==="approveComplete")return r==="lead"&&teamLeadOf(t.user)===u.id;
   // 협업자(뷰어 제외)는 해당 업무를 수정·상태변경 가능
   if((t.collab||[]).indexOf(u.id)>=0&&(action==="edit"||action==="status"))return true;
   const mine=t.user===u.id, inDomain=rootOwner(t)===u.id;
@@ -1067,6 +1133,7 @@ function renderBoard(){
       html+='<div class="bcard'+(dd&&daysBetween(today(),parse(t.end))<=2&&t.status!=="done"?" due":"")+'" data-st="'+t.status+'"'+(drag?' draggable="true"':'')+' data-id="'+t.id+'" data-edit="'+t.id+'">'+
         '<div class="bt">'+esc(t.title)+'</div><div class="bpath">'+(priv?'🔒 ':'')+esc(pathOf(t))+'</div>'+
         '<div class="bf"><span class="pill" style="background:'+pr.bg+';color:'+pr.fg+'">'+(dd&&t.status!=="done"?dd.txt:pr.label)+'</span>'+
+        (t.doneReq?'<span class="req-badge">⏳ 완료 승인 대기</span>':'')+
         (ckp?'<span class="ck-badge">☑ '+ckp.done+'/'+ckp.total+'</span>':'')+
         (t.attachments&&t.attachments.length?'<span class="ck-badge">🔗 '+t.attachments.length+'</span>':'')+
         '<div class="mini-av" style="background:'+p.bg+';color:'+p.fg+'" title="'+esc(p.name)+'">'+p.initials+'</div></div></div>';
@@ -1089,11 +1156,7 @@ function bindDrag(){
       e.preventDefault();col.classList.remove("dragover");
       if(!dragId)return;const t=getTask(dragId),ns=drop.dataset.drop;
       if(!t||!can("status",t))return;
-      if(t.status!==ns){
-        const np=(ns==="done")?100:(t.prog===100?90:t.prog);
-        if(dbMode&&sb){await dbUpdateTask(t.id,{status:ns,progress:np});await loadTasks(state.orgId);renderAll();}
-        else{t.status=ns;t.prog=np;save();renderAll();}
-      }
+      if(t.status!==ns)await changeStatus(t,ns);
     });
   });
 }
@@ -1119,6 +1182,7 @@ function renderMine(){
       html+='<div class="mrow'+(checked?" done":"")+'">'+
         '<div class="cbx'+(checked?" checked":"")+(lock?" locked":"")+'"'+(lock?"":' data-check="'+t.id+'"')+'>'+(checked?"✓":"")+'</div>'+
         '<div class="mt" data-edit="'+t.id+'"><div class="ttl">'+esc(t.title)+'</div><div class="path">'+esc(pathOf(t))+'</div></div>'+
+        (t.doneReq?'<span class="req-badge">⏳ 승인 대기</span>':'')+
         (dd?'<span class="dd" style="background:'+dd.bg+';color:'+dd.fg+'">'+dd.txt+'</span>':'')+'</div>';
     });
   });
@@ -1144,9 +1208,11 @@ function renderChrome(){
   renderPresence();
   const rb=ROLES[u.role];
   document.getElementById("userchip").innerHTML='<div class="mini-av" style="background:'+u.bg+';color:'+u.fg+'">'+u.initials+'</div><span class="nm">'+esc(u.name)+'</span><span class="rbadge" style="background:'+rb.bg+';color:'+rb.fg+'">'+rb.label+'</span>';
-  document.getElementById("newBtn").hidden=!can("createTop");
+  document.getElementById("newBtn").hidden=(u.role==="viewer");   // 뷰어 외 모두 새 업무 생성(팀원은 상위 필수)
+  document.getElementById("coopBtn").hidden=!(u.role==="lead"||u.role==="admin");
   document.getElementById("usersBtn").hidden=!can("manageUsers");
   document.getElementById("orgBtn").hidden=!can("manageUsers");
+  renderBell();
   const fa=document.getElementById("fAssignee");
   if(fa.options.length===0)fa.innerHTML='<option value="all">담당자 전체</option>'+people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("");
   // 기간 선택기(업무 날짜에서 자동 구성)
@@ -1180,6 +1246,8 @@ function renderHome(){
     card(done,"완료","var(--ok-bg)","var(--ok-fg)")+
     card(overdue,"지연","var(--danger-bg)","var(--danger-fg)")+
     card(weekDue,"이번 주 마감","var(--warn-bg)","var(--warn-fg)")+'</div>';
+  const reqH=requestsHtml();
+  if(reqH)html+='<div class="hm-sec hm-req"><h4>요청 · 승인 <span class="c">'+bellCount()+'</span></h4><div class="hm-reqlist">'+reqH+'</div></div>';
   html+='<div class="hm-cols"><div class="hm-sec"><h4>내 할 일 <span class="c">'+mine.length+'건</span></h4>';
   if(!mine.length)html+='<div class="hm-empty">할 일이 없습니다 👍</div>';
   else mine.forEach(t=>{const dd=fmtDD(t.end,t.status);html+='<div class="hm-row" data-edit="'+t.id+'"><span class="stdot" style="background:'+STATUS[t.status].color+'"></span><div class="t">'+esc(t.title)+'<div class="path">'+esc(pathOf(t))+'</div></div>'+(dd?'<span class="dd" style="background:'+dd.bg+';color:'+dd.fg+'">'+dd.txt+'</span>':'')+'</div>';});
@@ -1262,7 +1330,7 @@ async function doLogin(id){
   state.session=id;state.currentUser=id;
   if(dbMode)state.online=[id];else if(!isOnline(id))state.online.push(id);
   save();
-  if(dbMode&&sb&&state.orgId)await loadTasks(state.orgId);
+  if(dbMode&&sb&&state.orgId){await loadTasks(state.orgId);await loadRequests();}
   document.getElementById("login").classList.remove("on");
   document.getElementById("app").hidden=false;
   switchView(state.view||"home");renderAll();
@@ -1541,7 +1609,7 @@ function renderOrgEditor(){
 function openOrg(){if(!can("manageUsers"))return;renderOrgEditor();document.getElementById("orgOverlay").classList.add("on");}
 
 /* ---------- task modal ---------- */
-let editing=null,mParentCtx=null,mPrio="mid",mStatus="todo",mVis="public",mCollab=[],mCollabEditable=false,mCollabOpen=false;
+let editing=null,mParentCtx=null,mPrio="mid",mStatus="todo",mVis="public",mCollab=[],mCollabEditable=false,mCollabOpen=false,mAcceptCtx=null;
 function renderCollabField(){
   const field=document.getElementById("collabField");if(!field)return;
   const ownerId=document.getElementById("fUser").value;
@@ -1577,6 +1645,7 @@ function modalPerm(t,parentId){
     if(r==="member")return{ro:false,save:true,del:false,f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:"본인 업무 아래 하위 업무 — 담당자는 본인으로 지정됩니다."};
     return{ro:false,save:true,del:false,f:{title:1,parent:0,user:1,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:null};
   }
+  if(r==="member")return{ro:false,save:true,del:false,f:{title:1,parent:1,user:0,prio:1,dates:1,status:1,prog:1},vis:false,visEdit:false,hint:"본인 담당 업무 — 상위 트리를 선택하세요. 없으면 팀장에게 트리 생성을 요청합니다.",memberTop:true};
   if(r==="lead")return{ro:false,save:true,del:false,f:{title:1,parent:0,user:0,prio:1,dates:1,status:1,prog:1},vis:true,visEdit:true,hint:"우리 팀 업무 트리 — 소유자는 본인, 공개 범위를 선택하세요."};
   return{ro:false,save:true,del:false,f:all,vis:true,visEdit:true,hint:null};
 }
@@ -1601,10 +1670,14 @@ function openModal(taskId,parentId){
   document.getElementById("mCancel").textContent=perm.save?"취소":"닫기";
   document.getElementById("fTitleInput").value=t?t.title:"";
   const fp=document.getElementById("fParent");
-  const opts=['<option value="">— 없음 (최상위)</option>'];
-  state.tasks.filter(x=>x.id!==taskId&&x.parent===null).forEach(x=>opts.push('<option value="'+x.id+'">'+esc(x.title)+'</option>'));
+  const isMemberCreate=(!taskId&&u.role==="member");   // 팀원 새 업무: 최상위 불가, 상위 필수
+  const opts=[];
+  if(!isMemberCreate)opts.push('<option value="">— 없음 (최상위)</option>');
+  const topTrees=state.tasks.filter(x=>x.id!==taskId&&x.parent===null&&(isMemberCreate?visibleToMe(x):true));
+  topTrees.forEach(x=>opts.push('<option value="'+x.id+'">'+esc(x.title)+'</option>'));
+  if(isMemberCreate)opts.push('<option value="__request__">➕ 관련 트리 없음 — 팀장에게 트리 생성 요청</option>');
   fp.innerHTML=opts.join("");
-  fp.value=t?(t.parent||""):(parentId||"");
+  fp.value=t?(t.parent||""):(isMemberCreate?(topTrees[0]?topTrees[0].id:"__request__"):(parentId||""));
   const fu=document.getElementById("fUser");
   let cand=assigneeCandidates();
   if(t&&t.user&&!cand.some(p=>p.id===t.user)){const cur=person(t.user);cand=[cur,...cand];} // 기존 담당자 유지
@@ -1612,7 +1685,7 @@ function openModal(taskId,parentId){
   fu.value=t?t.user:(perm.f.user?(cand.some(p=>p.id===state.currentUser)?state.currentUser:u.id):u.id);
   // 협업자
   mCollab=t?((t.collab||[]).slice()):[];
-  mCollabEditable=!perm.ro&&(u.role==="admin"||u.role==="lead");
+  mCollabEditable=!perm.ro&&u.role!=="viewer";   // 팀원도 협조원 지정 가능(뷰어 제외)
   const showCollab=mCollabEditable||mCollab.length>0;
   document.getElementById("collabFld").hidden=!showCollab;
   closeCollabMenu();
@@ -1632,30 +1705,46 @@ function openModal(taskId,parentId){
   document.getElementById("overlay").classList.add("on");
   if(perm.f.title)document.getElementById("fTitleInput").focus();
 }
-function closeModal(){document.getElementById("overlay").classList.remove("on");editing=null;mParentCtx=null;closeCollabMenu();}
+function closeModal(){document.getElementById("overlay").classList.remove("on");editing=null;mParentCtx=null;mAcceptCtx=null;closeCollabMenu();}
 async function saveModal(){
   const t=editing?getTask(editing):null,u=me();
   const perm=modalPerm(t,mParentCtx);if(!perm.save)return;
+  if(mAcceptCtx){perm.f.user=1;perm.f.parent=1;}   // 요청 수락: 담당자·상위 지정 허용
   const title=document.getElementById("fTitleInput").value.trim();
   if(!title){document.getElementById("fTitleInput").focus();return;}
   let start=document.getElementById("fStart").value||iso(today());
   let end=document.getElementById("fEnd").value||start;if(parse(end)<parse(start))end=start;
   let parentVal=perm.f.parent?(document.getElementById("fParent").value||null):(t?t.parent:(mParentCtx||null));
   let userVal=perm.f.user?document.getElementById("fUser").value:(t?t.user:(u.role==="member"?u.id:state.currentUser));
-  const data={title,parent:parentVal,user:userVal,prio:mPrio,status:mStatus,start,end,prog:mStatus==="done"?100:parseInt(document.getElementById("fProg").value,10)};
+  // 팀원: "관련 트리 없음" 선택 → 팀장에게 트리 생성 요청
+  if(parentVal==="__request__"){
+    const collabProp=mCollabEditable?mCollab.filter(id=>id!==userVal&&people.some(p=>p.id===id)):[];
+    const ok=await sendTreeRequest({title,start,end,collab:collabProp});
+    if(ok)closeModal();
+    return;
+  }
+  // 완료는 팀장 승인 필요: 비승인권자가 완료 선택 시 승인 요청(done_requested)으로 전환
+  const approver=can("approveComplete",t||{user:userVal,collab:[]});
+  const reqDone=(mStatus==="done"&&!approver);
+  const effStatus=reqDone?((t&&t.status&&t.status!=="done")?t.status:"review"):mStatus;
+  const data={title,parent:parentVal,user:userVal,prio:mPrio,status:effStatus,start,end,prog:effStatus==="done"?100:parseInt(document.getElementById("fProg").value,10),doneReq:reqDone};
   if(parentVal===null)data.visibility=perm.vis?mVis:((t&&t.visibility)||"public");
   if(mCollabEditable)data.collab=mCollab.filter(id=>id!==userVal&&people.some(p=>p.id===id));
   else if(t)data.collab=(t.collab||[]);
+  const acc=mAcceptCtx;
+  if(acc&&!editing)data.id=(crypto&&crypto.randomUUID)?crypto.randomUUID():("t"+Date.now());
   if(dbMode&&sb){
     const btn=document.getElementById("mSave");btn.disabled=true;btn.textContent="저장 중…";
     const res=await dbSaveTask(editing,data);
     btn.disabled=false;btn.textContent="저장";
     if(res&&res.error){alert("저장 실패: "+res.error.message);return;}
-    await loadTasks(state.orgId);renderAll();closeModal();if(dtId)renderDetail();return;
+    await loadTasks(state.orgId);
+    if(acc)await resolveAccept(acc.id,data.id);
+    renderAll();closeModal();if(dtId)renderDetail();if(reqDone)alert("완료는 팀장 승인이 필요합니다. 승인 요청을 보냈습니다.");return;
   }
   if(editing){Object.assign(getTask(editing),data);}
-  else{data.id="t"+Date.now();data.open=true;state.tasks.push(data);}
-  save();renderAll();closeModal();if(dtId)renderDetail();
+  else{data.id=data.id||("t"+Date.now());data.open=true;state.tasks.push(data);}
+  save();if(acc)await resolveAccept(acc.id,data.id);renderAll();closeModal();if(dtId)renderDetail();if(reqDone)alert("완료는 팀장 승인이 필요합니다. 승인 요청을 보냈습니다.");
 }
 async function deleteTask(){
   if(!editing)return;const t=getTask(editing);if(!can("delete",t))return;
@@ -1670,6 +1759,131 @@ async function deleteTask(){
   const toDel=new Set([editing]);let ch=true;
   while(ch){ch=false;state.tasks.forEach(x=>{if(x.parent&&toDel.has(x.parent)&&!toDel.has(x.id)){toDel.add(x.id);ch=true;}});}
   state.tasks=state.tasks.filter(x=>!toDel.has(x.id));save();renderAll();closeModal();if(wasDt)closeTaskDetail();
+}
+
+/* ---------- 완료 승인 워크플로 ---------- */
+// 완료 승인 대기 목록(내가 승인권자인 것)
+function pendingApprovals(){return state.tasks.filter(t=>t.doneReq&&can("approveComplete",t));}
+// 모든 상태 변경의 단일 진입점. 완료는 팀장 승인 필요 → 비승인권자는 승인요청만.
+async function changeStatus(t,ns){
+  if(!t)return;
+  if(ns==="done"&&!can("approveComplete",t)){
+    if(t.doneReq)return;
+    if(dbMode&&sb){const r=await dbUpdateTask(t.id,{done_requested:true});if(r&&r.error){alert("완료 요청 실패: "+r.error.message);return;}await loadTasks(state.orgId);}
+    else{t.doneReq=true;save();}
+    renderAll();if(dtId)renderDetail();return;
+  }
+  const np=(ns==="done")?100:(t.prog===100?90:t.prog);
+  if(dbMode&&sb){const r=await dbUpdateTask(t.id,{status:ns,progress:np,done_requested:false});if(r&&r.error){alert("상태 변경 실패: "+r.error.message);return;}await loadTasks(state.orgId);}
+  else{t.status=ns;t.prog=np;t.doneReq=false;save();}
+  renderAll();if(dtId)renderDetail();
+}
+async function approveDone(taskId){const t=getTask(taskId);if(!t||!can("approveComplete",t))return;
+  if(dbMode&&sb){const r=await dbUpdateTask(t.id,{status:"done",progress:100,done_requested:false});if(r&&r.error){alert(r.error.message);return;}await loadTasks(state.orgId);}
+  else{t.status="done";t.prog=100;t.doneReq=false;save();}
+  renderAll();if(dtId)renderDetail();}
+async function rejectDone(taskId){const t=getTask(taskId);if(!t||!can("approveComplete",t))return;
+  if(dbMode&&sb){const r=await dbUpdateTask(t.id,{done_requested:false});if(r&&r.error){alert(r.error.message);return;}await loadTasks(state.orgId);}
+  else{t.doneReq=false;save();}
+  renderAll();if(dtId)renderDetail();}
+
+/* ---------- 요청함(협조/트리 생성) ---------- */
+const REQ_KIND={coop:"협조 요청",tree:"트리 생성 요청"};
+const REQ_ST={pending:"대기",accepted:"수락됨",rejected:"거절됨"};
+function reqName(id){return id?person(id).name:"—";}
+async function loadRequests(){
+  if(!(dbMode&&sb&&state.orgId)){if(!Array.isArray(state.requests))state.requests=[];return;}
+  const {data,error}=await sb.from("work_requests").select("*").eq("org_id",state.orgId).order("created_at",{ascending:false});
+  if(!error&&Array.isArray(data))state.requests=data;
+}
+function incomingRequests(){return (state.requests||[]).filter(r=>r.to_id===state.session&&r.status==="pending");}
+function sentRequests(){return (state.requests||[]).filter(r=>r.from_id===state.session);}
+function bellCount(){return incomingRequests().length+pendingApprovals().length;}
+function reqCardHtml(r,mode){
+  const kc='<span class="rq-kind '+r.kind+'">'+REQ_KIND[r.kind]+'</span>';
+  let meta,btns="";
+  if(mode==="incoming"){meta='<span class="rq-m">'+kc+'<span>'+esc(reqName(r.from_id))+'님</span>'+(r.due_end?'<span>· ~'+esc(r.due_end)+'</span>':'')+'</span>';
+    btns='<div class="rq-b"><button class="btn primary" data-acc="'+r.id+'">수락</button><button class="btn" data-rej="'+r.id+'">거절</button></div>';}
+  else{meta='<span class="rq-m">'+kc+'<span>→ '+esc(reqName(r.to_id))+'님</span><span class="rq-st '+r.status+'">'+REQ_ST[r.status]+'</span></span>';}
+  return '<div class="reqcard"><div class="rq-t">'+esc(r.title)+'</div>'+meta+(r.note?'<div class="rq-m">'+esc(r.note)+'</div>':'')+btns+'</div>';
+}
+function approveCardHtml(t){
+  return '<div class="reqcard"><div class="rq-t">'+esc(t.title)+'</div><span class="rq-m"><span class="rq-kind">완료 승인</span><span>'+esc(person(t.user).name)+'님</span></span><div class="rq-b"><button class="btn primary" data-apv="'+t.id+'">승인</button><button class="btn" data-rjd="'+t.id+'">반려</button></div></div>';
+}
+function requestsHtml(){
+  const inc=incomingRequests(),apv=pendingApprovals(),sent=sentRequests();
+  let h="";
+  if(apv.length)h+='<h5>완료 승인 대기</h5>'+apv.map(approveCardHtml).join("");
+  if(inc.length)h+='<h5>받은 요청</h5>'+inc.map(r=>reqCardHtml(r,"incoming")).join("");
+  if(sent.length)h+='<h5>보낸 요청</h5>'+sent.slice(0,6).map(r=>reqCardHtml(r,"sent")).join("");
+  return h;
+}
+function renderBell(){
+  const cnt=bellCount(),bc=document.getElementById("bellCnt");
+  if(bc){bc.hidden=cnt===0;bc.textContent=cnt;}
+  const panel=document.getElementById("bellPanel");if(!panel)return;
+  panel.innerHTML=requestsHtml()||'<div class="bell-empty">받은 요청이 없습니다.</div>';
+  if(state.lang&&state.lang!=="ko")translateDOM();
+}
+function toggleBell(){const p=document.getElementById("bellPanel");if(!p)return;if(p.hidden){renderBell();p.hidden=false;}else p.hidden=true;}
+async function sendRequest(o){
+  const row={org_id:state.orgId,kind:o.kind,from_id:state.session,to_id:o.to_id,title:o.title,note:o.note||null,due_start:o.due_start||null,due_end:o.due_end||null,collaborators:o.collaborators||[]};
+  if(dbMode&&sb){const r=await sb.from("work_requests").insert(row);if(r.error){alert("요청 실패: "+r.error.message);return false;}await loadRequests();}
+  else{if(!Array.isArray(state.requests))state.requests=[];state.requests.unshift({...row,id:"rq"+Date.now(),status:"pending",created_at:new Date().toISOString()});save();}
+  renderAll();return true;
+}
+async function sendTreeRequest(o){
+  const to=teamLeadOf(state.session);
+  if(!to){alert("소속 팀장이 지정되어 있지 않습니다. 관리자에게 문의하세요.");return false;}
+  const ok=await sendRequest({kind:"tree",to_id:to,title:o.title,note:o.note,due_start:o.start,due_end:o.end,collaborators:o.collab||[]});
+  if(ok)alert(reqName(to)+" 팀장에게 트리 생성 요청을 보냈습니다.");
+  return ok;
+}
+function openCoopCompose(){
+  const u=me();if(!u||!(u.role==="lead"||u.role==="admin"))return;
+  const others=people.filter(p=>roleOf(p.id)==="lead"&&p.id!==u.id);
+  const sel=document.getElementById("rqTo");
+  sel.innerHTML=others.length?others.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join(""):'<option value="">(다른 팀장이 없습니다)</option>';
+  document.getElementById("rqTitle").value="";document.getElementById("rqNote").value="";
+  document.getElementById("rqStart").value=iso(today());document.getElementById("rqEnd").value=iso(addDays(today(),7));
+  document.getElementById("bellPanel").hidden=true;
+  document.getElementById("reqOverlay").classList.add("on");
+}
+async function saveCoop(){
+  const to=document.getElementById("rqTo").value;
+  const title=document.getElementById("rqTitle").value.trim();
+  if(!to){alert("대상 팀장을 선택하세요.");return;}
+  if(!title){document.getElementById("rqTitle").focus();return;}
+  const ok=await sendRequest({kind:"coop",to_id:to,title,note:document.getElementById("rqNote").value.trim(),due_start:document.getElementById("rqStart").value||null,due_end:document.getElementById("rqEnd").value||null,collaborators:[]});
+  if(ok){document.getElementById("reqOverlay").classList.remove("on");alert(reqName(to)+" 팀장에게 협조 요청을 보냈습니다.");}
+}
+async function rejectRequest(reqId){
+  if(dbMode&&sb){const r=await sb.from("work_requests").update({status:"rejected",resolved_at:new Date().toISOString()}).eq("id",reqId);if(r.error){alert(r.error.message);return;}await loadRequests();}
+  else{const q=(state.requests||[]).find(x=>x.id===reqId);if(q)q.status="rejected";save();}
+  renderAll();
+}
+function acceptRequest(reqId){openAcceptModal(reqId);}
+async function resolveAccept(reqId,taskId){
+  if(dbMode&&sb){await sb.from("work_requests").update({status:"accepted",result_task_id:taskId||null,resolved_at:new Date().toISOString()}).eq("id",reqId);await loadRequests();}
+  else{const q=(state.requests||[]).find(x=>x.id===reqId);if(q){q.status="accepted";q.result_task_id=taskId;}save();}
+}
+function openAcceptModal(reqId){
+  const r=(state.requests||[]).find(x=>x.id===reqId);if(!r)return;
+  document.getElementById("bellPanel").hidden=true;
+  mAcceptCtx=r;
+  openModal(null,null);
+  document.getElementById("mTitle").textContent=(r.kind==="coop"?"협조 수락 · 업무 생성":"트리요청 수락 · 업무 생성");
+  document.getElementById("roHint").hidden=false;
+  document.getElementById("roHintText").textContent=reqName(r.from_id)+"님의 "+REQ_KIND[r.kind]+" — 담당자·기간·협조원을 확인하고 업무를 생성하세요.";
+  document.getElementById("fTitleInput").value=r.title||"";
+  if(r.due_start)document.getElementById("fStart").value=r.due_start;
+  if(r.due_end)document.getElementById("fEnd").value=r.due_end;
+  const fu=document.getElementById("fUser");fu.disabled=false;
+  if(r.kind==="tree"&&[...fu.options].some(o=>o.value===r.from_id))fu.value=r.from_id;
+  document.getElementById("fParent").disabled=false;
+  mCollab=[];(Array.isArray(r.collaborators)?r.collaborators:[]).forEach(id=>{if(mCollab.indexOf(id)<0)mCollab.push(id);});
+  if(r.from_id&&mCollab.indexOf(r.from_id)<0)mCollab.push(r.from_id);   // 요청자 협조원 자동
+  document.getElementById("collabFld").hidden=false;renderCollabField();
 }
 
 /* ---------- TASK DETAIL DRAWER ---------- */
@@ -1703,6 +1917,16 @@ function renderDetail(){
   chips+='<span class="dw-chip">우선순위 '+pr.label+'</span>';
   if(canEdit)chips+='<span class="dw-chip edit" data-dt="edit">✏️ 편집</span>';
   chips+='</div>';
+  // 완료 승인 대기 배너
+  let approveSec="";
+  if(t.doneReq){
+    if(can("approveComplete",t)){
+      approveSec='<div class="dw-approve"><div class="dw-approve-t">⏳ 완료 승인 대기 — <b>'+esc(p.name)+'</b>님이 완료를 요청했습니다.</div>'+
+        '<div class="dw-approve-b"><button class="btn primary" data-dt="approve">승인</button><button class="btn" data-dt="reject">반려</button></div></div>';
+    }else{
+      approveSec='<div class="dw-approve"><div class="dw-approve-t">⏳ 완료 승인 대기 — 팀장 승인 후 완료됩니다.</div></div>';
+    }
+  }
   // 협업자
   const collab=(t.collab||[]).filter(id=>people.some(pp=>pp.id===id));
   let collabSec="";
@@ -1735,7 +1959,7 @@ function renderDetail(){
   atHtml+='</div>';
   // 댓글 (내용은 loadComments가 채움)
   const cm='<div class="dw-sec"><h4>댓글 <span class="c" id="dwCmCnt"></span></h4><div class="cmlist" id="dwComments"><div class="cm-empty">불러오는 중…</div></div></div>';
-  document.getElementById("dwBody").innerHTML=chips+collabSec+desc+ckHtml+atHtml+cm;
+  document.getElementById("dwBody").innerHTML=chips+approveSec+collabSec+desc+ckHtml+atHtml+cm;
   document.getElementById("dwCmAdd").hidden=false;
   if(state.lang&&state.lang!=="ko")translateDOM();
 }
@@ -1832,9 +2056,29 @@ function bind(){
   document.getElementById("userchip").addEventListener("click",()=>{const u=me();if(u)openSetPw(u.id,true);});
 
   document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(b)switchView(b.dataset.v);});
-  document.getElementById("newBtn").addEventListener("click",()=>{if(can("createTop"))openModal(null,null);});
+  document.getElementById("newBtn").addEventListener("click",()=>{const u=me();if(u&&u.role!=="viewer")openModal(null,null);});
   document.getElementById("usersBtn").addEventListener("click",openUsers);
   document.getElementById("orgBtn").addEventListener("click",openOrg);
+  // ----- 요청함(벨/협조) -----
+  document.getElementById("bellBtn").addEventListener("click",e=>{e.stopPropagation();toggleBell();});
+  document.getElementById("coopBtn").addEventListener("click",openCoopCompose);
+  document.getElementById("bellPanel").addEventListener("click",e=>{
+    const acc=e.target.closest("[data-acc]");if(acc){acceptRequest(acc.dataset.acc);return;}
+    const rej=e.target.closest("[data-rej]");if(rej){rejectRequest(rej.dataset.rej);return;}
+    const apv=e.target.closest("[data-apv]");if(apv){approveDone(apv.dataset.apv);return;}
+    const rjd=e.target.closest("[data-rjd]");if(rjd){rejectDone(rjd.dataset.rjd);return;}
+  });
+  document.addEventListener("click",e=>{if(!e.target.closest("#bellBtn")&&!e.target.closest("#bellPanel")){const p=document.getElementById("bellPanel");if(p)p.hidden=true;}});
+  document.getElementById("home").addEventListener("click",e=>{
+    const acc=e.target.closest("[data-acc]");if(acc){acceptRequest(acc.dataset.acc);return;}
+    const rej=e.target.closest("[data-rej]");if(rej){rejectRequest(rej.dataset.rej);return;}
+    const apv=e.target.closest("[data-apv]");if(apv){approveDone(apv.dataset.apv);return;}
+    const rjd=e.target.closest("[data-rjd]");if(rjd){rejectDone(rjd.dataset.rjd);return;}
+  });
+  document.getElementById("rqClose").addEventListener("click",()=>document.getElementById("reqOverlay").classList.remove("on"));
+  document.getElementById("rqCancel").addEventListener("click",()=>document.getElementById("reqOverlay").classList.remove("on"));
+  document.getElementById("rqSend").addEventListener("click",saveCoop);
+  document.getElementById("reqOverlay").addEventListener("click",e=>{if(e.target.id==="reqOverlay")document.getElementById("reqOverlay").classList.remove("on");});
   document.getElementById("search").addEventListener("input",e=>{filter.q=e.target.value;renderAll();});
   document.getElementById("fAssignee").addEventListener("change",e=>{filter.assignee=e.target.value;renderAll();});
   document.getElementById("fPriority").addEventListener("change",e=>{filter.prio=e.target.value;renderAll();});
@@ -1846,7 +2090,7 @@ function bind(){
   document.getElementById("main").addEventListener("click",async e=>{
     const tog=e.target.closest("[data-toggle]");if(tog){const t=getTask(tog.dataset.toggle);t.open=!t.open;if(!dbMode)save();renderGantt();return;}
     const add=e.target.closest("[data-add]");if(add){openModal(null,add.dataset.add);return;}
-    const chk=e.target.closest("[data-check]");if(chk){const t=getTask(chk.dataset.check);if(!can("status",t))return;const ns=t.status==="done"?"doing":"done";const np=ns==="done"?100:90;if(dbMode&&sb){await dbUpdateTask(t.id,{status:ns,progress:np});await loadTasks(state.orgId);renderAll();}else{t.status=ns;t.prog=np;save();renderAll();}return;}
+    const chk=e.target.closest("[data-check]");if(chk){const t=getTask(chk.dataset.check);if(!can("status",t))return;const ns=t.status==="done"?"doing":"done";await changeStatus(t,ns);return;}
     const ed=e.target.closest("[data-edit]");if(ed){openTaskDetail(ed.dataset.edit);return;}
   });
 
@@ -1862,6 +2106,8 @@ function bind(){
     const dt=e.target.closest("[data-dt]");
     if(dt){const a=dt.dataset.dt;
       if(a==="edit"){const id=dtId;openModal(id,null);return;}
+      if(a==="approve"){approveDone(dtId);return;}
+      if(a==="reject"){rejectDone(dtId);return;}
       if(a==="ckadd"){const inp=document.getElementById("dwCkInput");dtAddChecklistItem(inp.value);return;}
       if(a==="atadd"){const n=document.getElementById("dwAtName"),u=document.getElementById("dwAtUrl");dtAddAttachment(n.value,u.value);return;}
     }
@@ -1936,7 +2182,7 @@ function bind(){
   if(dbMode){
     if(authed&&person(authId)&&person(authId).id===authId){
       state.session=authId;state.currentUser=authId;state.online=[authId];
-      await loadTasks(state.orgId);
+      await loadTasks(state.orgId);await loadRequests();
       document.getElementById("login").classList.remove("on");document.getElementById("app").hidden=false;
       switchView(state.view||"home");renderAll();
       if(sb)joinPresence();
