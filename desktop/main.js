@@ -155,7 +155,7 @@ function createTray() {
     trayIcon = nativeImage.createEmpty();
   }
   tray = new Tray(trayIcon.isEmpty() ? nativeImage.createEmpty() : trayIcon);
-  tray.setToolTip('Sprout Work');
+  tray.setToolTip('Sprout Work v' + app.getVersion());
   refreshTrayMenu();
   tray.on('click', () => showAndFocus());
 }
@@ -172,6 +172,8 @@ function refreshTrayMenu() {
   });
 
   const template = [
+    { label: 'Sprout Work  v' + app.getVersion(), enabled: false },
+    { type: 'separator' },
     { label: '열기', click: () => showAndFocus() },
     {
       label: '플로팅 타이머',
