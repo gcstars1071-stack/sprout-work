@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Tray, Menu, Notification, ipcMain, nativeImage, powerMonitor, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { autoUpdater } = require('electron-updater');
 
 let mainWindow = null;
 let floatWindow = null;
@@ -148,7 +149,14 @@ function createTray() {
   }
   tray = new Tray(trayIcon.isEmpty() ? nativeImage.createEmpty() : trayIcon);
   tray.setToolTip('Sprout Work');
+  refreshTrayMenu();
+  tray.on('click', () => showAndFocus());
+}
 
+// (re)build the tray menu — called on create and whenever a downloaded update
+// should surface an "install" shortcut
+function refreshTrayMenu() {
+  if (!tray) return;
   const opacityItem = (label, val) => ({
     label,
     type: 'radio',
@@ -156,7 +164,7 @@ function createTray() {
     click: () => applyFloatOpacity(val)
   });
 
-  const menu = Menu.buildFromTemplate([
+  const template = [
     { label: '열기', click: () => showAndFocus() },
     {
       label: '플로팅 타이머',
@@ -175,12 +183,16 @@ function createTray() {
         opacityItem('70%', 0.7),
         opacityItem('50%', 0.5)
       ]
-    },
-    { type: 'separator' },
-    { label: '종료', click: () => { app.isQuitting = true; app.quit(); } }
-  ]);
-  tray.setContextMenu(menu);
-  tray.on('click', () => showAndFocus());
+    }
+  ];
+  if (updateDownloaded) {
+    template.push({ type: 'separator' });
+    template.push({ label: '업데이트 설치 (재시작)', click: () => { app.isQuitting = true; autoUpdater.quitAndInstall(); } });
+  }
+  template.push({ type: 'separator' });
+  template.push({ label: '종료', click: () => { app.isQuitting = true; app.quit(); } });
+
+  tray.setContextMenu(Menu.buildFromTemplate(template));
 }
 
 function showAndFocus() {
@@ -218,6 +230,47 @@ ipcMain.on('sprout-work-float-cmd', (event, cmd) => {
   }
 });
 
+/* ---------- in-app updater (electron-updater / GitHub Releases) ----------
+   Checks the published release feed for a newer version. autoDownload is off so the
+   user drives it from the Settings panel: check → download → install (quitAndInstall).
+   Only functional in a packaged build; in dev, checkForUpdates rejects and we surface
+   a benign 'error' status. */
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+let updateDownloaded = false;
+
+function sendUpdate(status) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('sprout-update-status', status);
+  }
+}
+
+autoUpdater.on('update-available', (info) => sendUpdate({ state: 'available', version: info && info.version }));
+autoUpdater.on('update-not-available', () => sendUpdate({ state: 'none' }));
+autoUpdater.on('error', (err) => sendUpdate({ state: 'error', message: err ? String(err.message || err) : 'error' }));
+autoUpdater.on('download-progress', (p) => sendUpdate({ state: 'downloading', percent: Math.round(p.percent || 0) }));
+autoUpdater.on('update-downloaded', (info) => {
+  updateDownloaded = true;
+  sendUpdate({ state: 'downloaded', version: info && info.version });
+  if (tray) refreshTrayMenu();
+});
+
+ipcMain.handle('sprout-update-check', () => {
+  return autoUpdater.checkForUpdates().catch((e) => {
+    sendUpdate({ state: 'error', message: String(e && (e.message || e)) });
+  });
+});
+ipcMain.on('sprout-update-download', () => {
+  sendUpdate({ state: 'downloading', percent: 0 });
+  autoUpdater.downloadUpdate().catch((e) => {
+    sendUpdate({ state: 'error', message: String(e && (e.message || e)) });
+  });
+});
+ipcMain.on('sprout-update-install', () => {
+  app.isQuitting = true;
+  autoUpdater.quitAndInstall();
+});
+
 ipcMain.on('sprout-work-notify', (event, { title, body }) => {
   try {
     new Notification({
@@ -248,6 +301,10 @@ app.whenReady().then(() => {
 
   // start automatically when the computer/user logs in
   app.setLoginItemSettings({ openAtLogin: true, openAsHidden: false });
+
+  // quietly check for a newer release on launch (no-op / benign error in dev);
+  // the Settings panel shows the result and lets the user download + install
+  autoUpdater.checkForUpdates().catch(() => {});
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

@@ -937,6 +937,14 @@
       </div>
     </div>
 
+    <div class="settings-section" id="appUpdateSection" style="display:none;">
+      <div class="settings-label" data-i18n="settingsAppUpdate">App update</div>
+      <div class="settings-row" style="justify-content:space-between;">
+        <span style="font-size:13px;" id="appUpdateStatus"></span>
+        <button class="btn-ghost" id="appUpdateBtn" style="font-size:12px; padding:6px 10px;"></button>
+      </div>
+    </div>
+
     <div class="settings-section">
       <div class="settings-label" data-i18n="settingsWorkHours">Work hours range (for tracking paused time)</div>
       <div class="settings-row">
@@ -1304,7 +1312,7 @@ const TRANSLATIONS = {
     statsTotalLbl: 'Total focus time', close: 'Close',
     settingsTitle: 'Settings', settingsDisplayMode: 'Display mode', modeLight: 'Light', modeDark: 'Dark', modeSystem: 'Follow system',
     settingsColorPreset: 'Color preset', settingsFontSize: 'Font size', fontSmall: 'Small', fontMedium: 'Medium', fontLarge: 'Large',
-    settingsSound: 'Notification sound', soundToggleLabel: 'Enable beep', settingsNotifyPermission: 'Browser popup notifications', notifyStatusDesktop: 'Handled by the desktop app', notifyStatusUnsupported: 'Not supported in this browser', notifyStatusGranted: 'Allowed', notifyStatusDenied: 'Blocked — enable it from your browser\'s site settings for this page', notifyStatusDefault: 'Not yet allowed', notifyTestBtn: 'Send test notification', notifyRequestBtn: 'Allow notifications', testNotifyTitle: 'Sprout Work', testNotifyBody: 'Notifications are working.',
+    settingsSound: 'Notification sound', soundToggleLabel: 'Enable beep', settingsNotifyPermission: 'Browser popup notifications', notifyStatusDesktop: 'Handled by the desktop app', notifyStatusUnsupported: 'Not supported in this browser', notifyStatusGranted: 'Allowed', notifyStatusDenied: 'Blocked — enable it from your browser\'s site settings for this page', notifyStatusDefault: 'Not yet allowed', notifyTestBtn: 'Send test notification', notifyRequestBtn: 'Allow notifications', testNotifyTitle: 'Sprout Work', testNotifyBody: 'Notifications are working.', settingsAppUpdate: 'App update', updateCheckBtn: 'Check for updates', updateChecking: 'Checking…', updateAvailable: 'New version {{version}} available', updateDownloadBtn: 'Download', updateDownloading: 'Downloading {{percent}}%', updateReady: 'Version {{version}} ready', updateInstallBtn: 'Restart & install', updateUpToDate: 'You\'re on the latest version', updateError: 'Update check failed',
     settingsWorkHours: 'Work hours range (for tracking paused time)', hourUnit: 'h',
     settingsIdle: 'Idle detection time', settingsDefaultPresets: 'Default timer presets (minutes)',
     settingsSystemIdle: 'System-wide away detection', settingsSystemIdleHint: 'Also counts activity in other apps, not just this tab (Chrome/Edge only). Requires a one-time permission.', systemIdleStatusOn: 'On — using system activity', systemIdleStatusOff: 'Off — only this tab is tracked', systemIdleStatusUnsupported: 'Not supported in this browser', systemIdleEnableBtn: 'Enable', systemIdleDisableBtn: 'Turn off',
@@ -1349,7 +1357,7 @@ const TRANSLATIONS = {
     statsTotalLbl: '총 집중시간', close: '닫기',
     settingsTitle: '설정', settingsDisplayMode: '화면 모드', modeLight: '라이트', modeDark: '다크', modeSystem: '시스템 설정 따름',
     settingsColorPreset: '색상 프리셋', settingsFontSize: '글자 크기', fontSmall: '작게', fontMedium: '보통', fontLarge: '크게',
-    settingsSound: '알림 소리', soundToggleLabel: '비프음 켜기', settingsNotifyPermission: '브라우저 팝업 알림', notifyStatusDesktop: '데스크톱 앱에서 자동으로 처리됩니다', notifyStatusUnsupported: '이 브라우저에서는 지원하지 않습니다', notifyStatusGranted: '허용됨', notifyStatusDenied: '차단됨 — 브라우저의 이 사이트 설정에서 직접 허용해주세요', notifyStatusDefault: '아직 허용하지 않음', notifyTestBtn: '테스트 알림 보내기', notifyRequestBtn: '알림 허용하기', testNotifyTitle: 'Sprout Work', testNotifyBody: '알림이 정상적으로 작동합니다.',
+    settingsSound: '알림 소리', soundToggleLabel: '비프음 켜기', settingsNotifyPermission: '브라우저 팝업 알림', notifyStatusDesktop: '데스크톱 앱에서 자동으로 처리됩니다', notifyStatusUnsupported: '이 브라우저에서는 지원하지 않습니다', notifyStatusGranted: '허용됨', notifyStatusDenied: '차단됨 — 브라우저의 이 사이트 설정에서 직접 허용해주세요', notifyStatusDefault: '아직 허용하지 않음', notifyTestBtn: '테스트 알림 보내기', notifyRequestBtn: '알림 허용하기', testNotifyTitle: 'Sprout Work', testNotifyBody: '알림이 정상적으로 작동합니다.', settingsAppUpdate: '앱 업데이트', updateCheckBtn: '업데이트 확인', updateChecking: '확인 중…', updateAvailable: '새 버전 {{version}} 있음', updateDownloadBtn: '다운로드', updateDownloading: '다운로드 중 {{percent}}%', updateReady: '버전 {{version}} 준비됨', updateInstallBtn: '재시작하여 설치', updateUpToDate: '최신 버전입니다', updateError: '업데이트 확인 실패',
     settingsWorkHours: '근무시간 범위 (멈춤시간 집계 기준)', hourUnit: '시',
     settingsIdle: '유휴 감지 시간', settingsDefaultPresets: '기본 타이머 프리셋 (분)',
     settingsSystemIdle: '시스템 전체 자리비움 감지', settingsSystemIdleHint: '이 탭뿐 아니라 다른 앱에서의 활동도 감지합니다 (Chrome/Edge 전용). 최초 1회 권한 허용이 필요합니다.', systemIdleStatusOn: '켜짐 — 시스템 활동 사용', systemIdleStatusOff: '꺼짐 — 이 탭만 감지', systemIdleStatusUnsupported: '이 브라우저에서는 지원하지 않습니다', systemIdleEnableBtn: '켜기', systemIdleDisableBtn: '끄기',
@@ -1394,7 +1402,7 @@ const TRANSLATIONS = {
     statsTotalLbl: 'Tổng thời gian tập trung', close: 'Đóng',
     settingsTitle: 'Cài đặt', settingsDisplayMode: 'Chế độ hiển thị', modeLight: 'Sáng', modeDark: 'Tối', modeSystem: 'Theo hệ thống',
     settingsColorPreset: 'Bảng màu', settingsFontSize: 'Cỡ chữ', fontSmall: 'Nhỏ', fontMedium: 'Vừa', fontLarge: 'Lớn',
-    settingsSound: 'Âm thanh thông báo', soundToggleLabel: 'Bật âm báo', settingsNotifyPermission: 'Thông báo popup trên trình duyệt', notifyStatusDesktop: 'Được xử lý tự động bởi ứng dụng desktop', notifyStatusUnsupported: 'Trình duyệt này không hỗ trợ', notifyStatusGranted: 'Đã cho phép', notifyStatusDenied: 'Đã bị chặn — hãy cho phép trong cài đặt trang web của trình duyệt', notifyStatusDefault: 'Chưa cho phép', notifyTestBtn: 'Gửi thông báo thử', notifyRequestBtn: 'Cho phép thông báo', testNotifyTitle: 'Sprout Work', testNotifyBody: 'Thông báo đang hoạt động bình thường.',
+    settingsSound: 'Âm thanh thông báo', soundToggleLabel: 'Bật âm báo', settingsNotifyPermission: 'Thông báo popup trên trình duyệt', notifyStatusDesktop: 'Được xử lý tự động bởi ứng dụng desktop', notifyStatusUnsupported: 'Trình duyệt này không hỗ trợ', notifyStatusGranted: 'Đã cho phép', notifyStatusDenied: 'Đã bị chặn — hãy cho phép trong cài đặt trang web của trình duyệt', notifyStatusDefault: 'Chưa cho phép', notifyTestBtn: 'Gửi thông báo thử', notifyRequestBtn: 'Cho phép thông báo', testNotifyTitle: 'Sprout Work', testNotifyBody: 'Thông báo đang hoạt động bình thường.', settingsAppUpdate: 'Cập nhật ứng dụng', updateCheckBtn: 'Kiểm tra cập nhật', updateChecking: 'Đang kiểm tra…', updateAvailable: 'Có phiên bản mới {{version}}', updateDownloadBtn: 'Tải xuống', updateDownloading: 'Đang tải {{percent}}%', updateReady: 'Phiên bản {{version}} đã sẵn sàng', updateInstallBtn: 'Khởi động lại để cài đặt', updateUpToDate: 'Bạn đang dùng bản mới nhất', updateError: 'Kiểm tra cập nhật thất bại',
     settingsWorkHours: 'Khung giờ làm việc (tính thời gian tạm dừng)', hourUnit: 'h',
     settingsIdle: 'Thời gian phát hiện không hoạt động', settingsDefaultPresets: 'Mốc thời gian mặc định (phút)',
     settingsSystemIdle: 'Phát hiện vắng mặt toàn hệ thống', settingsSystemIdleHint: 'Tính cả hoạt động trong ứng dụng khác, không chỉ tab này (chỉ Chrome/Edge). Cần cấp quyền một lần.', systemIdleStatusOn: 'Bật — dùng hoạt động hệ thống', systemIdleStatusOff: 'Tắt — chỉ theo dõi tab này', systemIdleStatusUnsupported: 'Trình duyệt này không hỗ trợ', systemIdleEnableBtn: 'Bật', systemIdleDisableBtn: 'Tắt',
@@ -2035,6 +2043,47 @@ document.getElementById('notifyPermissionBtn').addEventListener('click', () => {
   }
   Notification.requestPermission().then(() => renderNotifyPermissionUI());
 });
+
+/* ---------- desktop in-app updater (Settings) ----------
+   Driven by status pushes from the Electron main process (electron-updater). The one
+   button walks a state machine: check → download → install. Hidden on web/mobile. */
+let updateState = { state: 'idle' };
+function renderAppUpdateUI(status) {
+  const section = document.getElementById('appUpdateSection');
+  const statusEl = document.getElementById('appUpdateStatus');
+  const btnEl = document.getElementById('appUpdateBtn');
+  if (!section || !statusEl || !btnEl) return;
+  if (!(window.sproutWorkDesktop && window.sproutWorkDesktop.update)) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  if (status) updateState = status;
+  const s = updateState.state || 'idle';
+  btnEl.disabled = false;
+  if (s === 'checking') {
+    statusEl.textContent = t('updateChecking'); btnEl.disabled = true; btnEl.textContent = t('updateCheckBtn');
+  } else if (s === 'available') {
+    statusEl.textContent = t('updateAvailable', { version: updateState.version || '' }); btnEl.textContent = t('updateDownloadBtn');
+  } else if (s === 'downloading') {
+    statusEl.textContent = t('updateDownloading', { percent: updateState.percent != null ? updateState.percent : 0 }); btnEl.disabled = true; btnEl.textContent = t('updateDownloadBtn');
+  } else if (s === 'downloaded') {
+    statusEl.textContent = t('updateReady', { version: updateState.version || '' }); btnEl.textContent = t('updateInstallBtn');
+  } else if (s === 'none') {
+    statusEl.textContent = t('updateUpToDate'); btnEl.textContent = t('updateCheckBtn');
+  } else if (s === 'error') {
+    statusEl.textContent = t('updateError'); btnEl.textContent = t('updateCheckBtn');
+  } else {
+    statusEl.textContent = ''; btnEl.textContent = t('updateCheckBtn');
+  }
+}
+if (window.sproutWorkDesktop && window.sproutWorkDesktop.update) {
+  window.sproutWorkDesktop.update.onStatus((s) => renderAppUpdateUI(s));
+  document.getElementById('appUpdateBtn').addEventListener('click', () => {
+    const up = window.sproutWorkDesktop.update;
+    const s = updateState.state || 'idle';
+    if (s === 'available') { up.download(); renderAppUpdateUI({ state: 'downloading', percent: 0 }); }
+    else if (s === 'downloaded') { up.install(); }
+    else { renderAppUpdateUI({ state: 'checking' }); up.check(); }
+  });
+}
 
 let titleFlashId = null;
 const baseTitle = document.title;
@@ -3697,6 +3746,7 @@ customAccent2Input.addEventListener('input', () => {
 
 function renderSettingsUI() {
   renderNotifyPermissionUI();
+  renderAppUpdateUI();
   renderSystemIdleUI();
   renderPomoSettings();
   modeTabs.querySelectorAll('button').forEach(btn => {

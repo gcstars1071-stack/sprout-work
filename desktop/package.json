@@ -9,6 +9,9 @@
     "dist:win": "electron-builder --win",
     "dist:all": "electron-builder --mac --win"
   },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
   "devDependencies": {
     "electron": "^31.0.0",
     "electron-builder": "^24.13.3"
@@ -16,6 +19,9 @@
   "build": {
     "appId": "xyz.sproutwork.app",
     "productName": "Sprout Work",
+    "publish": [
+      { "provider": "github", "owner": "gcstars1071-stack", "repo": "sprout-work" }
+    ],
     "files": [
       "main.js",
       "preload.js",
