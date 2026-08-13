@@ -51,7 +51,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "${productName} Setup ${version}-${arch}.${ext}"
+      "artifactName": "Sprout-Work-Setup-${version}-${arch}.${ext}"
     }
   },
   "keywords": [],
