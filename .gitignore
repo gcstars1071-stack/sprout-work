@@ -1,6 +1,7 @@
 .DS_Store
 desktop/node_modules/
 desktop/dist/
+desktop/release-artifacts/
 desktop/package-lock.json
 mobile/node_modules/
 mobile/package-lock.json
