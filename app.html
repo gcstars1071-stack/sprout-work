@@ -4978,6 +4978,22 @@ function cloudPushAllFromGuest() {
       cloudSet(k, value);
     });
 }
+// Does this account already hold data in the cloud? Used to decide, on a guest→login,
+// whether it's a brand-new signup (safe to adopt the guest's local work) or an EXISTING
+// user (whose real data must NEVER be overwritten by throwaway trial work). On any
+// error we deliberately assume "has data" — discarding trial work is far safer than
+// clobbering a real account.
+async function accountHasData() {
+  if (!currentUser) return true;
+  try {
+    const { count, error } = await supabaseClient
+      .from('user_data')
+      .select('data_key', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id);
+    if (error) return true;
+    return (count || 0) > 0;
+  } catch (e) { return true; }
+}
 
 function showApp(user) {
   const wasGuest = !currentUser;
@@ -4995,8 +5011,21 @@ function showApp(user) {
   setupRealtimeSync(); // live cross-device sync (idempotent)
   if (guestMigrationPending || (wasGuest && guestSessionCount() > 0)) {
     guestMigrationPending = false;
-    cloudPushAllFromGuest();
-    render();
+    // CRITICAL: only adopt the guest's local trial work when the account is EMPTY
+    // (brand-new signup). If the account already has data, it is the source of truth —
+    // pull it and DISCARD the trial data. Never push guest data over a real account
+    // (that overwrote existing users' task lists).
+    accountHasData().then(hasData => {
+      if (hasData) {
+        cloudPullAll().then(() => {
+          if (!appStarted) { appStarted = true; startApp(); }
+          else { render(); if (typeof renderCalendar === 'function') renderCalendar(); }
+        });
+      } else {
+        cloudPushAllFromGuest();
+        if (!appStarted) { appStarted = true; startApp(); } else render();
+      }
+    });
     return;
   }
   if (!appStarted) {
