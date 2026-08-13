@@ -4884,11 +4884,34 @@ function cloudSet(key, value) {
   }).then(({ error }) => { if (error) console.error('cloudSet failed', key, error); });
 }
 
+// Enforce the single-active invariant: only state.activeId may be 'active' with an OPEN
+// focus interval. A sync race (or an older bug) can leave another session stuck 'active'
+// with a dangling open interval — it shows "in progress" forever, its time keeps growing,
+// and you can't return to it. Close those intervals and demote them to paused. Returns
+// true if anything was repaired.
+function sanitizeSessions() {
+  let changed = false;
+  if (!state || !state.sessions) return false;
+  for (const s of Object.values(state.sessions)) {
+    if (!s || s.id === state.activeId) continue;
+    const last = s.intervals && s.intervals[s.intervals.length - 1];
+    if (last && last.type === 'focus' && last.end === null) { last.end = Date.now(); changed = true; }
+    if (s.status === 'active') {
+      s.status = 'paused';
+      if (!Array.isArray(state.waitingIds)) state.waitingIds = [];
+      if (!state.waitingIds.includes(s.id)) state.waitingIds.push(s.id);
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 // re-read every in-memory copy from localStorage (after the cloud overwrites it)
 function reloadInMemoryFromLocal() {
   state = loadState();
   nextIdCounter = Object.keys(state.sessions).length
     ? Math.max(...Object.keys(state.sessions).map(Number)) + 1 : 1;
+  sanitizeSessions();
   appSettings = loadAppSettings();
   themeSettings = loadThemeSettings();
   todos = loadTodos();
@@ -5172,6 +5195,9 @@ function startApp() {
   document.getElementById('dateLabel').textContent = `Sprout Work · ${todayStr}`;
   applyAppSettings();
   applyI18n();
+  // heal any task stuck "in progress" (dangling open interval on a non-active session)
+  // left behind by an earlier sync race, and persist the repair
+  if (sanitizeSessions()) persist('sanitize_on_load');
   render();
   renderHistoryLists();
   renderCalendar();

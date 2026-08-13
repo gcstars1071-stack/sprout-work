@@ -1,6 +1,6 @@
 {
   "name": "sprout-work",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Sprout Work — task tree & focus timer desktop app",
   "main": "main.js",
   "scripts": {
