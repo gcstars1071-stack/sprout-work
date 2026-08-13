@@ -4848,11 +4848,25 @@ function startGuestApp() {
 }
 
 /* ---------- cloud sync (per-user key/value mirror of localStorage) ---------- */
+// Stable stringify: sort object keys recursively. Supabase stores data_value as
+// jsonb, which does NOT preserve key order — so the Realtime echo of our own write
+// comes back with reordered keys. Comparing raw JSON.stringify then fails to
+// recognize the echo, re-applies it, re-renders, re-writes… an infinite sync loop
+// (UI flicker, tasks bouncing). Canonicalizing both sides makes the compare
+// order-independent so the echo is correctly ignored.
+function stableStringify(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(stableStringify).join(',') + ']';
+  return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + stableStringify(v[k])).join(',') + '}';
+}
+function localCanon(key) {
+  try { return stableStringify(JSON.parse(localStorage.getItem(key))); } catch (e) { return null; }
+}
 // remember what we just wrote so the realtime echo of our own change is ignored
-const recentCloudWrites = {}; // key -> { json, ts }
+const recentCloudWrites = {}; // key -> { canon, ts }
 function cloudSet(key, value) {
   if (!currentUser) return;
-  try { recentCloudWrites[key] = { json: JSON.stringify(value), ts: Date.now() }; } catch (e) {}
+  try { recentCloudWrites[key] = { canon: stableStringify(value), ts: Date.now() }; } catch (e) {}
   supabaseClient.from('user_data').upsert({
     user_id: currentUser.id, data_key: key, data_value: value, updated_at: new Date().toISOString()
   }).then(({ error }) => { if (error) console.error('cloudSet failed', key, error); });
@@ -4889,12 +4903,14 @@ function teardownRealtimeSync() {
 function applyRemoteRow(row) {
   if (!row || !row.data_key) return;
   const key = row.data_key;
-  const json = JSON.stringify(row.data_value);
+  const incomingCanon = stableStringify(row.data_value);
   // ignore the echo of our own recent write (same value within 10s)
   const rec = recentCloudWrites[key];
-  if (rec && rec.json === json && Date.now() - rec.ts < 10000) return;
-  if (localStorage.getItem(key) === json) return; // already up to date
-  localStorage.setItem(key, json);
+  if (rec && rec.canon === incomingCanon && Date.now() - rec.ts < 10000) return;
+  // order-independent "already up to date" check — this is what actually breaks the
+  // jsonb key-reorder echo loop (raw string compare would spuriously differ)
+  if (localCanon(key) === incomingCanon) return;
+  localStorage.setItem(key, JSON.stringify(row.data_value));
   reloadInMemoryFromLocal();
   applyAppSettings(); applyTheme(); applyI18n();
   render();
@@ -4912,8 +4928,11 @@ async function cloudRefresh() {
   if (error || !data) return;
   let changed = false;
   data.forEach(row => {
-    const json = JSON.stringify(row.data_value);
-    if (localStorage.getItem(row.data_key) !== json) { localStorage.setItem(row.data_key, json); changed = true; }
+    // order-independent compare so a jsonb key-reorder isn't mistaken for a change
+    if (localCanon(row.data_key) !== stableStringify(row.data_value)) {
+      localStorage.setItem(row.data_key, JSON.stringify(row.data_value));
+      changed = true;
+    }
   });
   if (changed) {
     reloadInMemoryFromLocal();
