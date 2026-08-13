@@ -4724,6 +4724,18 @@ function initDashboard() {
     } catch (e) {}
   }
 
+  // Self-heal orphaned widget records. GridStack.load() removes any widget not present
+  // in the saved layout, but its entry can linger in widgetsData — inflating type counts
+  // so e.g. the "max 4 digital clocks" limit blocks new adds even when only 1 is on the
+  // grid. Prune widgetsData down to the widgets actually on the grid (syncs to cloud too).
+  try {
+    const liveIds = new Set(dashboardGrid.save(false).map(n => n.id));
+    const wd = loadWidgetsData();
+    let pruned = false;
+    Object.keys(wd).forEach(id => { if (!liveIds.has(id)) { delete wd[id]; pruned = true; } });
+    if (pruned) saveWidgetsData(wd);
+  } catch (e) {}
+
   dashboardGrid.on('change', saveLayout);
 
   // GridStack's own 1-column reflow scrambles the card order on phones, burying the
