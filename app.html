@@ -2098,6 +2098,7 @@ function render() {
   updatePomoToggle();
   applyDayEndedVisuals();
   syncNativeSchedule();
+  pushFloatState();
 }
 
 /* ---------- todo list ---------- */
@@ -2175,6 +2176,61 @@ const LAST_SEEN_KEY = 'sproutWork_lastSeen';
 let tickCount = 0;
 let lastTickAt = 0;
 
+/* ---------- desktop floating timer bridge ----------
+   Mirrors the live timer to the always-on-top Electron float window and accepts its
+   pause/resume/finish commands. No-op on web/mobile (bridge absent). `floatCurrentId`
+   keeps the float showing a *paused* task even after state.activeId is cleared. */
+let floatCurrentId = null;
+function pushFloatState() {
+  if (!(window.sproutWorkDesktop && window.sproutWorkDesktop.updateFloat)) return;
+  const active = state.activeId ? state.sessions[state.activeId] : null;
+  let payload;
+  if (active) {
+    floatCurrentId = active.id;
+    let remaining, pomoLabel = '';
+    if (pomoOn()) {
+      remaining = pomoRemaining();
+      pomoLabel = '🍅 ' + (state.pomo.phase === 'work' ? t('pomoPhaseWork') : t('pomoPhaseBreak'));
+    } else {
+      remaining = active.plannedSeconds - focusSeconds(active);
+    }
+    payload = {
+      visible: true, running: true,
+      title: active.title, crumb: breadcrumbFor(active),
+      time: fmt(remaining), overtime: remaining < 0,
+      isBreak: active.category === 'break', pomoLabel
+    };
+  } else if (floatCurrentId && state.sessions[floatCurrentId] && state.sessions[floatCurrentId].status === 'paused') {
+    const s = state.sessions[floatCurrentId];
+    const remaining = s.plannedSeconds - focusSeconds(s);
+    payload = {
+      visible: true, running: false,
+      title: s.title, crumb: breadcrumbFor(s),
+      time: fmt(remaining), overtime: remaining < 0,
+      isBreak: s.category === 'break', pomoLabel: ''
+    };
+  } else {
+    floatCurrentId = null;
+    payload = { visible: false };
+  }
+  window.sproutWorkDesktop.updateFloat(payload);
+}
+if (window.sproutWorkDesktop && window.sproutWorkDesktop.onFloatCommand) {
+  window.sproutWorkDesktop.onFloatCommand((cmd) => {
+    if (cmd === 'pause') {
+      const a = state.activeId ? state.sessions[state.activeId] : null;
+      if (a) { stopPomodoro(); pauseSession(a); state.activeId = null; render(); }
+    } else if (cmd === 'resume') {
+      const s = floatCurrentId ? state.sessions[floatCurrentId] : null;
+      if (s && s.status === 'paused') { resumeSession(s); render(); }
+    } else if (cmd === 'finish') {
+      const cur = (state.activeId ? state.sessions[state.activeId] : null)
+                || (floatCurrentId ? state.sessions[floatCurrentId] : null);
+      if (cur) { stopPomodoro(); finishSession(cur); floatCurrentId = null; render(); }
+    }
+  });
+}
+
 function tick() {
   tickCount++;
   const nowT = Date.now();
@@ -2222,6 +2278,7 @@ function tick() {
   // live-update waiting durations / tree timers
   renderTree();
   checkIdle();
+  pushFloatState();
 }
 
 /* ---------- Pomodoro auto-cycle (Pro) ----------

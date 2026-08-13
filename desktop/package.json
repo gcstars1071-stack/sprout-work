@@ -19,6 +19,8 @@
     "files": [
       "main.js",
       "preload.js",
+      "float.html",
+      "float-preload.js",
       "../app.html",
       "../manifest.json",
       "../icon.svg",

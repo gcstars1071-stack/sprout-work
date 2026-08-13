@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sprout Work — Floating Timer</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --card: #232342;
+    --card2: #2c2c52;
+    --accent: #ff6b6b;   /* coral — overtime / stop */
+    --accent2: #4ecdc4;  /* teal — primary */
+    --text: #eaeaea;
+    --muted: #9a9ac0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    background: transparent;            /* transparent Electron window */
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+    color: var(--text);
+    overflow: hidden;
+    user-select: none;
+    cursor: default;
+  }
+  #card {
+    position: absolute; inset: 6px;
+    background: linear-gradient(160deg, var(--card), var(--bg));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+    padding: 9px 12px 10px;
+    display: flex; flex-direction: column; gap: 4px;
+    -webkit-app-region: drag;          /* whole card draggable */
+  }
+  #top { display: flex; align-items: baseline; gap: 6px; min-height: 15px; }
+  #pomo { font-size: 11px; color: var(--accent2); font-weight: 600; flex-shrink: 0; display: none; }
+  #title {
+    font-size: 12.5px; font-weight: 600; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
+  }
+  #crumb {
+    font-size: 10.5px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 42%;
+  }
+  #row { display: flex; align-items: center; gap: 8px; }
+  #time {
+    font-size: 30px; font-weight: 700; line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-family: "SF Mono", "Cascadia Mono", ui-monospace, Menlo, Consolas, monospace;
+    letter-spacing: 0.5px; flex: 1;
+  }
+  #time.overtime { color: var(--accent); }
+  #paused-dot { color: var(--muted); font-size: 12px; }
+  .btns { display: flex; gap: 6px; -webkit-app-region: no-drag; }
+  button {
+    -webkit-app-region: no-drag;
+    width: 30px; height: 30px; border: none; border-radius: 9px;
+    background: var(--card2); color: var(--text);
+    font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s, transform 0.08s;
+  }
+  button:hover { background: #3a3a68; }
+  button:active { transform: scale(0.92); }
+  #playpause { background: var(--accent2); color: #06302c; }
+  #playpause:hover { background: #63d8cf; }
+  #finish:hover { background: var(--accent); color: #3a0d0d; }
+  #idle {
+    position: absolute; inset: 6px; display: none;
+    align-items: center; justify-content: center;
+    background: linear-gradient(160deg, var(--card), var(--bg));
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+    color: var(--muted); font-size: 12px; -webkit-app-region: drag;
+  }
+</style>
+</head>
+<body>
+  <div id="card">
+    <div id="top">
+      <span id="pomo"></span>
+      <span id="title">—</span>
+      <span id="crumb"></span>
+    </div>
+    <div id="row">
+      <span id="time">00:00</span>
+      <div class="btns">
+        <button id="playpause" title="Pause / Resume">⏸</button>
+        <button id="finish" title="Finish">✓</button>
+        <button id="open" title="Open Sprout Work">⤢</button>
+      </div>
+    </div>
+  </div>
+  <div id="idle">Sprout Work</div>
+
+<script>
+  const els = {
+    card: document.getElementById('card'),
+    idle: document.getElementById('idle'),
+    pomo: document.getElementById('pomo'),
+    title: document.getElementById('title'),
+    crumb: document.getElementById('crumb'),
+    time: document.getElementById('time'),
+    playpause: document.getElementById('playpause'),
+    finish: document.getElementById('finish'),
+    open: document.getElementById('open'),
+  };
+
+  function render(d) {
+    d = d || {};
+    if (!d.visible) {
+      els.card.style.display = 'none';
+      els.idle.style.display = 'flex';
+      return;
+    }
+    els.idle.style.display = 'none';
+    els.card.style.display = 'flex';
+
+    els.title.textContent = (d.isBreak ? '☕ ' : '') + (d.title || '');
+    els.crumb.textContent = d.crumb || '';
+    els.crumb.style.display = d.crumb ? '' : 'none';
+
+    els.pomo.textContent = d.pomoLabel || '';
+    els.pomo.style.display = d.pomoLabel ? '' : 'none';
+
+    els.time.textContent = d.time || '00:00';
+    els.time.classList.toggle('overtime', !!d.overtime);
+
+    // running → show pause; paused → show resume
+    els.playpause.textContent = d.running ? '⏸' : '▶';
+    els.playpause.title = d.running ? 'Pause' : 'Resume';
+    els.time.style.opacity = d.running ? '1' : '0.6';
+  }
+
+  els.playpause.addEventListener('click', () => {
+    const running = els.playpause.textContent === '⏸';
+    send(running ? 'pause' : 'resume');
+  });
+  els.finish.addEventListener('click', () => send('finish'));
+  els.open.addEventListener('click', () => send('open'));
+
+  function send(cmd) {
+    if (window.floatBridge) window.floatBridge.cmd(cmd);
+  }
+
+  if (window.floatBridge) {
+    window.floatBridge.onData(render);
+  } else {
+    // opened directly in a browser (style preview) — show sample data
+    render({ visible: true, running: true, title: 'Draft the report',
+             crumb: 'Q3 planning', time: '24:31', overtime: false,
+             isBreak: false, pomoLabel: '🍅 Focus · 2/4' });
+  }
+</script>
+</body>
+</html>
