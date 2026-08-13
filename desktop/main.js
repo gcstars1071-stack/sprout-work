@@ -48,7 +48,10 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      // keep the 1s timer (which feeds the floating window) running at full cadence
+      // even when the main window is minimized or hidden to tray
+      backgroundThrottling: false
     }
   });
 
@@ -84,7 +87,10 @@ function createFloatWindow() {
     x: startX,
     y: startY,
     frame: false,
-    transparent: true,
+    // NOTE: intentionally NOT transparent. Transparent frameless windows can render
+    // fully invisible on some Windows GPU/compositor setups; an opaque window with a
+    // dark backgroundColor always paints. Windows 11 rounds the corners automatically.
+    backgroundColor: '#232342',
     resizable: false,
     movable: true,
     alwaysOnTop: true,
@@ -97,7 +103,8 @@ function createFloatWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'float-preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      backgroundThrottling: false
     }
   });
   floatWindow.setAlwaysOnTop(true, 'screen-saver');
