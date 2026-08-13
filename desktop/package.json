@@ -20,14 +20,14 @@
       "main.js",
       "preload.js",
       "float.html",
-      "float-preload.js",
-      "../app.html",
-      "../manifest.json",
-      "../icon.svg",
-      "../icon.png",
-      "../icon.ico",
-      "../icon.icns",
-      "../sw.js"
+      "float-preload.js"
+    ],
+    "extraResources": [
+      { "from": "../app.html", "to": "app.html" },
+      { "from": "../manifest.json", "to": "manifest.json" },
+      { "from": "../sw.js", "to": "sw.js" },
+      { "from": "../icon.png", "to": "icon.png" },
+      { "from": "../icon.svg", "to": "icon.svg" }
     ],
     "mac": {
       "category": "public.app-category.productivity",
