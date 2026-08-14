@@ -1,6 +1,6 @@
 {
   "name": "sprout-work",
-  "version": "1.0.1",
+  "version": "1.0.9",
   "description": "Sprout Work — task tree & focus timer desktop app",
   "main": "main.js",
   "scripts": {
@@ -9,6 +9,9 @@
     "dist:win": "electron-builder --win",
     "dist:all": "electron-builder --mac --win"
   },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
   "devDependencies": {
     "electron": "^31.0.0",
     "electron-builder": "^24.13.3"
@@ -16,16 +19,21 @@
   "build": {
     "appId": "xyz.sproutwork.app",
     "productName": "Sprout Work",
+    "publish": [
+      { "provider": "github", "owner": "gcstars1071-stack", "repo": "sprout-work" }
+    ],
     "files": [
       "main.js",
       "preload.js",
-      "../app.html",
-      "../manifest.json",
-      "../icon.svg",
-      "../icon.png",
-      "../icon.ico",
-      "../icon.icns",
-      "../sw.js"
+      "float.html",
+      "float-preload.js"
+    ],
+    "extraResources": [
+      { "from": "../app.html", "to": "app.html" },
+      { "from": "../manifest.json", "to": "manifest.json" },
+      { "from": "../sw.js", "to": "sw.js" },
+      { "from": "../icon.png", "to": "icon.png" },
+      { "from": "../icon.svg", "to": "icon.svg" }
     ],
     "mac": {
       "category": "public.app-category.productivity",
@@ -43,7 +51,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "${productName} Setup ${version}-${arch}.${ext}"
+      "artifactName": "Sprout-Work-Setup-${version}-${arch}.${ext}"
     }
   },
   "keywords": [],
