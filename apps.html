@@ -17,7 +17,36 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#1a1a2e">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2971371892705124" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="marketing.css">
+<link rel="stylesheet" href="marketing.css?v=2">
+<style>
+/* apps page — inlined so the layout never depends on a stale cached marketing.css */
+.app-grid { display: flex; flex-wrap: wrap; gap: 22px; justify-content: center; margin-top: 44px; }
+.app-card {
+  width: 440px; max-width: 100%; background: var(--card, #232342); border: 1px solid #33334d;
+  border-radius: 18px; padding: 28px 26px; text-align: center;
+}
+.app-card .app-icon { width: 96px; height: 96px; border-radius: 22px; display: block; margin: 0 auto 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+.app-card .app-name { font-size: 20px; font-weight: 700; }
+.app-card .app-cat { font-size: 13px; color: var(--dim, #8888aa); margin: 6px 0 2px; }
+.app-card .app-desc { font-size: 14px; color: #cfcfe0; margin: 12px 0 20px; line-height: 1.55; }
+.store-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.store-badge {
+  display: flex; align-items: center; gap: 9px; background: #000; border: 1px solid #3a3a3a;
+  border-radius: 11px; padding: 9px 15px; min-width: 150px; text-decoration: none;
+}
+.store-badge:hover { text-decoration: none; }
+.store-badge .s-sub { font-size: 9px; color: #cfcfcf; letter-spacing: 0.5px; }
+.store-badge .s-name { font-size: 15px; color: #fff; font-weight: 600; }
+.store-badge svg { width: 24px; height: 24px; flex-shrink: 0; }
+.store-badge.disabled { opacity: 0.7; cursor: default; position: relative; }
+.store-badge.disabled .store-tip {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 8px);
+  background: var(--card2, #2c2c52); color: var(--text, #eaeaea); font-size: 12px; padding: 6px 12px;
+  border-radius: 8px; white-space: nowrap; opacity: 0; transition: opacity 0.15s;
+  pointer-events: none; border: 1px solid #44447a;
+}
+.store-badge.disabled:hover .store-tip, .store-badge.disabled:focus .store-tip { opacity: 1; }
+</style>
 </head>
 <body>
 
@@ -50,11 +79,11 @@
 
         <a class="store-badge" href="https://play.google.com/store/apps/details?id=kr.gcstars.mytodo" target="_blank" rel="noopener">
           <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path fill="#00d3ff" d="M47 25 300 278 47 486z"/>
-            <path fill="#00f076" d="M47 25 47 25 355 210 300 278z"/>
-            <path fill="#ff3a44" d="M300 278 355 210 465 256 300 278z" transform="translate(0 0)"/>
-            <path fill="#00f076" d="M47 486 300 278 355 346 47 486z"/>
-            <path fill="#ffce00" d="M300 278 355 210 465 256 355 302z"/>
+            <path fill="#00d3ff" d="M45 34c-3 3-5 8-5 14v416c0 6 2 11 5 14l2 2 233-233v-2L47 32z"/>
+            <path fill="#00f076" d="M356 333 278 255v-4l78-78 2 1 92 53c26 15 26 39 0 54z" transform="translate(0 -1)"/>
+            <path fill="#ffce00" d="M358 332 278 252l80-80 92 52c20 12 20 32 0 44z"/>
+            <path fill="#ff3b44" d="M47 480c4 4 11 5 19 0l280-159-80-80z"/>
+            <path fill="#00f076" d="M47 32c-4-5-11-4-19 0l280 159 78-78z" transform="translate(0 0)"/>
           </svg>
           <span style="text-align:left; line-height:1.15;">
             <span class="s-sub" style="display:block;">GET IT ON</span>
