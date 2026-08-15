@@ -116,3 +116,31 @@ a:hover { text-decoration: underline; }
 .dl-card.ready { border-color: var(--accent2); cursor: pointer; }
 .dl-card.ready:hover { background: var(--card2); text-decoration: none; }
 .dl-card.soon { opacity: 0.4; cursor: default; pointer-events: none; }
+
+/* apps */
+.app-grid { display: flex; flex-wrap: wrap; gap: 22px; justify-content: center; margin-top: 44px; }
+.app-card {
+  width: 440px; max-width: 100%; background: var(--card); border: 1px solid #33334d;
+  border-radius: 18px; padding: 28px 26px; text-align: center;
+}
+.app-card .app-icon { width: 96px; height: 96px; border-radius: 22px; display: block; margin: 0 auto 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+.app-card .app-name { font-size: 20px; font-weight: 700; }
+.app-card .app-cat { font-size: 13px; color: var(--dim); margin: 6px 0 2px; }
+.app-card .app-desc { font-size: 14px; color: #cfcfe0; margin: 12px 0 20px; line-height: 1.55; }
+.store-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.store-badge {
+  display: flex; align-items: center; gap: 9px; background: #000; border: 1px solid #3a3a3a;
+  border-radius: 11px; padding: 9px 15px; min-width: 150px; text-decoration: none;
+}
+.store-badge:hover { text-decoration: none; }
+.store-badge .s-sub { font-size: 9px; color: #cfcfcf; letter-spacing: 0.5px; }
+.store-badge .s-name { font-size: 15px; color: #fff; font-weight: 600; }
+.store-badge svg { width: 24px; height: 24px; flex-shrink: 0; }
+.store-badge.disabled { opacity: 0.7; cursor: default; position: relative; }
+.store-badge.disabled .store-tip {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 8px);
+  background: var(--card2); color: var(--text); font-size: 12px; padding: 6px 12px;
+  border-radius: 8px; white-space: nowrap; opacity: 0; transition: opacity 0.15s;
+  pointer-events: none; border: 1px solid #44447a;
+}
+.store-badge.disabled:hover .store-tip, .store-badge.disabled:focus .store-tip { opacity: 1; }
