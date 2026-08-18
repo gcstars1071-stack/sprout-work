@@ -133,7 +133,10 @@ function createFloatWindow() {
 
 // reconcile the floating window's visibility with the latest snapshot + tray toggle
 function applyFloatVisibility() {
-  if (!floatWindow) return;
+  // also bail if the window's native object is already gone (e.g. a last float update
+  // arrives while the app is quitting) — calling methods on it throws "Object has been
+  // destroyed" and pops a main-process error dialog on exit
+  if (!floatWindow || floatWindow.isDestroyed() || app.isQuitting) return;
   const shouldShow = floatEnabled && lastFloatVisible;
   if (shouldShow && !floatWindow.isVisible()) floatWindow.showInactive();
   else if (!shouldShow && floatWindow.isVisible()) floatWindow.hide();
