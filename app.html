@@ -2122,6 +2122,10 @@ function checkAlarm(session) {
 
 /* ---------- render ---------- */
 function render() {
+  // enforce the single-active invariant every paint: if any non-active task is still
+  // marked 'active' with a dangling open interval (an earlier sync race), close it and
+  // demote to paused so it stops showing "in progress" and becomes clickable/resumable
+  sanitizeSessions();
   persist('state_change');
 
   const active = state.activeId ? state.sessions[state.activeId] : null;
@@ -3050,12 +3054,17 @@ function statusIcon(s) {
 }
 
 function switchToSession(session) {
-  if (session.status !== 'paused') return;
+  // Allow switching to ANY task that isn't the current active one and isn't finished —
+  // not just 'paused'. A task stuck as 'active' (a non-activeId session left with an open
+  // interval by an earlier sync race) must still be clickable to return to; the old
+  // `status !== 'paused'` guard silently swallowed those clicks.
+  if (!session || session.id === state.activeId) return;
+  if (session.status === 'done' || session.status === 'cancelled') return;
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (active && active.id !== session.id) pauseSession(active);
   resolveIdle();
   pendingRevert = null;
-  resumeSession(session);
+  resumeSession(session); // closes any dangling open interval, opens a fresh one, sets active
   closeModal();
   render();
 }
