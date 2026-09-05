@@ -1547,6 +1547,9 @@ if (todos.length === 0 && Array.isArray(state.todos) && state.todos.length > 0) 
 function checkDateRollover() {
   const now = currentDateStr();
   if (now === todayStr) return;
+  // cap any interval left open past its day's clock-out before finalizing the old day, so a
+  // timer the machine slept through banks only that day's in-hours time, not the whole gap
+  settleOverdueSessions(true);
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (active) pauseSessionAt(active, Date.now());
   persist('day_rollover');
@@ -1710,6 +1713,59 @@ function cancelSession(session) {
   state.waitingIds = state.waitingIds.filter(id => id !== session.id);
   if (state.activeId === session.id) state.activeId = null;
   if (state.pomo && state.pomo.workTaskId === session.id) state.pomo.on = false;
+}
+
+/* ---------- auto clock-out at end of work hours ----------
+   A timer left running (tab closed, machine asleep, task never finished) must not bank
+   wall-clock hours. Any interval left open is auto-closed at the clock-out time
+   (WORK_HOURS_END) of the day it began — so a task forgotten overnight records only that
+   day's in-hours time, never the whole gap. Resuming it the next day starts a fresh count
+   (see the plan / yesterday "start" paths), keeping each day's record to its actual work. */
+function workEndOfDayMs(ms) {
+  const d = new Date(ms);
+  d.setHours(WORK_HOURS_END, 0, 0, 0);
+  return d.getTime();
+}
+// the timestamp an open interval should be auto-closed at: its day's clock-out time, or —
+// if it began at/after clock-out — the end of that same calendar day, so it never bleeds
+// into another day's record.
+function autoCloseBoundary(startMs) {
+  const we = workEndOfDayMs(startMs);
+  if (we > startMs) return we;
+  const eod = new Date(startMs); eod.setHours(23, 59, 59, 999);
+  return eod.getTime();
+}
+// Close a session's open interval at its auto-close boundary once we're past it, and clock
+// the session out. includeToday=false leaves an interval that began today alone (the user
+// may still be actively working); it always settles intervals carried over from an earlier
+// day. Returns true if anything changed.
+function settleSessionOverdue(s, includeToday) {
+  if (!s || !s.intervals || !s.intervals.length) return false;
+  const last = s.intervals[s.intervals.length - 1];
+  if (!last || last.end !== null) return false;
+  const startedToday = new Date(last.start).toDateString() === new Date().toDateString();
+  if (startedToday && !includeToday) return false;
+  const cap = autoCloseBoundary(last.start);
+  const GRACE_MS = 5 * 60 * 1000; // small grace past clock-out before auto-ending
+  if (Date.now() <= cap + GRACE_MS) return false;
+  last.end = Math.max(last.start, cap);
+  if (s.status === 'active') s.status = 'paused';
+  if (state.activeId === s.id) state.activeId = null;
+  if (s.status !== 'done' && s.status !== 'cancelled' &&
+      Array.isArray(state.waitingIds) && !state.waitingIds.includes(s.id)) {
+    state.waitingIds.push(s.id);
+  }
+  s.alarmNextAt = null;
+  if (state.pomo && state.pomo.workTaskId === s.id) state.pomo.on = false;
+  return true;
+}
+function settleOverdueSessions(includeToday) {
+  if (!state || !state.sessions) return false;
+  let changed = false;
+  for (const s of Object.values(state.sessions)) {
+    if (settleSessionOverdue(s, includeToday)) changed = true;
+  }
+  return changed;
 }
 
 /* ---------- DOM refs ---------- */
@@ -2293,6 +2349,9 @@ function tick() {
   lastTickAt = nowT;
   if (tickCount % 60 === 0) localStorage.setItem(LAST_SEEN_KEY, String(nowT));
   checkDateRollover();
+  // safety net for a tab left open: auto clock-out any timer still running from an earlier
+  // day (today's is left alone here so we never yank a task the user may be actively doing)
+  if (settleOverdueSessions(false)) { persist('auto_clock_out'); render(); }
   const active = state.activeId ? state.sessions[state.activeId] : null;
   if (active && pomoOn()) {
     // Pomodoro: advance the phase FIRST if this boundary was reached, so we never
@@ -3295,7 +3354,10 @@ function renderPlan() {
     row.innerHTML = `<div class="label"><span class="icon-open">○</span><span class="txt">${escapeHtml(s.title)}</span></div><div class="meta">${meta}</div>`;
     row.title = t('setTimeTooltip');
     row.addEventListener('click', () => {
-      openConvertModal({ title: s.title, priorFocusSeconds: focusSeconds(s), planKey: key });
+      // carried over from an earlier day → start fresh (0); today's own unfinished branch
+      // keeps its accrued time so resuming it mid-day continues the same day's count
+      const carry = (dateStr === todayStr) ? focusSeconds(s) : 0;
+      openConvertModal({ title: s.title, priorFocusSeconds: carry, planKey: key });
     });
     // "+" — send this plan item to the Todo List without starting it
     const addBtn = document.createElement('button');
@@ -3348,8 +3410,9 @@ function buildHistoryNode(session, sessionsMap, clickable) {
     row.style.cursor = 'pointer';
     row.title = t('setTimeTooltip');
     row.addEventListener('click', () => {
-      const priorFocusSeconds = session.status !== 'done' ? focusSeconds(session) : 0;
-      openConvertModal({ title: session.title, priorFocusSeconds });
+      // this clickable path is the "yesterday" panel — continuing a task on a later day
+      // starts a fresh count so that day's record reflects only that day's work
+      openConvertModal({ title: session.title, priorFocusSeconds: 0 });
     });
   }
   wrap.appendChild(row);
@@ -4908,7 +4971,14 @@ function sanitizeSessions() {
   for (const s of Object.values(state.sessions)) {
     if (!s || s.id === state.activeId) continue;
     const last = s.intervals && s.intervals[s.intervals.length - 1];
-    if (last && last.type === 'focus' && last.end === null) { last.end = Date.now(); changed = true; }
+    if (last && last.type === 'focus' && last.end === null) {
+      // close at the day's clock-out time, not "now" — a task the app was closed on for
+      // days must record only that day's in-hours time, not the whole gap. (min with now
+      // keeps a same-day, still-before-clock-out dangling interval closing at the present.)
+      const cap = autoCloseBoundary(last.start);
+      last.end = Math.min(Date.now(), Math.max(last.start, cap));
+      changed = true;
+    }
     if (s.status === 'active') {
       s.status = 'paused';
       if (!Array.isArray(state.waitingIds)) state.waitingIds = [];
@@ -5216,9 +5286,12 @@ function startApp() {
   document.getElementById('dateLabel').textContent = `Sprout Work · ${todayStr}`;
   applyAppSettings();
   applyI18n();
-  // heal any task stuck "in progress" (dangling open interval on a non-active session)
-  // left behind by an earlier sync race, and persist the repair
-  if (sanitizeSessions()) persist('sanitize_on_load');
+  // auto clock-out anything left running past its day's work-end (incl. the active task),
+  // then heal any remaining dangling open interval on a non-active session left behind by
+  // an earlier sync race — persist either repair
+  let healed = settleOverdueSessions(true);
+  if (sanitizeSessions()) healed = true;
+  if (healed) persist('sanitize_on_load');
   render();
   renderHistoryLists();
   renderCalendar();
