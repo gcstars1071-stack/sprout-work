@@ -4954,7 +4954,13 @@ const recentCloudWrites = {}; // key -> { canon, ts }
 let suspendCloudWrites = false;
 function cloudSet(key, value) {
   if (!currentUser || suspendCloudWrites) return;
-  try { recentCloudWrites[key] = { canon: stableStringify(value), ts: Date.now() }; } catch (e) {}
+  let canon = null;
+  try { canon = stableStringify(value); } catch (e) {}
+  // skip redundant writes: a view-only render/tick re-persisting an unchanged blob
+  // just creates churn and clobber windows against other devices' real edits
+  const prev = recentCloudWrites[key];
+  if (canon !== null && prev && prev.canon === canon) return;
+  recentCloudWrites[key] = { canon, ts: Date.now() };
   supabaseClient.from('user_data').upsert({
     user_id: currentUser.id, data_key: key, data_value: value, updated_at: new Date().toISOString()
   }).then(({ error }) => { if (error) console.error('cloudSet failed', key, error); });
@@ -5018,6 +5024,73 @@ function setupRealtimeSync() {
 function teardownRealtimeSync() {
   if (realtimeChannel) { try { supabaseClient.removeChannel(realtimeChannel); } catch (e) {} realtimeChannel = null; }
 }
+/* ---------- cross-device MERGE for day state (replaces blind overwrite) ----------
+   The whole-day state is one jsonb blob; two devices editing the same day used to clobber
+   each other (a +N extend, or a task added on one device, lost when the other wrote). Merge
+   semantically: union sessions, keep the monotonic facts (max planned time, longer time
+   record, terminal status), recompute the single active task. */
+function isDayKey(key) { return /^sproutWork_\d{4}-\d{2}-\d{2}$/.test(key); }
+function openFocusStart(s) {
+  const last = s && s.intervals && s.intervals[s.intervals.length - 1];
+  return (last && last.type === 'focus' && last.end === null) ? last.start : null;
+}
+function isTerminalStatus(st) { return st === 'done' || st === 'cancelled'; }
+function mergeSession(a, b) {
+  if (!a) return b; if (!b) return a;
+  const primary = focusSeconds(a) >= focusSeconds(b) ? a : b;   // more-worked copy drives scalars
+  const out = Object.assign({}, primary);
+  out.intervals = primary.intervals;
+  out.plannedSeconds = Math.max(a.plannedSeconds || 0, b.plannedSeconds || 0); // extends never lost
+  // both still running → keep earliest start so elapsed isn't under-counted
+  const oa = openFocusStart(a), ob = openFocusStart(b);
+  if (oa != null && ob != null && out.intervals.length) {
+    const last = out.intervals[out.intervals.length - 1];
+    if (last.type === 'focus' && last.end === null) {
+      out.intervals = out.intervals.slice();
+      out.intervals[out.intervals.length - 1] = Object.assign({}, last, { start: Math.min(oa, ob) });
+    }
+  }
+  out.status = isTerminalStatus(a.status) ? a.status
+             : isTerminalStatus(b.status) ? b.status
+             : (a.status === 'active' || b.status === 'active') ? 'active'
+             : primary.status;
+  return out;
+}
+function pickActiveId(sessions) {
+  let best = null, bestStart = -Infinity;
+  for (const s of Object.values(sessions)) {
+    if (isTerminalStatus(s.status)) continue;
+    const st = openFocusStart(s);
+    if (st != null && st > bestStart) { bestStart = st; best = s.id; }
+  }
+  return best;
+}
+function mergeDayState(local, remote) {
+  if (!local) return remote; if (!remote) return local;
+  const ls = local.sessions || {}, rs = remote.sessions || {};
+  const ids = new Set(Object.keys(ls).concat(Object.keys(rs)));
+  const sessions = {};
+  ids.forEach(id => { sessions[id] = mergeSession(ls[id], rs[id]); });
+  const merged = Object.assign({}, local, { sessions });
+  merged.activeId = pickActiveId(sessions);
+  // every paused task is resumable → must be in waiting; keep known order, append the rest
+  const wOrder = (local.waitingIds || []).concat((remote.waitingIds || []).filter(id => (local.waitingIds || []).indexOf(id) === -1));
+  const pausedIds = Object.keys(sessions).filter(id => sessions[id].status === 'paused' && id !== merged.activeId);
+  merged.waitingIds = wOrder.filter(id => pausedIds.indexOf(id) !== -1).concat(pausedIds.filter(id => wOrder.indexOf(id) === -1));
+  merged.dayEnded = merged.activeId ? false : !!(local.dayEnded && remote.dayEnded);
+  if (!merged.pomo && remote.pomo) merged.pomo = remote.pomo;
+  return merged;
+}
+// ponytail: semantic merge, no vector clocks. Monotonic facts (planned time, elapsed, terminal
+// status, task existence) are safe; a rare concurrent rename/reorder of the SAME task keeps the
+// more-worked copy's value, and deletions don't propagate (tasks are cancelled, not deleted).
+// Upgrade to per-field clocks only if concurrent free-text edits of one task become a problem.
+function mergeDayRaw(key, remoteVal) {
+  let localVal = null;
+  try { localVal = JSON.parse(localStorage.getItem(key)); } catch (e) {}
+  return mergeDayState(localVal, remoteVal);
+}
+
 function applyRemoteRow(row) {
   if (!row || !row.data_key) return;
   const key = row.data_key;
@@ -5028,7 +5101,9 @@ function applyRemoteRow(row) {
   // order-independent "already up to date" check — this is what actually breaks the
   // jsonb key-reorder echo loop (raw string compare would spuriously differ)
   if (localCanon(key) === incomingCanon) return;
-  localStorage.setItem(key, JSON.stringify(row.data_value));
+  // day state merges (no lost extends / tasks); everything else is last-write-wins
+  const toStore = isDayKey(key) ? mergeDayRaw(key, row.data_value) : row.data_value;
+  localStorage.setItem(key, JSON.stringify(toStore));
   reloadInMemoryFromLocal();
   applyAppSettings(); applyTheme(); applyI18n();
   render();
@@ -5048,7 +5123,8 @@ async function cloudRefresh() {
   data.forEach(row => {
     // order-independent compare so a jsonb key-reorder isn't mistaken for a change
     if (localCanon(row.data_key) !== stableStringify(row.data_value)) {
-      localStorage.setItem(row.data_key, JSON.stringify(row.data_value));
+      const toStore = isDayKey(row.data_key) ? mergeDayRaw(row.data_key, row.data_value) : row.data_value;
+      localStorage.setItem(row.data_key, JSON.stringify(toStore));
       changed = true;
     }
   });
