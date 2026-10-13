@@ -5257,9 +5257,44 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   }
 });
 
-document.getElementById('googleLoginBtn').addEventListener('click', () => {
+document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+  // Desktop: Google blocks OAuth inside the Electron window and file:// can't
+  // receive a web redirect — open the real browser and let the sproutwork://
+  // deep link carry the session back.
+  if (window.sproutWorkDesktop && window.sproutWorkDesktop.openExternalAuth) {
+    authMsg.textContent = '';
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: 'sproutwork://login-callback', skipBrowserRedirect: true }
+    });
+    if (error || !data || !data.url) { authMsg.textContent = t('authError'); return; }
+    window.sproutWorkDesktop.openExternalAuth(data.url);
+    return;
+  }
   supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/app' } });
 });
+// Desktop: finish the handshake when the browser hands the result back via deep link.
+if (window.sproutWorkDesktop && window.sproutWorkDesktop.onAuthCallback) {
+  window.sproutWorkDesktop.onAuthCallback(async (url) => {
+    try {
+      const u = new URL(url);
+      const hp = new URLSearchParams((u.hash || '').replace(/^#/, ''));
+      const errDesc = u.searchParams.get('error_description') || hp.get('error_description');
+      if (errDesc) { authMsg.textContent = errDesc; return; }
+      const access_token = hp.get('access_token'), refresh_token = hp.get('refresh_token');
+      if (access_token && refresh_token) {
+        const { error } = await supabaseClient.auth.setSession({ access_token, refresh_token });
+        if (error) authMsg.textContent = error.message || t('authError');
+        return; // success → onAuthStateChange('SIGNED_IN') → showApp()
+      }
+      const code = u.searchParams.get('code');
+      if (code) {
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        if (error) authMsg.textContent = error.message || t('authError');
+      }
+    } catch (e) { console.error('desktop auth callback failed', e); authMsg.textContent = t('authError'); }
+  });
+}
 document.getElementById('authLoginBtn').addEventListener('click', async () => {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;

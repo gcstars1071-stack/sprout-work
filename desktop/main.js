@@ -1,7 +1,36 @@
-const { app, BrowserWindow, Tray, Menu, Notification, ipcMain, nativeImage, powerMonitor, screen } = require('electron');
+const { app, BrowserWindow, Tray, Menu, Notification, ipcMain, nativeImage, powerMonitor, screen, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
+
+/* ---------- Google OAuth return via sproutwork:// deep link ----------
+   The browser does the sign-in; Supabase redirects to sproutwork://login-callback,
+   the OS re-launches us with that URL, and we forward it to the renderer. */
+const AUTH_PROTOCOL = 'sproutwork';
+let pendingAuthUrl = null;
+function handleAuthDeepLink(url) {
+  if (!url) return;
+  if (mainWindow && mainWindow.webContents && !mainWindow.webContents.isLoading()) {
+    mainWindow.webContents.send('sprout-work-auth-callback', url);
+  } else {
+    pendingAuthUrl = url;
+  }
+  if (mainWindow) showAndFocus();
+}
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+} else {
+  app.setAsDefaultProtocolClient(AUTH_PROTOCOL);
+  app.on('second-instance', (event, argv) => {
+    const url = argv.find((a) => typeof a === 'string' && a.startsWith(AUTH_PROTOCOL + '://'));
+    if (url) handleAuthDeepLink(url);
+    else if (mainWindow) showAndFocus();
+  });
+  app.on('open-url', (event, url) => { event.preventDefault(); handleAuthDeepLink(url); });
+  const initialUrl = process.argv.find((a) => typeof a === 'string' && a.startsWith(AUTH_PROTOCOL + '://'));
+  if (initialUrl) pendingAuthUrl = initialUrl;
+}
 
 let mainWindow = null;
 let floatWindow = null;
@@ -56,6 +85,11 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, '..', 'app.html'));
+
+  // deliver any OAuth deep link that arrived before the page was ready
+  mainWindow.webContents.on('did-finish-load', () => {
+    if (pendingAuthUrl) { mainWindow.webContents.send('sprout-work-auth-callback', pendingAuthUrl); pendingAuthUrl = null; }
+  });
 
   // keep the app running in the tray instead of quitting when the window is closed
   mainWindow.on('close', (event) => {
@@ -223,6 +257,12 @@ ipcMain.handle('sprout-work-idle-time', () => {
   try { return powerMonitor.getSystemIdleTime(); } catch (e) { return null; }
 });
 
+// renderer hands us the Supabase OAuth URL → open it in the user's real browser
+ipcMain.handle('sprout-work-open-external', async (event, url) => {
+  try { if (typeof url === 'string' && /^https?:\/\//i.test(url)) { await shell.openExternal(url); return true; } } catch (e) {}
+  return false;
+});
+
 // renderer pushes a timer snapshot each tick/render; relay it to the floating
 // window and reconcile visibility (show while a task is active/paused).
 ipcMain.on('sprout-work-float-update', (event, data) => {
@@ -306,7 +346,7 @@ if (process.platform === 'win32') {
   app.setAppUserModelId('xyz.sproutwork.app');
 }
 
-app.whenReady().then(() => {
+if (gotSingleInstanceLock) app.whenReady().then(() => {
   createWindow();
   createTray();
   createFloatWindow();

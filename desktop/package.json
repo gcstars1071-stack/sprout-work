@@ -19,6 +19,9 @@
   "build": {
     "appId": "xyz.sproutwork.app",
     "productName": "Sprout Work",
+    "protocols": [
+      { "name": "Sprout Work", "schemes": ["sproutwork"] }
+    ],
     "publish": [
       { "provider": "github", "owner": "gcstars1071-stack", "repo": "sprout-work" }
     ],
